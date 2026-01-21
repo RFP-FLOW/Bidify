@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -6,10 +7,10 @@ function VendorLogin() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    role: "",
-  });
+  email: "",
+  password: "",
+});
+
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -22,10 +23,30 @@ function VendorLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/auth/login",
+      {
+        email: formData.email,
+        password: formData.password,
+      }
+    );
+
+    // ✅ SAVE TOKEN (MOST IMPORTANT)
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    // ✅ REDIRECT TO DASHBOARD
+    navigate("/vendor/dashboard");
+
+  } catch (error) {
+    alert(error.response?.data?.message || "Login failed");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">

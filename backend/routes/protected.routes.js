@@ -3,10 +3,10 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/dashboard", authMiddleware, (req, res) => {
+router.get("/vendor-dashboard", authMiddleware, (req, res) => {
   res.json({
-    message: "Welcome to vendor dashboard",
-    user: req.user
+    message: "Welcome to Vendor Dashboard",
+    user: req.user,
   });
 });
 

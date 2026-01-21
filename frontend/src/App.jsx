@@ -3,7 +3,7 @@ import LandingPage from "./pages/landing";
 import CompanyLogin from "./pages/companylogin";
 import CompanyRegister from "./pages/companyregistar";
 import VendorLogin from "./pages/vendorlogin";
-import VendorRegister from "./pages/vendorregistar";
+import VendorRegister from "./pages/vendorregister";
 
 
 function App() {

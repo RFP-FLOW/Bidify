@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import axios from "axios";
 
 function VendorRegister() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    name: "",
     businessName: "",
     email: "",
-    gstNo: "",
+    gstNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -17,8 +19,7 @@ function VendorRegister() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // GST format (official)
-  const gstRegex =
-    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,8 +32,8 @@ function VendorRegister() {
       return;
 
     // auto-uppercase GST
-    if (name === "gstNo") {
-      setFormData({ ...formData, gstNo: value.toUpperCase() });
+    if (name === "gstNumber") {
+      setFormData({ ...formData, gstNumber: value.toUpperCase() });
       return;
     }
 
@@ -47,7 +48,7 @@ function VendorRegister() {
       ? "-top-2 text-xs text-[#3a2d97] font-bold"
       : "top-1/2 -translate-y-1/2 text-gray-500 text-sm";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isInvalidName(formData.businessName)) {
@@ -55,7 +56,7 @@ function VendorRegister() {
       return;
     }
 
-    if (!gstRegex.test(formData.gstNo)) {
+    if (!gstRegex.test(formData.gstNumber)) {
       alert("Invalid GST number. Example: 22AAAAA0000A1Z5");
       return;
     }
@@ -65,7 +66,20 @@ function VendorRegister() {
       return;
     }
 
-    console.log("Vendor Registration Data:", formData);
+    try {
+      await axios.post("http://localhost:5000/api/auth/register", {
+        name: formData.name,
+        businessName: formData.businessName,
+        gstNumber: formData.gstNumber,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      alert("Vendor registered successfully");
+      navigate("/vendor/login");
+    } catch (error) {
+      alert(error.response?.data?.message || "Registration failed");
+    }
   };
 
   return (
@@ -74,7 +88,6 @@ function VendorRegister() {
 
       <div className="flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] bg-white">
-
           {/* IMAGE */}
           <div className="hidden md:block">
             <img
@@ -91,7 +104,6 @@ function VendorRegister() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* BUSINESS NAME */}
               <div className="relative">
                 <input
@@ -100,14 +112,29 @@ function VendorRegister() {
                   value={formData.businessName}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50"
                 />
+
                 <label
-                  className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
-                    formData.businessName
-                  )}`}
+                  className={`absolute left-3 bg-white px-1 ${floatingLabel(formData.businessName)}`}
                 >
                   Business Name
+                </label>
+              </div>
+              {/* OWNER NAME */}
+              <div className="relative">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50"
+                />
+                <label
+                  className={`absolute left-3 bg-white px-1 ${floatingLabel(formData.name)}`}
+                >
+                  Owner Name
                 </label>
               </div>
 
@@ -124,7 +151,7 @@ function VendorRegister() {
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
-                    formData.email
+                    formData.email,
                   )}`}
                 >
                   Email
@@ -135,15 +162,15 @@ function VendorRegister() {
               <div className="relative">
                 <input
                   type="text"
-                  name="gstNo"
-                  value={formData.gstNo}
+                  name="gstNumber"
+                  value={formData.gstNumber}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 text-sm uppercase border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none"
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
-                    formData.gstNo
+                    formData.gstNumber,
                   )}`}
                 >
                   GST Number
@@ -163,7 +190,7 @@ function VendorRegister() {
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
-                    formData.password
+                    formData.password,
                   )}`}
                 >
                   Password
@@ -190,20 +217,16 @@ function VendorRegister() {
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
-                    formData.confirmPassword
+                    formData.confirmPassword,
                   )}`}
                 >
                   Confirm Password
                 </label>
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-[#3a2d97]"
-                >
-                  {showConfirmPassword ? "🙈" : "👁"}
-                </button>
+                ></button>
               </div>
 
               {/* SUBMIT */}
@@ -224,7 +247,6 @@ function VendorRegister() {
                 Login here
               </button>
             </p>
-
           </div>
         </div>
       </div>

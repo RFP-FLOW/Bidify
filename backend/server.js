@@ -22,7 +22,7 @@ app.use(cors({
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/protected", protectedRoutes);
-
+  
 // Test route
 app.get("/", (req, res) => {
   res.send("Bidify API running");

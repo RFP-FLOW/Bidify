@@ -1,55 +1,68 @@
-import User from "../models/User.js";
+import Vendor from "../models/Vendor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 /* ================= REGISTER ================= */
-export const register = async (req, res) => {
+export const registerVendor = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, businessName, gstNumber, email, password } = req.body;
 
-    // check user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    // basic validation
+    if (!name || !businessName || !gstNumber || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // hash password
+    // GST format validation (extra safety)
+    const gstRegex =
+      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+    if (!gstRegex.test(gstNumber)) {
+      return res.status(400).json({ message: "Invalid GST Number format" });
+    }
+
+    // check existing email or GST
+    const existingUser = await Vendor.findOne({
+      $or: [{ email }, { gstNumber }],
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Email or GST already registered" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create user
-    const user = await User.create({
+    await Vendor.create({
       name,
+      businessName,
+      gstNumber,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role: "vendor", // ✅ ADD THIS
     });
 
-    res.status(201).json({
-      message: "Vendor registered successfully",
-      userId: user._id
-    });
+    res.status(201).json({ message: "Vendor registered successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 /* ================= LOGIN ================= */
-export const login = async (req, res) => {
+export const loginVendor = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // check user
-    const user = await User.findOne({ email });
+    const user = await Vendor.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // generate token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -63,10 +76,12 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
