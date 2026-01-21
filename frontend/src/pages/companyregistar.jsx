@@ -15,6 +15,8 @@ function CompanyRegister() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +34,7 @@ function CompanyRegister() {
   const isInvalidName = (value) =>
     /^\d+$/.test(value) || value.trim().length < 3;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isInvalidName(formData.companyName)) {
@@ -50,8 +52,42 @@ function CompanyRegister() {
       return;
     }
 
-    console.log(formData);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        "http://localhost:5000/api/company/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            companyName: formData.companyName,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Registration failed");
+        return;
+      }
+
+      alert("Company registered successfully 🎉");
+      navigate("/company/login");
+    } catch (error) {
+      alert("Server error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const floatingLabel = (value) =>
     value

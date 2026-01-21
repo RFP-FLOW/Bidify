@@ -12,6 +12,7 @@ function CompanyLogin() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,10 +23,47 @@ function CompanyLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+  
+     try {
+      setLoading(true);
+
+      const res = await fetch("http://localhost:5000/api/company/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      // store token
+      localStorage.setItem("companyToken", data.token);
+      localStorage.setItem("companyRole", data.user.role);
+
+      // role-based redirect
+      if (data.user.role === "manager") {
+        navigate("/company/manager/dashboard");
+      } else {
+        navigate("/company/employee/dashboard");
+      }
+    } catch (error) {
+      alert("Server error. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">
