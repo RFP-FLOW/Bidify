@@ -1,18 +1,18 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 
-function VendorLogin() {
+function CompanyLogin() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-  email: "",
-  password: "",
-});
-
+    email: "",
+    password: "",
+    role: "",
+  });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,29 +23,46 @@ function VendorLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+     try {
+      setLoading(true);
 
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/auth/login",
-      {
-        email: formData.email,
-        password: formData.password,
+      const res = await fetch("http://localhost:5000/api/company/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
       }
-    );
 
-    // ✅ SAVE TOKEN (MOST IMPORTANT)
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+      // store token
+      localStorage.setItem("companyToken", data.token);
+      localStorage.setItem("companyRole", data.user.role);
 
-    // ✅ REDIRECT TO DASHBOARD
-    navigate("/vendor/dashboard");
-
-  } catch (error) {
-    alert(error.response?.data?.message || "Login failed");
-  }
-};
+      // role-based redirect
+      if (data.user.role === "manager") {
+        navigate("/company/manager/dashboard");
+      } else {
+        navigate("/company/employee/dashboard");
+      }
+    } catch (error) {
+      alert("Server error. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
@@ -67,7 +84,7 @@ function VendorLogin() {
           {/* FORM */}
           <div className="p-8">
             <h2 className="text-2xl font-bold text-center mb-8">
-              Vendor Login
+              Company Login
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -133,6 +150,24 @@ function VendorLogin() {
                 </button>
               </div>
 
+              {/* ROLE */}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600 font-medium">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none"
+                >
+                  <option value="">Select Role</option>
+                  <option value="manager">Manager</option>
+                  <option value="employee">Employee</option>
+                </select>
+              </div>
+
               {/* SUBMIT */}
               <button
                 type="submit"
@@ -146,7 +181,7 @@ function VendorLogin() {
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
               <button
-                onClick={() => navigate("/vendor/register")}
+                onClick={() => navigate("/company/register")}
                 className="text-[#3a2d97] font-semibold hover:underline"
               >
                 Sign up here
@@ -160,4 +195,4 @@ function VendorLogin() {
   );
 }
 
-export default VendorLogin;
+export default CompanyLogin;
