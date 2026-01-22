@@ -5,11 +5,14 @@ import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
 import VendorRegister from "./pages/Vendor/vendorRegister.jsx";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 function App() {
   return (
     <BrowserRouter>
+       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/company/login" element={<CompanyLogin />} />

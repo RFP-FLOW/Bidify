@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function VendorRegister() {
   const navigate = useNavigate();
@@ -50,19 +51,28 @@ function VendorRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     if (!formData.email || !formData.password || !formData.confirmPassword || formData.businessName||formData.gstNumber) {
+    toast.error("Please fill all fields");
+    return;
+    }
 
+    if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+    }
+ 
     if (isInvalidName(formData.businessName)) {
-      alert("Business name must contain letters and be at least 3 characters.");
+      toast.error("Business name must contain letters and be at least 3 characters.");
       return;
     }
 
     if (!gstRegex.test(formData.gstNumber)) {
-      alert("Invalid GST number. Example: 22AAAAA0000A1Z5");
+      toast.error("Invalid GST number. Example: 22AAAAA0000A1Z5");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -75,10 +85,10 @@ function VendorRegister() {
         password: formData.password,
       });
 
-      alert("Vendor registered successfully");
+      toast.success("Vendor registered successfully");
       navigate("/vendor/login");
     } catch (error) {
-      alert(error.response?.data?.message || "Registration failed");
+      toast.error(error.response?.data?.message || "Registration failed");
     }
   };
 

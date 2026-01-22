@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 function CompanyLogin() {
   const navigate = useNavigate();
@@ -25,7 +26,16 @@ function CompanyLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+     if (!formData.email || !formData.password || !formData.role) {
+    toast.error("Please fill all fields");
+    return;
+    }
+
+  if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+  }
+
      try {
       setLoading(true);
 
@@ -43,7 +53,7 @@ function CompanyLogin() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Login failed");
+        toast.error(data.message || "Login failed");
         return;
       }
 
@@ -52,13 +62,14 @@ function CompanyLogin() {
       localStorage.setItem("companyRole", data.user.role);
 
       // role-based redirect
+      toast.success("Login Successfull!")
       if (data.user.role === "manager") {
         navigate("/company/manager/dashboard");
       } else {
         navigate("/company/employee/dashboard");
       }
     } catch (error) {
-      alert("Server error. Try again.");
+      toast.error("Server error. Try again.");
     } finally {
       setLoading(false);
     }

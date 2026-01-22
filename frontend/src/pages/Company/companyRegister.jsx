@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 function CompanyRegister() {
   const navigate = useNavigate();
@@ -36,21 +37,31 @@ function CompanyRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+     if (!formData.email || !formData.password || !formData.confirmPassword || formData.companyName||formData.username) {
+    toast.error("Please fill all fields");
+    return;
+    }
 
+  if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+  }
     if (isInvalidName(formData.companyName)) {
-      alert("Company name must contain letters and be at least 3 characters.");
+      toast.error("Company name must contain letters and be at least 3 characters.");
       return;
     }
 
     if (isInvalidName(formData.username)) {
-      alert("Username must contain letters and be at least 3 characters.");
+      toast.error("Username must contain letters and be at least 3 characters.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
+     
 
 
     try {
@@ -75,14 +86,14 @@ function CompanyRegister() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Registration failed");
+        toast.error(data.message || "Registration failed");
         return;
       }
 
-      alert("Company registered successfully 🎉");
+      toast.success("Company registered successfully 🎉");
       navigate("/company/login");
     } catch (error) {
-      alert("Server error. Please try again.");
+      toast.error("Server error. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 function VendorLogin() {
   const navigate = useNavigate();
@@ -25,7 +26,15 @@ function VendorLogin() {
 
  const handleSubmit = async (e) => {
   e.preventDefault();
+    if (!formData.email || !formData.password ) {
+    toast.error("Please fill all fields");
+    return;
+    }
 
+  if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+  }
   try {
     const res = await axios.post(
       "http://localhost:5000/api/auth/login",
@@ -43,7 +52,7 @@ function VendorLogin() {
     navigate("/vendor/dashboard");
 
   } catch (error) {
-    alert(error.response?.data?.message || "Login failed");
+    toast.error(error.response?.data?.message || "Login failed");
   }
 };
 
