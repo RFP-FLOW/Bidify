@@ -1,15 +1,17 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
-function CompanyLogin() {
+function VendorLogin() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    role: "",
-  });
+  email: "",
+  password: "",
+});
+
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -22,10 +24,38 @@ function CompanyLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+    if (!formData.email || !formData.password ) {
+    toast.error("Please fill all fields");
+    return;
+    }
+
+  if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+  }
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/auth/login",
+      {
+        email: formData.email,
+        password: formData.password,
+      }
+    );
+
+    // ✅ SAVE TOKEN (MOST IMPORTANT)
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    // ✅ REDIRECT TO DASHBOARD
+    navigate("/vendor/dashboard");
+
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Login failed");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">
@@ -46,7 +76,7 @@ function CompanyLogin() {
           {/* FORM */}
           <div className="p-8">
             <h2 className="text-2xl font-bold text-center mb-8">
-              Company Login
+              Vendor Login
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -112,24 +142,6 @@ function CompanyLogin() {
                 </button>
               </div>
 
-              {/* ROLE */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600 font-medium">
-                  Role
-                </label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none"
-                >
-                  <option value="">Select Role</option>
-                  <option value="manager">Manager</option>
-                  <option value="employee">Employee</option>
-                </select>
-              </div>
-
               {/* SUBMIT */}
               <button
                 type="submit"
@@ -143,7 +155,7 @@ function CompanyLogin() {
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
               <button
-                onClick={() => navigate("/company/register")}
+                onClick={() => navigate("/vendor/register")}
                 className="text-[#3a2d97] font-semibold hover:underline"
               >
                 Sign up here
@@ -157,4 +169,4 @@ function CompanyLogin() {
   );
 }
 
-export default CompanyLogin;
+export default VendorLogin;

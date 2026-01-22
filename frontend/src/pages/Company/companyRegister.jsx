@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 function CompanyRegister() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ function CompanyRegister() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,26 +35,70 @@ function CompanyRegister() {
   const isInvalidName = (value) =>
     /^\d+$/.test(value) || value.trim().length < 3;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+     if (!formData.email || !formData.password || !formData.confirmPassword || formData.companyName||formData.username) {
+    toast.error("Please fill all fields");
+    return;
+    }
 
+  if (!formData.email.includes("@")) {
+    toast.error("Please enter a valid email");
+    return;
+  }
     if (isInvalidName(formData.companyName)) {
-      alert("Company name must contain letters and be at least 3 characters.");
+      toast.error("Company name must contain letters and be at least 3 characters.");
       return;
     }
 
     if (isInvalidName(formData.username)) {
-      alert("Username must contain letters and be at least 3 characters.");
+      toast.error("Username must contain letters and be at least 3 characters.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
+     
 
-    console.log(formData);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        "http://localhost:5000/api/company/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            companyName: formData.companyName,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Registration failed");
+        return;
+      }
+
+      toast.success("Company registered successfully 🎉");
+      navigate("/company/login");
+    } catch (error) {
+      toast.error("Server error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const floatingLabel = (value) =>
     value
