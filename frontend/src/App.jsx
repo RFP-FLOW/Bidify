@@ -5,6 +5,7 @@ import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
 import VendorRegister from "./pages/Vendor/vendorRegister.jsx";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
+import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -16,6 +17,10 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/company/login" element={<CompanyLogin />} />
+        
+ <Route path="/company/manager/dashboard" element={<ManagerDashboard />} />
+      
+
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/vendor/login" element={<VendorLogin />} />
         <Route path="/vendor/register" element={<VendorRegister />} />

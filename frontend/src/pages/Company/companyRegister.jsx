@@ -38,7 +38,7 @@ function CompanyRegister() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-     if (!formData.email || !formData.password || !formData.confirmPassword || formData.companyName||formData.username) {
+     if (!formData.email || !formData.password || !formData.confirmPassword || !formData.companyName|| !formData.username) {
     toast.error("Please fill all fields");
     return;
     }
