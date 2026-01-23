@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import { toast } from "react-toastify";
 
 function CompanyLogin() {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ function CompanyLogin() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,57 +22,40 @@ function CompanyLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-     if (!formData.email || !formData.password || !formData.role) {
-    toast.error("Please fill all fields");
-    return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("http://localhost:5000/api/company/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        role: formData.role, // ✅ lowercase matches schema
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
     }
 
-  if (!formData.email.includes("@")) {
-    toast.error("Please enter a valid email");
-    return;
+    // navigate after successful login
+    if (formData.role === "manager") {
+      navigate("/company/manager/dashboard");
+    } else if (formData.role === "employee") {
+      navigate("/employee/dashboard");
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong");
   }
-
-     try {
-      setLoading(true);
-
-      const res = await fetch("http://localhost:5000/api/company/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Login failed");
-        return;
-      }
-
-      // store token
-      localStorage.setItem("companyToken", data.token);
-      localStorage.setItem("companyRole", data.user.role);
-
-      // role-based redirect
-      toast.success("Login Successfull!")
-      if (data.user.role === "manager") {
-        navigate("/company/manager/dashboard");
-      } else {
-        navigate("/company/employee/dashboard");
-      }
-    } catch (error) {
-      toast.error("Server error. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+};
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">
