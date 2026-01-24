@@ -1,9 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Sidebar";
 import { toast } from "react-toastify";
 
 function CreateRFP() {
+     const navigate = useNavigate(); 
   const [prompt, setPrompt] = useState("");
   const [aiRFP, setAiRFP] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
@@ -52,41 +54,46 @@ function CreateRFP() {
   };
 
   // 📄 Create RFP (save to DB)
-  const handleCreateRFP = async () => {
-    if (!aiRFP) {
-      toast.error("Generate RFP first");
-      return;
-    }
+const handleCreateRFP = async () => {
+  if (!aiRFP) {
+    toast.error("Please generate RFP using AI first");
+    return;
+  }
 
-    try {
-      setSubmitting(true);
+  try {
+    setSubmitting(true);
 
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-      const res = await axios.post(
-        "http://localhost:5000/api/rfp",
-        {
-          title: aiRFP.title,
-          description: prompt,
-          items: aiRFP.items,
+    const res = await axios.post(
+      "http://localhost:5000/api/rfp",
+      {
+        title: aiRFP.title,
+        description: prompt,
+        items: aiRFP.items,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+        withCredentials: true,
+      }
+    );
 
-      toast.success("RFP created successfully");
-      console.log("Saved RFP:", res.data);
-    } catch (error) {
-      console.error("Create RFP Error:", error);
-      toast.error("Failed to create RFP");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    console.log("Saved RFP:", res.data);
+
+    const rfpId = res.data.rfp._id;
+
+    // ✅ REDIRECT
+    navigate(`/rfp/${rfpId}`);
+
+  } catch (error) {
+    console.error("Create RFP Error:", error);
+    toast.error("Failed to create RFP");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="flex">
