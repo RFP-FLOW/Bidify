@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Sidebar";
 import { toast } from "react-toastify";
+import SelectVendorsModal from "../../components/SelectVendorsModal";
 
 function RFPDetails() {
   const { rfpId } = useParams();
   const [rfp, setRfp] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchRFP = async () => {
@@ -74,7 +76,11 @@ function RFPDetails() {
             <button className="px-4 py-2 border rounded hover:bg-gray-100">
               Check Emails
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            >
               Send to Vendors
             </button>
           </div>
@@ -107,16 +113,57 @@ function RFPDetails() {
           </pre>
         </div>
 
-        {/* PROPOSALS */}
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="font-semibold mb-2">
-            Proposals (0)
-          </h2>
-          <p className="text-gray-500">
-            No proposals received yet
-          </p>
+        {/* PROPOSALS EMPTY STATE */}
+        <div className="bg-white p-8 rounded shadow text-center">
+          <div className="flex flex-col items-center gap-3 text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75M21.75 6.75A2.25 2.25 0 0019.5 4.5H4.5A2.25 2.25 0 002.25 6.75m19.5 0l-9.75 6.75L2.25 6.75"
+              />
+            </svg>
+
+            <h3 className="text-lg font-medium text-gray-600">
+              No proposals received yet
+            </h3>
+
+            <p className="text-sm text-gray-400">
+              Proposals will appear here once vendors respond
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* ✅ MODAL MUST BE INSIDE RETURN */}
+      <SelectVendorsModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        vendors={[
+          {
+            _id: "1",
+            name: "Dell Technologies",
+            email: "dell@gmail.com",
+          },
+          {
+            _id: "2",
+            name: "Lenovo",
+            email: "lenovo@gmail.com",
+          },
+          {
+            _id: "3",
+            name: "Thinkpad Solutions",
+            email: "thinkpad@gmail.com",
+          },
+        ]}
+      />
     </div>
   );
 }
