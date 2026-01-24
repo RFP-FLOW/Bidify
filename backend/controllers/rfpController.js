@@ -74,3 +74,25 @@ export const getRFPStats = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getRFPById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const rfp = await RFP.findOne({
+  _id: req.params.id,
+  createdBy: req.user._id,
+}).lean();
+
+    if (!rfp) {
+      return res.status(404).json({
+        message: "RFP not found or access denied",
+      });
+    }
+
+    res.status(200).json(rfp);
+  } catch (error) {
+    console.error("Get RFP By ID Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
