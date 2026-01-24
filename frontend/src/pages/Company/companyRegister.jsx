@@ -43,10 +43,13 @@ function CompanyRegister() {
     return;
     }
 
-  if (!formData.email.includes("@")) {
-    toast.error("Please enter a valid email");
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+   if (!emailRegex.test(formData.email)) {
+    toast.error("Please enter a valid email address");
     return;
-  }
+   }
+
     if (isInvalidName(formData.companyName)) {
       toast.error("Company name must contain letters and be at least 3 characters.");
       return;

@@ -53,7 +53,7 @@ console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
 
     // navigate after successful login
     if (formData.role === "manager") {
-      navigate("/company/manager/dashboard");
+      navigate("/manager/dashboard");
     } else if (formData.role === "employee") {
       navigate("/employee/dashboard");
     }
