@@ -3,7 +3,7 @@ import {
   createRFP,
   getEmployeeRFPs,
   getRFPStats,
-   getRFPById,
+  getRFPById,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -11,11 +11,16 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 /**
- * Create new RFP (DRAFT)
- * POST /api/rfp
+ * AI Generate RFP
+ * POST /api/rfp/generate
  */
 router.post("/generate", authMiddleware, generateRFP);
-router.post("/", authMiddleware, createRFP);
+
+/**
+ * Get dashboard stats
+ * GET /api/rfp/stats
+ */
+router.get("/stats", authMiddleware, getRFPStats);
 
 /**
  * Get all RFPs of logged-in employee
@@ -24,16 +29,15 @@ router.post("/", authMiddleware, createRFP);
 router.get("/employee", authMiddleware, getEmployeeRFPs);
 
 /**
- * Get dashboard stats
- * GET /api/rfp/stats
+ * Get single RFP by ID
+ * GET /api/rfp/:id
  */
-// GET single RFP by ID
 router.get("/:id", authMiddleware, getRFPById);
-router.get("/stats", authMiddleware, getRFPStats);
-router.get("/:id", authMiddleware, async (req, res) => {
-  const rfp = await RFP.findById(req.params.id);
-  res.json(rfp);
-});
 
+/**
+ * Create new RFP (DRAFT)
+ * POST /api/rfp
+ */
+router.post("/", authMiddleware, createRFP);
 
 export default router;
