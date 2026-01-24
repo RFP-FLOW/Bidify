@@ -34,7 +34,7 @@ const handleSubmit = async (e) => {
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
-        role: formData.role, // ✅ lowercase matches schema
+        role: formData.role,
       }),
     });
 
@@ -44,6 +44,12 @@ const handleSubmit = async (e) => {
       alert(data.message || "Login failed");
       return;
     }
+
+    // 🔥 FIX HERE
+    localStorage.setItem("token", data.token);
+    
+console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
+    localStorage.setItem("user", JSON.stringify(data.user));
 
     // navigate after successful login
     if (formData.role === "manager") {
@@ -56,6 +62,7 @@ const handleSubmit = async (e) => {
     alert("Something went wrong");
   }
 };
+
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">
