@@ -4,7 +4,8 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/vendorauth.routes.js";
 import protectedRoutes from "./routes/protected.routes.js";
-import companyauthRoutes from "./routes/companyauth.routes.js";  
+import companyauthRoutes from "./routes/companyauth.routes.js"; 
+import rfpRoutes from "./routes/rfpRoutes.js"; 
 ;
 
 dotenv.config();
@@ -25,7 +26,7 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api/protected", protectedRoutes);
 app.use("/api/company", companyauthRoutes);
-
+app.use("/api/rfp", rfpRoutes);
   
 // Test route
 app.get("/", (req, res) => {
