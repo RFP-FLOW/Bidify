@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landing.jsx";
+import CreateRFP from "./pages/Employee/CreateRFP";
 import CompanyLogin from "./pages/Company/companyLogin.jsx";
 import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
@@ -22,6 +23,7 @@ function App() {
  <Route path="/company/manager/dashboard" element={<ManagerDashboard />} />
       
          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+         <Route path="/employee/create-rfp"  element={<CreateRFP />} />
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/vendor/login" element={<VendorLogin />} />
         <Route path="/vendor/register" element={<VendorRegister />} />

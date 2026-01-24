@@ -1,3 +1,10 @@
+import fetch, { Headers, Request, Response } from "node-fetch";
+
+global.fetch = fetch;
+global.Headers = Headers;
+global.Request = Request;
+global.Response = Response;
+
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -9,7 +16,7 @@ import rfpRoutes from "./routes/rfpRoutes.js";
 ;
 
 dotenv.config();
-
+console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
 const app = express();
 
 // DB
