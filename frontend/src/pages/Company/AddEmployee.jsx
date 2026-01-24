@@ -33,7 +33,7 @@ function AddEmployee() {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:5000/api/manager/add-employee",
+        "http://localhost:5000/api/company/manager/add-employee",
         {
           method: "POST",
           headers: {

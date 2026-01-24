@@ -10,6 +10,7 @@ import RFPDetails from "./pages/Employee/RFPDetails";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
 import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
+import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,8 +24,9 @@ function App() {
         <Route path="/company/login" element={<CompanyLogin />} />  
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/company/register" element={<CompanyRegister />} />
-        <Route path="/manager/add-employee" element={<AddEmployee />} />
-        
+        <Route path="/company/manager/add-employee" element={<AddEmployee />} />
+        <Route path="/employee/set-password/:token" element={<EmployeeSetPassword />}/>
+
          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
          <Route path="/employee/create-rfp"  element={<CreateRFP />} />
 

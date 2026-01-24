@@ -49,7 +49,7 @@ function ManagerSidebar() {
         <SidebarItem
           icon={<Users size={18} />}
           label="Add Employee"
-          to="/manager/add-employee"
+          to="/company/manager/add-employee"
           collapsed={collapsed}
         />
         <SidebarItem

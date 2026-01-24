@@ -7,7 +7,7 @@ import {
 } from "../controllers/companyauth.controller.js";
 
 
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware,{managerOnly} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.post("/register", registerCompany);
 router.post("/login", loginCompany);
 
 // manager protected routes
-router.post("/add-employee", authMiddleware, addEmployee);
-router.post("/set-password/:employeeId", setEmployeePassword);
+router.post("/manager/add-employee", authMiddleware,managerOnly, addEmployee);
+router.post("/set-password/:token", setEmployeePassword);
 
 export default router;
