@@ -7,7 +7,9 @@ import {
   forgotPassword,
   resetPassword,
   verifyOtp,
-  registerInit
+  registerInit,
+  getManagerProfile,
+  updateManagerProfile,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -29,5 +31,9 @@ router.post("/reset-password/:token", resetPassword);
 router.post("/register-init", registerInit);
 router.post("/verify-otp", verifyOtp);
 
+router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
+
+// UPDATE phone number
+router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
 
 export default router;

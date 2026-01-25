@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landing.jsx";
 import CreateRFP from "./pages/Employee/CreateRFP";
 import CompanyLogin from "./pages/Company/companyLogin.jsx";
-import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import AddEmployee from "./pages/Company/AddEmployee.jsx";
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
 import VendorRegister from "./pages/Vendor/vendorRegister.jsx";
@@ -13,9 +12,11 @@ import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import SetPassword from "./pages/Password-reset/SetPassword.jsx";
 import ForgotPassword from "./pages/Password-reset/ForgotPassword.jsx";
 import VerifyOtp from "./pages/OTP/Verify-otp.jsx";
+import AddCompanyProfile from "./pages/Company/Profile.jsx"
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-//import { verifyOtp } from "../../backend/controllers/companyauth.controller.js";
+import CompanyRegister from "./pages/Company/companyRegistEr.jsx";
+
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/manager/dashboard" element={<ManagerDashboard />} />
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
+        <Route path="/company/profile" element={<AddCompanyProfile/>} />
 
      
          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />

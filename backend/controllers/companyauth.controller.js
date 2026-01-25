@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
+
 /* ================= REGISTER COMPANY (MANAGER) ================= */
 export const registerCompany = async (req, res) => {
   try {
@@ -350,3 +351,40 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+
+
+//-----GET DETAILS------
+
+export const getManagerProfile = async (req, res) => {
+  try {
+    // req.user.id comes from auth middleware
+    const manager = await User.findById(req.user.id).select(
+      "name email phone"
+    );
+
+    if (!manager) {
+      return res.status(404).json({ message: "Manager not found" });
+    }
+
+    res.status(200).json(manager);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//-----------UPDATE phone
+export const updateManagerProfile = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    const manager = await User.findByIdAndUpdate(
+      req.user.id,
+      { phone },
+      { new: true }
+    ).select("name email phone");
+
+    res.status(200).json(manager);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};

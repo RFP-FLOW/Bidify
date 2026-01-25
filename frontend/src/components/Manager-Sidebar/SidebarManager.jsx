@@ -73,7 +73,7 @@ function ManagerSidebar() {
         <SidebarItem
           icon={<User size={18} />}
           label="Profile"
-          to="/manager/profile"
+          to="/company/profile"
           collapsed={collapsed}
         />
       </nav>
