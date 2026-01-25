@@ -8,33 +8,25 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
-    username: {
+    gstNumber: {
       type: String,
-      required: true,
       unique: true,
-      trim: true,
+      sparse: true, // allows null but unique if present
     },
 
-    email: {
+
+    address: {
       type: String,
+    },
+
+    description: {
+      type: String,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // manager
       required: true,
-      unique: true,
-      lowercase: true,
-    },
-
-    password: {
-      type: String,
-    },
-
-    role: {
-      type: String,
-      enum: ["manager", "employee"],
-      default: "employee",
-    },
-
-    isActive: {
-      type: Boolean,
-      default: false, // employee inactive until password set
     },
   },
   { timestamps: true }

@@ -43,10 +43,13 @@ function CompanyRegister() {
     return;
     }
 
-  if (!formData.email.includes("@")) {
-    toast.error("Please enter a valid email");
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+   if (!emailRegex.test(formData.email)) {
+    toast.error("Please enter a valid email address");
     return;
-  }
+   }
+
     if (isInvalidName(formData.companyName)) {
       toast.error("Company name must contain letters and be at least 3 characters.");
       return;
@@ -68,7 +71,7 @@ function CompanyRegister() {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:5000/api/company/register",
+        "http://localhost:5000/api/company/register-init",
         {
           method: "POST",
           headers: {
@@ -90,8 +93,17 @@ function CompanyRegister() {
         return;
       }
 
-      toast.success("Company registered successfully 🎉");
-      navigate("/company/login");
+      toast.success("OTP sent to your email 📩");
+
+      navigate("/verify-otp", {
+        state: {
+        companyName: formData.companyName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+       },
+      });
+
     } catch (error) {
       toast.error("Server error. Please try again.");
     } finally {

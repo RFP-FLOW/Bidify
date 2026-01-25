@@ -4,10 +4,16 @@ import {
   loginCompany,
   addEmployee,
   setEmployeePassword,
+  forgotPassword,
+  resetPassword,
+  verifyOtp,
+  registerInit,
+  getManagerProfile,
+  updateManagerProfile,
 } from "../controllers/companyauth.controller.js";
 
 
-import authMiddleware from "../middlewares/auth.middleware.js";
+import authMiddleware,{managerOnly} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -15,7 +21,19 @@ router.post("/register", registerCompany);
 router.post("/login", loginCompany);
 
 // manager protected routes
-router.post("/add-employee", authMiddleware, addEmployee);
-router.post("/set-password/:employeeId", setEmployeePassword);
+router.post("/manager/add-employee", authMiddleware,managerOnly, addEmployee);
+router.post("/set-password/:token", setEmployeePassword);
+//forgot password
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
+
+//email verified by otp 
+router.post("/register-init", registerInit);
+router.post("/verify-otp", verifyOtp);
+
+router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
+
+// UPDATE phone number
+router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
 
 export default router;
