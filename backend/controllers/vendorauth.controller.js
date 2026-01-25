@@ -84,4 +84,24 @@ export const loginVendor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const getVendorStats = async (req, res) => {
+  res.json({
+    pending: 3,
+    replied: 1,
+    accepted: 0,
+  });
+};
+
+export const getVendorRFPs = async (req, res) => {
+  res.json([
+    {
+      _id: "1",
+      title: "Laptop Procurement",
+      description: "Need 20 laptops",
+      status: "PENDING",
+      createdAt: new Date(),
+    },
+  ]);
+};
+
 

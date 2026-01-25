@@ -25,6 +25,12 @@ const authMiddleware = (req, res, next) => {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+export const vendorOnly = (req, res, next) => {
+  if (req.user?.role !== "vendor") {
+    return res.status(403).json({ message: "Access denied" });
+  }
+  next();
+};
 
 
 export const managerOnly = (req, res, next) => {
