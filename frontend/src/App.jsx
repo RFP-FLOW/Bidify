@@ -10,10 +10,12 @@ import RFPDetails from "./pages/Employee/RFPDetails";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
 import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
-import SetPassword from "./pages/SetPassword.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
+import SetPassword from "./pages/Password-reset/SetPassword.jsx";
+import ForgotPassword from "./pages/Password-reset/ForgotPassword.jsx";
+import VerifyOtp from "./pages/OTP/Verify-otp.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+//import { verifyOtp } from "../../backend/controllers/companyauth.controller.js";
 
 
 function App() {
@@ -40,6 +42,9 @@ function App() {
 
         <Route path="/set-password/:token" element={<SetPassword />}/>
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+
+        <Route path="/verify-otp" element={<VerifyOtp/>} />
         {/* <Route path="/vendor/dashboard" element={<ProtectedRoute /> />} */}
         
       </Routes>

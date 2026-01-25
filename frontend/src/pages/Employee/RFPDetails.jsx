@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "../../components/SidebarEmployee";
+import Sidebar from "../../components/Employee-Sidebar/SidebarEmployee";
 import { toast } from "react-toastify";
 import SelectVendorsModal from "../../components/SelectVendorsModal";
 

@@ -58,7 +58,87 @@ export const registerCompany = async (req, res) => {
   }
 };
 
+//--------------------Register INIT ...SEND OTP
 
+export const registerInit = async (req, res) => {
+  try {
+    const { companyName, username, email, password } = req.body;
+
+    if (!companyName || !username || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // temporary user
+    await User.create({
+      name:username,
+      email,
+      password, // hash later
+      role: "manager",
+      otp,
+      otpExpiry: Date.now() + 10 * 60 * 1000, // 10 min
+      isEmailVerified: false,
+    });
+
+    await sendEmail({
+      to: email,
+      subject: "Verify your email - Bidify",
+      html: `
+        <h3>Your OTP is:</h3>
+        <h2>${otp}</h2>
+        <p>Valid for 10 minutes</p>
+      `,
+    });
+
+    res.json({ message: "OTP sent to email" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//------VERIFY OTP------
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp, companyName } = req.body;
+
+    const user = await User.findOne({
+      email,
+      otp,
+      otpExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    user.password = await bcrypt.hash(user.password, 10);
+    user.isEmailVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+
+    await user.save();
+
+    const company = await Company.create({
+      companyName,
+      createdBy: user._id,
+    });
+
+    user.companyId = company._id;
+    await user.save();
+
+    res.json({ message: "Company registered successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 /* ================= LOGIN COMPANY ================= */
 export const loginCompany = async (req, res) => {

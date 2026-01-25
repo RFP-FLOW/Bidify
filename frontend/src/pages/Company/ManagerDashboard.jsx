@@ -1,4 +1,4 @@
-import ManagerLayout  from "../../components/SidebarCardManager";
+import ManagerLayout  from "../../components/Manager-Sidebar/SidebarCardManager";
 function ManagerDashboard() {
 
   return (

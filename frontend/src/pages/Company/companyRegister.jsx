@@ -71,7 +71,7 @@ function CompanyRegister() {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:5000/api/company/register",
+        "http://localhost:5000/api/company/register-init",
         {
           method: "POST",
           headers: {
@@ -93,8 +93,17 @@ function CompanyRegister() {
         return;
       }
 
-      toast.success("Company registered successfully 🎉");
-      navigate("/company/login");
+      toast.success("OTP sent to your email 📩");
+
+      navigate("/verify-otp", {
+        state: {
+        companyName: formData.companyName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+       },
+      });
+
     } catch (error) {
       toast.error("Server error. Please try again.");
     } finally {

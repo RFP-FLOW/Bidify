@@ -1,5 +1,5 @@
 // components/Sidebar.jsx   Sidebar Component (Employee view)
-import { colors } from "../theme/colors";
+import { colors } from "../../theme/colors";
 
 export default function Sidebar() {
   return (

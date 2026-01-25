@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import ManagerLayout from "../../components/SidebarCardManager";
+import ManagerLayout from "../../components/Manager-Sidebar/SidebarCardManager";
 
 function AddEmployee() {
   const [formData, setFormData] = useState({

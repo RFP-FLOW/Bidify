@@ -1,4 +1,4 @@
-import ManagerSidebar from "../components/SidebarManager";
+import ManagerSidebar from "./SidebarManager";
 
 function ManagerLayout({ children }) {
   return (

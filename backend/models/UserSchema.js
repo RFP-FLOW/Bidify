@@ -49,6 +49,20 @@ const userSchema = new mongoose.Schema(
     resetTokenExpiry: {
       type: Date,
     },
+
+    otp: {
+     type: String,
+   },
+
+   otpExpiry: {
+    type: Date,
+   },
+
+   isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+
   },
   { timestamps: true }
 );
