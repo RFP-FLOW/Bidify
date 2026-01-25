@@ -186,3 +186,87 @@ export const setEmployeePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+///////////////FORGET PASSWORD--------------
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    // 🔐 Security best practice:
+    // Always return success even if user not found
+    if (!user) {
+      return res.json({
+        message: "If the email exists, a reset link has been sent",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 min
+    await user.save();
+
+    const resetLink = `http://localhost:5173/set-password/${resetToken}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Reset your password – Bidify",
+      html: `
+        <p>You requested a password reset.</p>
+        <p>Click below to set a new password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link expires in 15 minutes.</p>
+      `,
+    });
+
+    res.json({
+      message: "If the email exists, a reset link has been sent",
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+///------------------RESET PASSWORD------------
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired reset link",
+      });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    user.isActive = true;
+
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

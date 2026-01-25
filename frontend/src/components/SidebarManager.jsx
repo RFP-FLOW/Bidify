@@ -83,7 +83,7 @@ function ManagerSidebar() {
       <SidebarItem
         icon={<LogOut size={18} />}
         label="Logout"
-        to="/logout"
+        to="/"
         collapsed={collapsed}
       />
     </aside>

@@ -176,6 +176,16 @@ console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
               </button>
             </form>
 
+           {/* FORGET PASSWORD */}
+            <p className="text-sm text-center mt-4">
+             <span
+               onClick={() => navigate("/forgot-password")}
+               className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+             >
+               Forgot password?
+             </span>
+           </p>        
+
             {/* SIGNUP LINK */}
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
