@@ -29,7 +29,7 @@ const VendorCompanyDetails = () => {
       await sendVendorRequest(id);
       alert("Request sent successfully ✅");
     } catch (err) {
-    console.log(err);
+      console.log(err);
       alert("Request already sent or failed ❌");
     } finally {
       setLoading(false);
@@ -45,9 +45,7 @@ const VendorCompanyDetails = () => {
           {company.companyName}
         </h2>
 
-        <p className="text-gray-600 mb-4">
-          {company.description}
-        </p>
+        <p className="text-gray-600 mb-4">{company.description}</p>
 
         <p className="text-sm text-gray-500">
           <b>Industry:</b> {company.industry}
@@ -66,6 +64,18 @@ const VendorCompanyDetails = () => {
             className="px-6 py-2 bg-[#3F2E96] text-white rounded-md hover:bg-[#2f2275]"
           >
             {loading ? "Sending..." : "Send Request"}
+          </button>
+          <button
+            disabled={company.alreadyRequested}
+            className={`px-6 py-2 rounded-md text-white
+    ${
+      company.alreadyRequested
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#3F2E96] hover:bg-[#2f2275]"
+    }
+  `}
+          >
+            {company.alreadyRequested ? "Request Sent" : "Send Request"}
           </button>
         </div>
       </div>
