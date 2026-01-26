@@ -14,3 +14,5 @@ api.interceptors.request.use((req) => {
 
 export const getVendorStats = () =>
   api.get("/vendor/dashboard/stats");
+export const sendVendorRequest = (companyId) =>
+  api.post("/vendor/request", { companyId });

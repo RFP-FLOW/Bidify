@@ -8,3 +8,9 @@ export const getCompanyProfile = async () => {
 export const updateCompanyProfile = async (data) => {
   return api.put("/company/profile", data);
 };
+
+export const getAllCompanies = () =>
+  api.get("/company/all");
+
+export const getCompanyById = (id) =>
+  api.get(`/company/${id}`);
