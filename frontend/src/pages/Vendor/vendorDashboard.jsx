@@ -1,195 +1,59 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  getVendorRFPs,
-  getVendorStats,
-} from "../../services/vendorService";
+import VendorLayout from "../../components/Vendor-Sidebar/Layout";
+import { getVendorStats } from "../../services/vendorService";
+import StatCard from "../../components/Vendor-Sidebar/StatCard";
 
 const VendorDashboard = () => {
-  const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     pending: 0,
     replied: 0,
     accepted: 0,
   });
 
-  const [rfps, setRfps] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  /* ================= AUTH GUARD ================= */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/vendor/login");
-    }
-  }, [navigate]);
-
-  /* ================= FETCH DASHBOARD DATA ================= */
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    const fetchData = async () => {
+    const fetchStats = async () => {
       try {
-        const [statsRes, rfpsRes] = await Promise.all([
-          getVendorStats(),
-          getVendorRFPs(),
-        ]);
-
+        const res = await getVendorStats();
         setStats({
-          pending: statsRes.data.pending || 0,
-          replied: statsRes.data.replied || 0,
-          accepted: statsRes.data.accepted || 0,
+          pending: res.data.pending || 0,
+          replied: res.data.replied || 0,
+          accepted: res.data.accepted || 0,
         });
-
-        setRfps(rfpsRes.data);
-      } catch (error) {
-        console.error(
-          "Vendor Dashboard Error:",
-          error.response?.data || error.message
-        );
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error(err);
       }
     };
 
-    fetchData();
+    fetchStats();
   }, []);
 
-  if (loading) {
-    return <div className="p-6">Loading dashboard...</div>;
-  }
-
   return (
-    <div className="flex min-h-screen bg-[#f6f7fb]">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#5b3df5] text-white flex flex-col justify-between">
-        <div>
-          <h2 className="text-2xl font-bold p-6">Vendor Portal</h2>
-
-          <nav className="flex flex-col gap-2 px-4">
-            <button className="text-left px-4 py-2 rounded bg-white/20">
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate("/vendor/rfps")}
-              className="text-left px-4 py-2 rounded hover:bg-white/20"
-            >
-              RFP Requests
-            </button>
-            <button
-              onClick={() => navigate("/vendor/profile")}
-              className="text-left px-4 py-2 rounded hover:bg-white/20"
-            >
-              Profile
-            </button>
-          </nav>
-        </div>
-
-        <p className="text-sm p-6 text-white/80">
-          Vendor Support <br /> help@rfpmanager.com
+    <VendorLayout>
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+          Welcome, Vendor 👋
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Here’s what’s happening today
         </p>
-      </aside>
+      </div>
 
-      {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 p-8">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              Vendor Dashboard
-            </h1>
-            <p className="text-gray-500">
-              Track and respond to company RFP requests
-            </p>
-          </div>
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <StatCard title="Pending Requests" value={stats.pending} />
+        <StatCard title="Replied" value={stats.replied} />
+        <StatCard title="Accepted" value={stats.accepted} />
+      </div>
 
-          <button
-            onClick={() => navigate("/vendor/rfps")}
-            className="bg-[#5b3df5] text-white px-5 py-2 rounded-lg shadow hover:bg-[#4a2ee0]"
-          >
-            View RFP Requests
-          </button>
+      {/* LIST */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="p-5 border-b border-gray-200">
+          <h3 className="font-medium text-gray-900">
+            Recent RFPs
+          </h3>
         </div>
-
-        {/* ================= STATS CARDS ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {/* Pending */}
-          <div className="bg-[#fff3df] rounded-xl p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-600">Pending Requests</p>
-              <h2 className="text-2xl font-bold">{stats.pending}</h2>
-            </div>
-            <span className="text-2xl">📥</span>
-          </div>
-
-          {/* Replied */}
-          <div className="bg-[#eef4ff] rounded-xl p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-600">Replied</p>
-              <h2 className="text-2xl font-bold">{stats.replied}</h2>
-            </div>
-            <span className="text-2xl">✉️</span>
-          </div>
-
-          {/* Accepted */}
-          <div className="bg-[#e9fff1] rounded-xl p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-600">Accepted</p>
-              <h2 className="text-2xl font-bold">{stats.accepted}</h2>
-            </div>
-            <span className="text-2xl">🤝</span>
-          </div>
-        </div>
-
-        {/* ================= RFP LIST ================= */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">
-            Received RFPs
-          </h2>
-
-          {rfps.length === 0 ? (
-            <p className="text-gray-500">
-              No RFP requests received yet
-            </p>
-          ) : (
-            rfps.map((rfp) => (
-              <div
-                key={rfp._id}
-                className="bg-white rounded-xl p-5 mb-4 flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="font-semibold text-gray-800">
-                    {rfp.title}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {rfp.description}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(rfp.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold
-                    ${
-                      rfp.status === "PENDING"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : rfp.status === "REPLIED"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700"
-                    }
-                  `}
-                >
-                  {rfp.status}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </VendorLayout>
   );
 };
 

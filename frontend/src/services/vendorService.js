@@ -1,10 +1,16 @@
-// src/services/vendorService.js
-import axios from "../utils/axiosInstance";
+import axios from "axios";
 
-export const getVendorStats = () => {
-  return axios.get("/vendor/dashboard/stats");
-};
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
 
-export const getVendorRFPs = () => {
-  return axios.get("/vendor/rfps");
-};
+api.interceptors.request.use((req) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+  return req;
+});
+
+export const getVendorStats = () =>
+  api.get("/vendor/dashboard/stats");

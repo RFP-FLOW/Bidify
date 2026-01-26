@@ -6,6 +6,7 @@ import {
   Inbox,
   CheckCircle,
   User,
+  Users,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -72,6 +73,18 @@ function VendorSidebar() {
           icon={<User size={18} />}
           label="Profile"
           to="/vendor/profile"
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<Inbox size={18} />}
+          label="My Requests"
+          to="/vendor/requests"
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<Users size={18} />}
+          label="Companies"
+          to="/vendor/companies"
           collapsed={collapsed}
         />
       </nav>

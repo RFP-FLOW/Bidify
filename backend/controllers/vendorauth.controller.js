@@ -84,24 +84,45 @@ export const loginVendor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// export const getVendorStats = async (req, res) => {
+//   const vendorId = req.user.id;
+
+//   const total = await Proposal.countDocuments({ vendorId });
+//   const accepted = await Proposal.countDocuments({
+//     vendorId,
+//     status: "ACCEPTED",
+//   });
+//   const pending = await Proposal.countDocuments({
+//     vendorId,
+//     status: "PENDING",
+//   });
+
+//   res.json({
+//     total,
+//     pending,
+//     accepted,
+//   });
+// };
 export const getVendorStats = async (req, res) => {
   res.json({
-    pending: 3,
-    replied: 1,
-    accepted: 0,
+    pending: 1,
+    replied: 2,
+    accepted: 3,
   });
 };
 
+
+
 export const getVendorRFPs = async (req, res) => {
-  res.json([
-    {
-      _id: "1",
-      title: "Laptop Procurement",
-      description: "Need 20 laptops",
-      status: "PENDING",
-      createdAt: new Date(),
-    },
-  ]);
+  // res.json([
+  //   {
+  //     _id: "1",
+  //     title: "Laptop Procurement",
+  //     description: "Need 20 laptops",
+  //     status: "PENDING",
+  //     createdAt: new Date(),
+  //   },
+  // ]);
 };
 
 

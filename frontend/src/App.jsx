@@ -16,6 +16,8 @@ import AddCompanyProfile from "./pages/Company/Profile.jsx"
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CompanyRegister from "./pages/Company/companyRegistEr.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import VendorRequests from "./pages/Vendor/VendorRequests.jsx";
 
 
 
@@ -38,7 +40,7 @@ function App() {
        
         <Route path="/vendor/login" element={<VendorLogin />} />
         <Route path="/vendor/register" element={<VendorRegister />} />
-        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/vendor/dashboard" element={<ProtectedRoute role="vendor"><VendorDashboard /></ProtectedRoute>} />
 
         <Route path="/rfp/:rfpId" element={<RFPDetails />} />
 
@@ -47,6 +49,7 @@ function App() {
 
 
         <Route path="/verify-otp" element={<VerifyOtp/>} />
+        <Route path="/vendor/requests" element={<ProtectedRoute><VendorRequests /></ProtectedRoute>} />
         {/* <Route path="/vendor/dashboard" element={<ProtectedRoute /> />} */}
         
       </Routes>

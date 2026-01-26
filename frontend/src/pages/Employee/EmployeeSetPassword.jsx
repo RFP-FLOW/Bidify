@@ -46,6 +46,7 @@ function EmployeeSetPassword() {
       navigate("/company/login");
 
     } catch (err) {
+      console.log(err);
       toast.error("Server error");
     } finally {
       setLoading(false);
