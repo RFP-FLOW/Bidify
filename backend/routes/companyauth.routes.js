@@ -10,6 +10,7 @@ import {
   registerInit,
   getManagerProfile,
   updateManagerProfile,
+  updateCompanyProfile,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -47,4 +48,10 @@ router.get("/all", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch companies" });
   }
 });
+router.put(
+  "/company/profile",
+  authMiddleware,
+  managerOnly,
+  updateCompanyProfile
+);
 export default router;
