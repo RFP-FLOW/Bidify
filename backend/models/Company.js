@@ -28,6 +28,13 @@ const companySchema = new mongoose.Schema(
       ref: "User", // manager
       required: true,
     },
+    acceptedVendors: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vendor",
+  },
+],
+
   },
   { timestamps: true }
 );
