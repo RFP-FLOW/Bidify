@@ -24,9 +24,9 @@ function AcceptedVendors() {
 
   return (
     <ManagerLayout>
-      <div className="min-h-screen bg-[#fff5d7] p-8">
+      <div className="min-h-screen bg-[#fff5d7] p-10">
 
-        <h2 className="text-2xl font-semibold mb-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
           Approved Vendors
         </h2>
 
@@ -41,7 +41,7 @@ function AcceptedVendors() {
         )}
 
         {/* GRID: 2 CARDS PER ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {vendors.map((vendor) => (
             <VendorCard key={vendor._id} vendor={vendor} />
           ))}
