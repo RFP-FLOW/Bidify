@@ -73,7 +73,7 @@ const handleLogout = () => {
         />
         <SidebarItem
           icon={<Inbox size={18} />}
-          label="Vendor Requests"
+          label="Vendor"
           to="/manager/vendors"
           collapsed={collapsed}
         />

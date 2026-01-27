@@ -98,7 +98,7 @@ export const getAcceptedVendors = async (req, res) => {
     const companyId = req.user.companyId;
 
     const company = await Company.findById(companyId)
-      .populate("acceptedVendors", "name email phone")
+      .populate("acceptedVendors", "name email phone gstNumber businessName description address")
       .select("acceptedVendors");
 
     res.status(200).json({

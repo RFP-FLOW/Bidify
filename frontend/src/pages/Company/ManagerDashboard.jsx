@@ -1,4 +1,4 @@
-import ManagerLayout  from "../../components/Manager-Sidebar/SidebarCardManager";
+import ManagerLayout  from "../../components/Manager/SidebarCardManager";
 import { useEffect, useState } from "react";
 import VendorDetailsModal from "./VendorDetailsModal";
 import { acceptRequest, getPendingRequests, rejectRequest } from "../../services/managerServices";
@@ -10,7 +10,7 @@ function ManagerDashboard() {
   
      useEffect(() => {
     fetchVendorRequests();
-    
+
   }, []);
 
   const fetchVendorRequests = async () => {

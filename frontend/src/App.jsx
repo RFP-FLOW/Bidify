@@ -11,6 +11,7 @@ import AddEmployee from "./pages/Company/AddEmployee.jsx";
 import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import AddCompanyProfile from "./pages/Company/Profile.jsx";
 import CompanyRegister from "./pages/Company/companyRegister.jsx";
+import AcceptedVendors from "./pages/Company/AcceptedVendor.jsx";
 
 //Employee
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
@@ -31,6 +32,7 @@ import ForgotPassword from "./pages/Password-reset/ForgotPassword.jsx";
 import VerifyOtp from "./pages/OTP/Verify-otp.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoutes.jsx";
+
 
 
 
@@ -60,6 +62,8 @@ function App() {
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
+        <Route path="/manager/vendors" element={<AcceptedVendors />} />
+
 
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/create-rfp" element={<CreateRFP />} />

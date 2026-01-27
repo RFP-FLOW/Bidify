@@ -1,6 +1,6 @@
 import CompanyProfileCard from "../../components/Company-profile/CompanyProfileCard";
 import ManagerProfileCard from "../../components/Company-profile/ManagerProfileCard";
-import ManagerLayout from "../../components/Manager-Sidebar/SidebarCardManager";
+import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import Navbar from "../../components/Navbar";
 
 const Profile = () => {
