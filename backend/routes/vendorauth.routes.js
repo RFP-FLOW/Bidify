@@ -69,5 +69,21 @@ router.post("/submit-proposal", authMiddleware, vendorOnly, async (req, res) => 
     proposal,
   });
 });
+router.get("/request-status/:companyId", authMiddleware, vendorOnly, async (req, res) => {
+  try {
+    const vendorId = req.user.id;
+    const { companyId } = req.params;
+
+    const existing = await VendorRequest.findOne({
+      vendorId,
+      companyId,
+    });
+
+    res.json({ requested: !!existing });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to check request status" });
+  }
+});
+
 
 export default router;
