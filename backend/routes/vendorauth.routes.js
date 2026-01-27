@@ -1,6 +1,7 @@
 import express from "express";
 import { registerVendor, loginVendor, getVendorRFPs, getVendorStats } from "../controllers/vendorauth.controller.js";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
+import VendorRequest from "../models/vendorRequest.js";
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router.post("/request", authMiddleware, async (req, res) => {
 });
 
 /* GET VENDOR REQUESTS */
-router.get("/requests", authMiddleware, async (req, res) => {
+router.get("/request", authMiddleware, async (req, res) => {
   try {
     const vendorId = req.user.id;
 
