@@ -46,7 +46,7 @@ const handleSubmit = async (e) => {
     }
 
     // 🔥 FIX HERE
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("authToken", data.token);
     
 console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
     localStorage.setItem("user", JSON.stringify(data.user));

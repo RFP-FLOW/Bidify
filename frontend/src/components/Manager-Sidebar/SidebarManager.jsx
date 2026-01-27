@@ -16,7 +16,13 @@ import {
 function ManagerSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
+const handleLogout = () => {
+    localStorage.clear();
+    navigate("/vendor/login");
+  };
+
   return (
+
     <aside
       className={`bg-white border-r border-gray-200 transition-all duration-300
       ${collapsed ? "w-20" : "w-64"} p-4`}
@@ -81,6 +87,7 @@ function ManagerSidebar() {
       <div className="my-6 border-t border-gray-200" />
 
       <SidebarItem
+         onClick={handleLogout}
         icon={<LogOut size={18} />}
         label="Logout"
         to="/"
