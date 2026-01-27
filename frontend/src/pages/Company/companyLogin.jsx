@@ -46,16 +46,17 @@ const handleSubmit = async (e) => {
     }
 
     // 🔥 FIX HERE
-    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", "manager");
     
 console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
     localStorage.setItem("user", JSON.stringify(data.user));
 
     // navigate after successful login
     if (formData.role === "manager") {
-      navigate("/manager/dashboard");
+      navigate("/manager/dashboard",{replace:true});
     } else if (formData.role === "employee") {
-      navigate("/employee/dashboard");
+      navigate("/employee/dashboard",{replace:true});
     }
   } catch (error) {
     console.error("Login error:", error);

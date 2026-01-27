@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink ,useNavigate} from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -15,10 +15,11 @@ import {
 
 function ManagerSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate(); 
 
 const handleLogout = () => {
     localStorage.clear();
-    navigate("/vendor/login");
+    navigate("/company/login", { replace: true });
   };
 
   return (
@@ -86,13 +87,14 @@ const handleLogout = () => {
 
       <div className="my-6 border-t border-gray-200" />
 
-      <SidebarItem
+      <button
          onClick={handleLogout}
-        icon={<LogOut size={18} />}
-        label="Logout"
-        to="/"
-        collapsed={collapsed}
-      />
+         className="flex w-full items-center gap-3 px-3 py-2 rounded-md
+                    text-gray-700 hover:bg-gray-100">
+         <LogOut size={18} />
+         {!collapsed && "Logout"}
+       </button>
+
     </aside>
   );
 }

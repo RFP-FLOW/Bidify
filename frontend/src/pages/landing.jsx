@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 
 function LandingPage() {
   const navigate = useNavigate();
-
+  
   return (
     <div className="min-h-screen bg-[#fff5d7]">
       <Navbar />
