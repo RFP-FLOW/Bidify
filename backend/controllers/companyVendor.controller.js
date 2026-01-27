@@ -1,5 +1,6 @@
 
 import Company from "../models/company.js";
+import Vendor from "../models/Vendor.js";
 import VendorRequest from "../models/vendorRequest.js";
 
 
@@ -12,9 +13,9 @@ export const getPendingVendorRequests = async (req, res) => {
       companyId,
       status: "PENDING",
     })
-      .populate("vendorId", "name email phone")
+      .populate("vendorId", "name email phone businessName address gstNumber")
       .sort({ createdAt: -1 });
-
+       
     res.status(200).json({
       success: true,
       count: requests.length,

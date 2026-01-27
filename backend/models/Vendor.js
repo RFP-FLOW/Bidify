@@ -9,7 +9,21 @@ const vendorSchema = new mongoose.Schema(
     gstNumber: { type: String, unique: true },
     email: { type: String, unique: true },
     password: String,
+     description: {
+      type: String,
+      trim: true,
+    },
 
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+    
     role: {
       type: String,
       default: "vendor",
