@@ -11,10 +11,11 @@ import {
   getManagerProfile,
   updateManagerProfile,
   updateCompanyProfile,
+  getAllCompanies,
 } from "../controllers/companyauth.controller.js";
 
 
-import authMiddleware,{managerOnly} from "../middlewares/auth.middleware.js";
+import authMiddleware,{managerOnly,vendorOnly} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -36,22 +37,8 @@ router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
 
 // UPDATE phone number
 router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
-/* GET ALL COMPANIES (FOR VENDORS) */
-router.get("/all", authMiddleware, async (req, res) => {
-  try {
-    const companies = await Company.find().select(
-      "companyName industry address description website"
-    );
 
-    res.json(companies);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch companies" });
-  }
-});
-router.put(
-  "/company/profile",
-  authMiddleware,
-  managerOnly,
-  updateCompanyProfile
-);
+router.get("/get-AllCompany",authMiddleware,vendorOnly,getAllCompanies);
+
+
 export default router;

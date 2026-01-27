@@ -46,6 +46,7 @@ function VendorLogin() {
 
     // ✅ SAVE TOKEN (MOST IMPORTANT)
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("role", "vendor");
     localStorage.setItem("user", JSON.stringify(res.data.user));
 
     // ✅ REDIRECT TO DASHBOARD

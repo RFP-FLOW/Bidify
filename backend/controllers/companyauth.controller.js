@@ -411,3 +411,24 @@ export const updateCompanyProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+
+export const getAllCompanies = async (req, res) => {
+  try {
+    const companies = await Company.find(); // 👈 returns EVERYTHING
+
+    res.status(200).json({
+      success: true,
+      count: companies.length,
+      companies
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to fetch companies"
+    });
+  }
+};
