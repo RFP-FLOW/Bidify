@@ -12,6 +12,7 @@ import {
   updateManagerProfile,
   updateCompanyProfile,
   getAllCompanies,
+  getCompanyById,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -39,6 +40,6 @@ router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
 router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
 
 router.get("/get-AllCompany",authMiddleware,vendorOnly,getAllCompanies);
-
+router.get("/:id", authMiddleware, getCompanyById);
 
 export default router;

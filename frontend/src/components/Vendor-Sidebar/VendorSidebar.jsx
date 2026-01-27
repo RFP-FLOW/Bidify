@@ -81,12 +81,6 @@ function VendorSidebar() {
           to="/vendor/requests"
           collapsed={collapsed}
         />
-        <SidebarItem
-          icon={<Users size={18} />}
-          label="Companies"
-          to="/vendor/companies"
-          collapsed={collapsed}
-        />
       </nav>
 
       <div className="my-6 border-t border-gray-200" />

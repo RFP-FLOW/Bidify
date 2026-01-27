@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { getAllCompanies } from "../../services/companyService";
 import { useNavigate } from "react-router-dom";
 import VendorLayout from "../../components/Vendor-Sidebar/Layout";
-import { getAllCompanies } from "../../services/companyService";
 
 const VendorCompanies = () => {
   const [companies, setCompanies] = useState([]);
@@ -11,7 +11,7 @@ const VendorCompanies = () => {
     const fetchCompanies = async () => {
       try {
         const res = await getAllCompanies();
-        setCompanies(res.data);
+        setCompanies(res.data.companies);
       } catch (err) {
         console.error(err);
       }
@@ -22,31 +22,28 @@ const VendorCompanies = () => {
 
   return (
     <VendorLayout>
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Available Companies
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Explore companies and send collaboration requests
-        </p>
-      </div>
+      <h2 className="text-2xl font-semibold mb-6">
+        Available Companies
+      </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {companies.map((company) => (
           <div
             key={company._id}
+            className="bg-white border rounded-lg p-5 cursor-pointer hover:shadow"
             onClick={() =>
               navigate(`/vendor/companies/${company._id}`)
             }
-            className="bg-white border border-gray-200 rounded-lg p-6 cursor-pointer hover:shadow"
           >
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-bold">
               {company.companyName}
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              {company.industry}
+
+            <p className="text-sm text-gray-600 mt-2">
+              {company.description || "No description available"}
             </p>
-            <p className="text-xs text-gray-400 mt-2">
+
+            <p className="text-xs text-gray-400 mt-3">
               {company.address}
             </p>
           </div>

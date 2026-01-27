@@ -412,6 +412,20 @@ export const updateCompanyProfile = async (req, res) => {
   }
 };
 
+// GET SINGLE COMPANY BY ID (FOR VENDOR)
+export const getCompanyById = async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id);
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json(company);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
