@@ -12,4 +12,7 @@ api.interceptors.request.use((req) => {
   return req;
 });
 
-export default api;
+export const getVendorStats = () =>
+  api.get("/vendor/dashboard/stats");
+export const sendVendorRequest = (companyId) =>
+  api.post("/vendor/request", { companyId });

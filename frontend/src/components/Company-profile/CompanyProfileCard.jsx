@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateCompanyProfile } from "../../services/companyService";
 
 const CompanyProfileCard = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -8,19 +9,25 @@ const CompanyProfileCard = () => {
     gst: "27ABCDE1234F1Z5",
     address: "Bangalore, India",
     website: "https://bidify.com",
-    description: "We provide RFP and bidding solutions."
+    description: "We provide RFP and bidding solutions.",
   });
 
   const handleChange = (e) => {
     setCompany({ ...company, [e.target.name]: e.target.value });
   };
+  const handleSave = async () => {
+    await updateCompanyProfile({
+      address: company.address,
+      description: company.description,
+      gstNumber: company.gst,
+    });
 
+    setIsEditing(false);
+  };
   return (
     <div className="bg-white rounded-2xl shadow p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Company Details
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-800">Company Details</h2>
 
         {!isEditing && (
           <button
@@ -109,7 +116,7 @@ const CompanyProfileCard = () => {
           </button>
 
           <button
-            onClick={() => setIsEditing(false)}
+            onClick={handleSave}
             className="px-6 py-2 bg-[#3F2E96] text-white rounded-md"
           >
             Save Changes

@@ -388,3 +388,26 @@ export const updateManagerProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+export const updateCompanyProfile = async (req, res) => {
+  try {
+    const { address, description, gstNumber } = req.body;
+
+    const company = await Company.findOneAndUpdate(
+      { createdBy: req.user.id }, // manager ki company
+      {
+        address,
+        description,
+        gstNumber,
+      },
+      { new: true }
+    );
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json(company);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
