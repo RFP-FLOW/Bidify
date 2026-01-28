@@ -8,3 +8,16 @@ export const getManagerProfile = async () => {
 export const updateManagerPhone = async (phone) => {
   return api.put("/company/manager/profile", { phone });
 };
+
+
+export const getPendingRequests = () =>
+  api.get("/manager-vendor/vendor-requests");
+
+export const acceptRequest = (id) =>
+  api.patch(`/manager-vendor/vendor-requests/${id}/accept`);
+
+export const rejectRequest = (id) =>
+  api.patch(`/manager-vendor/vendor-requests/${id}/reject`);
+
+export const getAcceptedVendors = () =>
+  api.get("/manager-vendor/vendors");

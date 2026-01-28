@@ -17,6 +17,15 @@ const vendorRequestSchema = new mongoose.Schema(
       enum: ["PENDING", "APPROVED", "REJECTED"],
       default: "PENDING",
     },
+     appliedAt: {
+      type: Date,
+      default: Date.now,
+    },
+
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // manager
+    },
   },
   { timestamps: true }
 );

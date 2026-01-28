@@ -1,7 +1,40 @@
-import ManagerLayout  from "../../components/Manager-Sidebar/SidebarCardManager";
-function ManagerDashboard() {
+import ManagerLayout  from "../../components/Manager/SidebarCardManager";
+import { useEffect, useState } from "react";
+import VendorDetailsModal from "./VendorDetailsModal";
+import { acceptRequest, getPendingRequests, rejectRequest } from "../../services/managerServices";
 
-  return (
+function ManagerDashboard() {
+ 
+    const [vendorRequests, setVendorRequests] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+  
+     useEffect(() => {
+    fetchVendorRequests();
+
+  }, []);
+
+  const fetchVendorRequests = async () => {
+    const res = await getPendingRequests();
+    setVendorRequests(res.data.data);
+  };
+
+  const handleApprove = async (id) => {
+    await acceptRequest(id);
+    setVendorRequests((prev) =>
+      prev.filter((req) => req._id !== id)
+    );
+    setSelectedRequest(null);
+  };
+
+  const handleReject = async (id) => {
+    await rejectRequest(id);
+    setVendorRequests((prev) =>
+      prev.filter((req) => req._id !== id)
+    );
+    setSelectedRequest(null);
+  };
+
+    return (
     <ManagerLayout>
     <div className="min-h-screen bg-[#fff5d7] flex">
 
@@ -29,29 +62,52 @@ function ManagerDashboard() {
             </h3>
           </div>
 
-          <table className="w-full text-sm">
-            <tbody>
-              {[
-                "Vendor A – Laptop Supplier",
-                "Vendor B – Sensor Supplier",
-              ].map((vendor) => (
-                <tr
-                  key={vendor}
-                  className="border-t border-gray-100 hover:bg-gray-50"
-                >
-                  <td className="px-5 py-4">{vendor}</td>
-                  <td className="px-5 py-4 text-right">
-                    <button className="px-4 py-1.5 rounded-md bg-[#3a2d97] text-white text-sm">
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          
+            <table className="w-full text-sm">
+              <tbody>
+                {vendorRequests.length === 0 && (
+                  <tr>
+                    <td className="px-5 py-6 text-center text-gray-400">
+                      No pending vendor requests
+                    </td>
+                  </tr>
+                )}
+
+                {vendorRequests.map((req) => (
+                  <tr
+                    key={req._id}
+                    className="border-t border-gray-100 hover:bg-gray-50"
+                  >
+                    <td className="px-5 py-4">
+                     {req.vendorId?.businessName || req.vendorId?.name || "Vendor"}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <button
+                        onClick={() => setSelectedRequest(req)}
+                        className="px-4 py-1.5 rounded-md bg-[#3a2d97] text-white text-sm"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
         </div>
       </main>
     </div>
+     
+       {/* MODAL */}
+      {selectedRequest && (
+        <VendorDetailsModal
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
+      )}
+
     </ManagerLayout>
   );
 }

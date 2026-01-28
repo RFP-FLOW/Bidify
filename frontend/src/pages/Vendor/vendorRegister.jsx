@@ -51,7 +51,7 @@ function VendorRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     if (!formData.email || !formData.password || !formData.confirmPassword || formData.businessName||formData.gstNumber) {
+     if (!formData.email || !formData.password || !formData.confirmPassword || !formData.businessName||!formData.gstNumber) {
     toast.error("Please fill all fields");
     return;
     }
