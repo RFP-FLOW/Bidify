@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getEmployeeRFPs, getRFPStats } from "../../services/rfpService";
+import Sidebar from "../../components/Employee/SidebarEmployee";
+
 
 const EmployeeDashboard = () => {
   const navigate = useNavigate();
@@ -61,30 +63,8 @@ const EmployeeDashboard = () => {
   return (
     <div className="flex min-h-screen bg-[#f6f7fb]">
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#5b3df5] text-white flex flex-col justify-between">
-        <div>
-          <h2 className="text-2xl font-bold p-6">RFP Manager</h2>
-
-          <nav className="flex flex-col gap-2 px-4">
-            <button className="text-left px-4 py-2 rounded bg-white/20">
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate("/employee/create-rfp")}
-              className="text-left px-4 py-2 rounded hover:bg-white/20"
-            >
-              Create RFP
-            </button>
-            <button className="text-left px-4 py-2 rounded hover:bg-white/20">
-              Vendors
-            </button>
-          </nav>
-        </div>
-
-        <p className="text-sm p-6 text-white/80">
-          Need Help? <br /> Check Documentation
-        </p>
-      </aside>
+     
+     <Sidebar />
 
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 p-8">
