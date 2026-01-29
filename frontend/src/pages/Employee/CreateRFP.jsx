@@ -66,19 +66,24 @@ const handleCreateRFP = async () => {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-      "http://localhost:5000/api/rfp",
-      {
-        title: aiRFP.title,
-        description: prompt,
-        items: aiRFP.items,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+  "http://localhost:5000/api/rfp",
+  {
+    title:
+      aiRFP.title && aiRFP.title.trim() !== ""
+        ? aiRFP.title
+        : "Procurement Request", // 🔥 fallback title
+
+    description: prompt,
+    items: aiRFP.items,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    withCredentials: true,
+  }
+);
+
 
     console.log("Saved RFP:", res.data);
 

@@ -10,6 +10,34 @@ function RFPDetails() {
   const [rfp, setRfp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [vendors, setVendors] = useState([]);
+const [vendorsLoading, setVendorsLoading] = useState(false);
+
+const fetchApprovedVendors = async () => {
+  try {
+    setVendorsLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+       "http://localhost:5000/api/manager-vendor/vendors/approved",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
+
+    setVendors(res.data.data || []);
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to load vendors");
+  } finally {
+    setVendorsLoading(false);
+  }
+};
+
 
   useEffect(() => {
     const fetchRFP = async () => {
@@ -78,7 +106,9 @@ function RFPDetails() {
             </button>
 
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+  setShowModal(true);
+  fetchApprovedVendors(); }}
               className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
             >
               Send to Vendors
@@ -143,27 +173,13 @@ function RFPDetails() {
       </div>
 
       {/* ✅ MODAL MUST BE INSIDE RETURN */}
-      <SelectVendorsModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        vendors={[
-          {
-            _id: "1",
-            name: "Dell Technologies",
-            email: "dell@gmail.com",
-          },
-          {
-            _id: "2",
-            name: "Lenovo",
-            email: "lenovo@gmail.com",
-          },
-          {
-            _id: "3",
-            name: "Thinkpad Solutions",
-            email: "thinkpad@gmail.com",
-          },
-        ]}
-      />
+     <SelectVendorsModal
+  isOpen={showModal}
+  onClose={() => setShowModal(false)}
+  vendors={vendors}
+  loading={vendorsLoading}
+/>
+
     </div>
   );
 }

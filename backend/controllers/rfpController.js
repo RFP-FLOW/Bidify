@@ -19,6 +19,7 @@ export const createRFP = async (req, res) => {
       description,
       items,
       createdBy: req.user._id, // comes from auth middleware
+      companyId: req.user.companyId,
       status: "DRAFT",
     });
 

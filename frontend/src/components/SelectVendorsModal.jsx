@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function SelectVendorsModal({ isOpen, onClose, vendors = [] }) {
+function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false }) {
   const [selected, setSelected] = useState([]);
 
   if (!isOpen) return null;
@@ -24,8 +24,21 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [] }) {
           Choose which vendors to send this RFP to
         </p>
 
+{loading && (
+  <p className="text-center text-gray-400 text-sm">
+    Loading approved vendors...
+  </p>
+)}
+
+{!loading && vendors.length === 0 && (
+  <p className="text-center text-gray-400 text-sm">
+    No approved vendors yet
+  </p>
+)}
+
         {/* Vendor List */}
-        <div className="space-y-3 max-h-60 overflow-auto">
+       {!loading && vendors.length > 0 && (
+  <div className="space-y-3 max-h-60 overflow-auto">
           {vendors.map((vendor) => (
             <div
               key={vendor._id}
@@ -44,7 +57,7 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [] }) {
               />
 
               <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-purple-600 text-white font-bold">
-                {vendor.name[0]}
+                {vendor.name?.[0] || "V"}
               </div>
 
               <div>
@@ -54,11 +67,15 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [] }) {
             </div>
           ))}
         </div>
+)}
 
         {/* Footer */}
         <div className="flex justify-between mt-6">
           <button
-            onClick={onClose}
+            onClick={() => {
+  setSelected([]);
+  onClose();
+}}
             className="px-4 py-2 bg-gray-100 rounded-lg"
           >
             Cancel

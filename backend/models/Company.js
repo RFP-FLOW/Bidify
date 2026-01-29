@@ -32,6 +32,7 @@ const companySchema = new mongoose.Schema(
   {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
+    unique:true,
   },
 ],
 
@@ -39,4 +40,6 @@ const companySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Company", companySchema);
+export default mongoose.models.Company ||
+  mongoose.model("Company", companySchema);
+

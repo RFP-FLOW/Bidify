@@ -44,15 +44,23 @@ const rfpSchema = new mongoose.Schema(
       default: "DRAFT",
     },
 
+    companyId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Company",
+  required: true,
+},
+
     // employee who created the RFP
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: "User",
       required: true,
     },
-
+deadline: {
+  type: Date,
+},
     // vendors selected while sending RFP
-    vendorIds: [
+    sentToVendors: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Vendor",

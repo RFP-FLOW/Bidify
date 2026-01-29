@@ -1,5 +1,5 @@
 
-import Company from "../models/company.js";
+import Company from "../models/Company.js";
 import Vendor from "../models/Vendor.js";
 import VendorRequest from "../models/vendorRequest.js";
 
@@ -44,6 +44,13 @@ export const acceptVendorRequest = async (req, res) => {
       });
     }
 
+    if (request.companyId.toString() !== req.user.companyId) {
+  return res.status(403).json({
+    success: false,
+    message: "Unauthorized approval attempt",
+  });
+}
+
     request.status = "APPROVED";
     request.reviewedBy = managerId;
     await request.save();
@@ -52,6 +59,12 @@ export const acceptVendorRequest = async (req, res) => {
       request.companyId,
       { $addToSet: { acceptedVendors: request.vendorId } }
     );
+
+    await Vendor.findByIdAndUpdate(
+  request.vendorId,
+  { $addToSet: { approvedCompanies: request.companyId } }
+);
+
 
     res.status(200).json({
       success: true,
@@ -97,14 +110,19 @@ export const getAcceptedVendors = async (req, res) => {
   try {
     const companyId = req.user.companyId;
 
-    const company = await Company.findById(companyId)
-      .populate("acceptedVendors", "name email phone gstNumber businessName description address")
-      .select("acceptedVendors");
+   const vendors = await VendorRequest.find({
+  companyId,
+  status: "APPROVED",
+}).populate(
+  "vendorId",
+  "name email phone gstNumber businessName description address"
+);
 
-    res.status(200).json({
-      success: true,
-      data: company.acceptedVendors,
-    });
+res.status(200).json({
+  success: true,
+  data: vendors.map(v => v.vendorId),
+});
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

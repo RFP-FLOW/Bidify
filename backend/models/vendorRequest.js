@@ -6,11 +6,13 @@ const vendorRequestSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
       required: true,
+      index:true,
     },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
+      index: true,
     },
     status: {
       type: String,
