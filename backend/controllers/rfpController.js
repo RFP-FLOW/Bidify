@@ -97,3 +97,51 @@ export const getRFPById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const sendRFPToVendors = async (req, res) => {
+  try {
+    if (!req.user || !req.user.companyId) {
+      return res.status(401).json({
+        message: "Unauthorized: user/company missing",
+      });
+    }
+
+    const { rfpId } = req.params;
+    const { vendorIds } = req.body;
+
+    if (!vendorIds || !Array.isArray(vendorIds) || vendorIds.length === 0) {
+      return res.status(400).json({
+        message: "Please select at least one vendor",
+      });
+    }
+
+    const rfp = await RFP.findById(rfpId);
+
+    if (!rfp) {
+      return res.status(404).json({ message: "RFP not found" });
+    }
+
+    if (rfp.companyId.toString() !== req.user.companyId.toString()) {
+      return res.status(403).json({
+        message: "Not allowed to send this RFP",
+      });
+    }
+
+    rfp.status = "SENT";
+    rfp.sentToVendors = vendorIds;
+    await rfp.save();
+
+    res.status(200).json({
+      success: true,
+      message: "RFP sent to vendors successfully",
+      rfp,
+    });
+  } catch (error) {
+    console.error("Send RFP Error:", error);
+    res.status(500).json({
+      message: "Server error while sending RFP",
+    });
+  }
+};
+

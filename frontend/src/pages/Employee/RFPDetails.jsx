@@ -173,12 +173,15 @@ const fetchApprovedVendors = async () => {
       </div>
 
       {/* ✅ MODAL MUST BE INSIDE RETURN */}
-     <SelectVendorsModal
+   <SelectVendorsModal
   isOpen={showModal}
   onClose={() => setShowModal(false)}
   vendors={vendors}
   loading={vendorsLoading}
-/>
+  rfpId={rfp._id}   
+ />
+
+
 
     </div>
   );

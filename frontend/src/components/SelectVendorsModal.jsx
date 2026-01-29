@@ -1,6 +1,14 @@
 import { useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false }) {
+function SelectVendorsModal({
+  isOpen,
+  onClose,
+  vendors = [],
+  loading = false,
+  rfpId,
+}) {
   const [selected, setSelected] = useState([]);
 
   if (!isOpen) return null;
@@ -12,6 +20,33 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false }) 
         : [...prev, id]
     );
   };
+
+  const handleSend = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.post(
+      `http://localhost:5000/api/rfp/${rfpId}/send`,
+      {
+        vendorIds: selected, // 👈 selected vendor IDs
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success("RFP sent to vendors 🚀");
+
+    setSelected([]);
+    onClose();
+  } catch (error) {
+    console.error("Send RFP Error:", error);
+    toast.error("Failed to send RFP");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
@@ -82,11 +117,13 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false }) 
           </button>
 
           <button
-            disabled={selected.length === 0}
-            className="px-6 py-2 rounded-lg text-white bg-gradient-to-r from-purple-500 to-indigo-500 disabled:opacity-50"
-          >
-            ✈️ Send ({selected.length})
-          </button>
+  onClick={handleSend}
+  disabled={selected.length === 0}
+  className="px-6 py-2 rounded-lg text-white bg-gradient-to-r from-purple-500 to-indigo-500 disabled:opacity-50"
+>
+  ✈️ Send ({selected.length})
+</button>
+
         </div>
       </div>
     </div>
