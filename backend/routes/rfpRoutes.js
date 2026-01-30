@@ -5,6 +5,7 @@ import {
   getRFPStats,
   getRFPById,
   sendRFPToVendors,
+  updateRFP,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -35,6 +36,9 @@ router.get("/:id", authMiddleware, getRFPById);
  * Create RFP
  */
 router.post("/", authMiddleware, createRFP);
+
+
+router.put("/:id", authMiddleware, updateRFP);
 
 /**
  * 🚀 SEND RFP TO VENDORS (FIXED)

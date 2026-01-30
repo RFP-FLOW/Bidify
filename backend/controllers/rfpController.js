@@ -1,4 +1,7 @@
 import RFP from "../models/RFP.js";
+import Proposal from "../models/Proposal.js";
+import Vendor from "../models/Vendor.js";
+import sendEmail from "../utils/sendEmail.js";
 
 /**
  * @desc    Create a new RFP (DRAFT)
@@ -104,7 +107,7 @@ export const sendRFPToVendors = async (req, res) => {
   try {
     if (!req.user || !req.user.companyId) {
       return res.status(401).json({
-        message: "Unauthorized: user/company missing",
+        message: "Unauthorized",
       });
     }
 
@@ -117,6 +120,7 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
+    // 🔍 Find RFP
     const rfp = await RFP.findById(rfpId);
 
     if (!rfp) {
@@ -129,14 +133,53 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
+    // 🔁 CREATE PROPOSALS (🔥 MAIN LOGIC)
+    const proposals = vendorIds.map((vendorId) => ({
+      vendorId,
+      rfpId,
+      status: "PENDING",
+    }));
+
+    await Proposal.insertMany(proposals);
+
+    // 🔄 Update RFP
     rfp.status = "SENT";
     rfp.sentToVendors = vendorIds;
     await rfp.save();
 
+    // 📧 Fetch vendor details
+const vendors = await Vendor.find({
+  _id: { $in: vendorIds },
+});
+
+// 📧 Send email to each vendor
+for (const vendor of vendors) {
+  await sendEmail({
+  to: vendor.email,
+  subject: `New RFP Received – ${rfp.title}`,
+  replyTo: req.user.email, // 🔥 EMPLOYEE EMAIL
+  html: `
+    <h2>Hello ${vendor.name},</h2>
+
+    <p>You have received a new <strong>Request for Proposal</strong>.</p>
+
+    <p><strong>Title:</strong> ${rfp.title}</p>
+    <p><strong>Description:</strong> ${rfp.description}</p>
+
+    <p>
+      You can directly reply to this email with your proposal.
+    </p>
+
+    <br/>
+    <p>— Team Bidify</p>
+  `,
+});
+}
+
+
     res.status(200).json({
       success: true,
       message: "RFP sent to vendors successfully",
-      rfp,
     });
   } catch (error) {
     console.error("Send RFP Error:", error);
@@ -145,4 +188,35 @@ export const sendRFPToVendors = async (req, res) => {
     });
   }
 };
+
+export const updateRFP = async (req, res) => {
+  try {
+    const { title, description, items } = req.body;
+
+    const rfp = await RFP.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        createdBy: req.user._id,
+        status: "DRAFT", // 🔒 only draft editable
+      },
+      { title, description, items },
+      { new: true }
+    );
+
+    if (!rfp) {
+      return res.status(404).json({
+        message: "Draft RFP not found or not editable",
+      });
+    }
+
+    res.json({
+      message: "Draft updated successfully",
+      rfp,
+    });
+  } catch (error) {
+    console.error("Update RFP Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 

@@ -41,7 +41,7 @@ const vendorSchema = new mongoose.Schema(
     status: {
       type: String,
       enum:  ["PENDING", "APPROVED", "REJECTED"],
-      default: "pending",
+      default: "PENDING",
     },
 
     requestedCompanies: [
