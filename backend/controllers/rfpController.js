@@ -83,7 +83,8 @@ export const getRFPById = async (req, res) => {
     const rfp = await RFP.findOne({
   _id: req.params.id,
   createdBy: req.user._id,
-}).lean();
+})
+.populate("sentToVendors", "name email");
 
     if (!rfp) {
       return res.status(404).json({

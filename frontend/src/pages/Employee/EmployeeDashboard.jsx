@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getEmployeeRFPs, getRFPStats } from "../../services/rfpService";
 import Sidebar from "../../components/Employee/SidebarEmployee";
+import RfpQuickView from "./RfpQuickView";
 
 
 const EmployeeDashboard = () => {
@@ -15,6 +16,8 @@ const EmployeeDashboard = () => {
 
   const [rfps, setRfps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openRfpId, setOpenRfpId] = useState(null);
+
 
   /* ================= AUTH GUARD ================= */
   useEffect(() => {
@@ -125,10 +128,19 @@ const EmployeeDashboard = () => {
             <p className="text-gray-500">No RFPs created yet</p>
           ) : (
             rfps.map((rfp) => (
-              <div
-                key={rfp._id}
-                className="bg-white rounded-xl p-5 mb-4 flex justify-between items-center"
-              >
+             <div
+  key={rfp._id}
+  onClick={() => {
+  if (rfp.status === "DRAFT") {
+    navigate(`/employee/create-rfp?draftId=${rfp._id}`);
+  } else if (rfp.status === "SENT") {
+    setOpenRfpId(rfp._id);
+  }
+}}
+  className={`bg-white rounded-xl p-5 mb-4 flex justify-between items-center
+    ${rfp.status === "DRAFT" ? "cursor-pointer hover:bg-gray-50" : ""}
+  `}
+>
                 <div>
                   <h3 className="font-semibold text-gray-800">
                     {rfp.title}
@@ -159,6 +171,13 @@ const EmployeeDashboard = () => {
           )}
         </div>
       </main>
+      {openRfpId && (
+  <RfpQuickView
+    rfpId={openRfpId}
+    onClose={() => setOpenRfpId(null)}
+  />
+)}
+
     </div>
   );
 };
