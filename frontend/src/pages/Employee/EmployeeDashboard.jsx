@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getEmployeeRFPs, getRFPStats } from "../../services/rfpService";
+import Sidebar from "../../components/Employee/SidebarEmployee";
+import RfpQuickView from "./RfpQuickView";
+
 
 const EmployeeDashboard = () => {
   const navigate = useNavigate();
@@ -13,6 +16,8 @@ const EmployeeDashboard = () => {
 
   const [rfps, setRfps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openRfpId, setOpenRfpId] = useState(null);
+
 
   /* ================= AUTH GUARD ================= */
   useEffect(() => {
@@ -61,30 +66,8 @@ const EmployeeDashboard = () => {
   return (
     <div className="flex min-h-screen bg-[#f6f7fb]">
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-[#5b3df5] text-white flex flex-col justify-between">
-        <div>
-          <h2 className="text-2xl font-bold p-6">RFP Manager</h2>
-
-          <nav className="flex flex-col gap-2 px-4">
-            <button className="text-left px-4 py-2 rounded bg-white/20">
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate("/employee/create-rfp")}
-              className="text-left px-4 py-2 rounded hover:bg-white/20"
-            >
-              Create RFP
-            </button>
-            <button className="text-left px-4 py-2 rounded hover:bg-white/20">
-              Vendors
-            </button>
-          </nav>
-        </div>
-
-        <p className="text-sm p-6 text-white/80">
-          Need Help? <br /> Check Documentation
-        </p>
-      </aside>
+     
+     <Sidebar />
 
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 p-8">
@@ -145,10 +128,19 @@ const EmployeeDashboard = () => {
             <p className="text-gray-500">No RFPs created yet</p>
           ) : (
             rfps.map((rfp) => (
-              <div
-                key={rfp._id}
-                className="bg-white rounded-xl p-5 mb-4 flex justify-between items-center"
-              >
+             <div
+  key={rfp._id}
+  onClick={() => {
+  if (rfp.status === "DRAFT") {
+    navigate(`/employee/create-rfp?draftId=${rfp._id}`);
+  } else if (rfp.status === "SENT") {
+    setOpenRfpId(rfp._id);
+  }
+}}
+  className={`bg-white rounded-xl p-5 mb-4 flex justify-between items-center
+    ${rfp.status === "DRAFT" ? "cursor-pointer hover:bg-gray-50" : ""}
+  `}
+>
                 <div>
                   <h3 className="font-semibold text-gray-800">
                     {rfp.title}
@@ -179,6 +171,13 @@ const EmployeeDashboard = () => {
           )}
         </div>
       </main>
+      {openRfpId && (
+  <RfpQuickView
+    rfpId={openRfpId}
+    onClose={() => setOpenRfpId(null)}
+  />
+)}
+
     </div>
   );
 };

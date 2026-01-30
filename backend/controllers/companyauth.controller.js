@@ -1,5 +1,5 @@
 import User from "../models/UserSchema.js";
-import Company  from "../models/company.js";
+import Company from "../models/Company.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -183,20 +183,28 @@ export const loginCompany = async (req, res) => {
 export const addEmployee = async (req, res) => {
   try {
     const { name, email } = req.body;
-    const managerId=req.user.id; //coming from auth middleware
 
-    if(!email || !name){
-      return res.status(400).json({message: "All fields are required"});
+    if (!name || !email) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const existingUser = await User.findOne(
-       { email }
-    );
+    // ✅ FIX 1: correct id
+    const managerId = req.user._id;
 
+    // ✅ FIX 2: fetch manager FIRST
+    const manager = await User.findById(managerId);
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Only manager can add employee" });
+    }
+
+    if (!manager.companyId) {
+      return res.status(400).json({ message: "Manager has no company assigned" });
+    }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Employee already exists" });
+      return res.status(400).json({ message: "Employee already exists" });
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
@@ -205,14 +213,13 @@ export const addEmployee = async (req, res) => {
       name,
       email,
       role: "employee",
-      managerId,
+      managerId: manager._id,
+      companyId: manager.companyId, // ✅ NOW VALID
       isActive: false,
       resetToken,
-      resetTokenExpiry: Date.now()+15*60*1000, //15min
+      resetTokenExpiry: Date.now() + 15 * 60 * 1000,
     });
 
-
-    // later: send email with set-password link
     const resetLink = `${process.env.CLIENT_URL}/employee/set-password/${resetToken}`;
 
     await sendEmail({
@@ -227,14 +234,16 @@ export const addEmployee = async (req, res) => {
       `,
     });
 
-
     res.status(201).json({
-      message: "Password setup link set to employee email ",
+      message: "Employee added successfully. Password setup link sent.",
     });
+
   } catch (error) {
+    console.error("Add Employee Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 /* ================= SET EMPLOYEE PASSWORD ================= */

@@ -1,15 +1,57 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { toast } from "react-toastify";
 
+
 function CreateRFP() {
-     const navigate = useNavigate(); 
+    const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get("draftId");
   const [prompt, setPrompt] = useState("");
   const [aiRFP, setAiRFP] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const hasLoadedDraft = useRef(false);
+
+useEffect(() => {
+  if (!draftId || hasLoadedDraft.current) return;
+
+  hasLoadedDraft.current = true;
+
+  const fetchDraft = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `http://localhost:5000/api/rfp/${draftId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const draft = res.data;
+
+      setPrompt(draft.description || "");
+      setAiRFP({
+        title: draft.title,
+        items: draft.items || [],
+      });
+
+      toast.info("Draft loaded for editing");
+    } catch (error) {
+      console.error("Draft Load Error:", error);
+      toast.error("Failed to load draft RFP");
+    }
+  };
+
+  fetchDraft();
+}, [draftId]);
+
+
 
   // 🔥 REAL AI GENERATION (Gemini backend)
   const handleGenerate = async () => {
@@ -62,38 +104,62 @@ const handleCreateRFP = async () => {
 
   try {
     setSubmitting(true);
-
     const token = localStorage.getItem("token");
 
-    const res = await axios.post(
-      "http://localhost:5000/api/rfp",
-      {
-        title: aiRFP.title,
-        description: prompt,
-        items: aiRFP.items,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+    let res;
 
-    console.log("Saved RFP:", res.data);
+    if (draftId) {
+      // 🟡 UPDATE EXISTING DRAFT
+      res = await axios.put(
+        `http://localhost:5000/api/rfp/${draftId}`,
+        {
+          title:
+            aiRFP.title && aiRFP.title.trim() !== ""
+              ? aiRFP.title
+              : "Procurement Request",
+          description: prompt,
+          items: aiRFP.items,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Draft updated successfully ✨");
+    } else {
+      // 🟢 CREATE NEW RFP
+      res = await axios.post(
+        "http://localhost:5000/api/rfp",
+        {
+          title:
+            aiRFP.title && aiRFP.title.trim() !== ""
+              ? aiRFP.title
+              : "Procurement Request",
+          description: prompt,
+          items: aiRFP.items,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("RFP created successfully 🚀");
+    }
 
     const rfpId = res.data.rfp._id;
-
-    // ✅ REDIRECT
     navigate(`/rfp/${rfpId}`);
-
   } catch (error) {
-    console.error("Create RFP Error:", error);
-    toast.error("Failed to create RFP");
+    console.error("Save RFP Error:", error);
+    toast.error("Failed to save RFP");
   } finally {
     setSubmitting(false);
   }
 };
+
 
   return (
     <div className="flex">

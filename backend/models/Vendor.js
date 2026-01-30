@@ -7,8 +7,17 @@ const vendorSchema = new mongoose.Schema(
     name: String,
     businessName: String,
     gstNumber: { type: String, unique: true },
-    email: { type: String, unique: true },
-    password: String,
+    email: {
+  type: String,
+  unique: true,
+  required: true,
+  lowercase: true,
+  trim: true,
+},
+    password: {
+  type: String,
+  select: false,
+},
      description: {
       type: String,
       trim: true,
@@ -31,8 +40,8 @@ const vendorSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum:  ["PENDING", "APPROVED", "REJECTED"],
+      default: "PENDING",
     },
 
     requestedCompanies: [

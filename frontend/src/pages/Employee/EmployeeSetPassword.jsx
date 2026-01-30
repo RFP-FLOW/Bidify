@@ -27,13 +27,13 @@ function EmployeeSetPassword() {
       setLoading(true);
 
       const res = await fetch(
-        `http://localhost:5000/api/company/set-password/${token}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password }),
-        }
-      );
+  `http://localhost:5000/api/company/set-password/${token}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  }
+);
 
       const data = await res.json();
 

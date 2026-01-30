@@ -1,4 +1,3 @@
-
 import express from "express";
 import authMiddleware, { managerOnly } from "../middlewares/auth.middleware.js";
 import {
@@ -10,14 +9,15 @@ import {
 
 const router = express.Router();
 
+// 🔐 all routes protected
 router.use(authMiddleware);
 
-// Manager only
+// 👨‍💼 Manager only
 router.get("/vendor-requests", managerOnly, getPendingVendorRequests);
 router.patch("/vendor-requests/:requestId/accept", managerOnly, acceptVendorRequest);
 router.patch("/vendor-requests/:requestId/reject", managerOnly, rejectVendorRequest);
 
-// Manager + Employee
-router.get("/vendors", getAcceptedVendors);
+// 👩‍💻 Employee + Manager → approved vendors (for RFP modal)
+router.get("/vendors/approved", getAcceptedVendors);
 
 export default router;

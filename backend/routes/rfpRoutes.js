@@ -4,6 +4,8 @@ import {
   getEmployeeRFPs,
   getRFPStats,
   getRFPById,
+  sendRFPToVendors,
+  updateRFP,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -12,32 +14,35 @@ const router = express.Router();
 
 /**
  * AI Generate RFP
- * POST /api/rfp/generate
  */
 router.post("/generate", authMiddleware, generateRFP);
 
 /**
- * Get dashboard stats
- * GET /api/rfp/stats
+ * Dashboard stats
  */
 router.get("/stats", authMiddleware, getRFPStats);
 
 /**
- * Get all RFPs of logged-in employee
- * GET /api/rfp/employee
+ * Employee RFPs
  */
 router.get("/employee", authMiddleware, getEmployeeRFPs);
 
 /**
- * Get single RFP by ID
- * GET /api/rfp/:id
+ * Get single RFP
  */
 router.get("/:id", authMiddleware, getRFPById);
 
 /**
- * Create new RFP (DRAFT)
- * POST /api/rfp
+ * Create RFP
  */
 router.post("/", authMiddleware, createRFP);
+
+
+router.put("/:id", authMiddleware, updateRFP);
+
+/**
+ * 🚀 SEND RFP TO VENDORS (FIXED)
+ */
+router.post("/:rfpId/send", authMiddleware, sendRFPToVendors);
 
 export default router;

@@ -10,7 +10,7 @@ const VendorDashboard = () => {
   const checkRequestStatus = async (companyId) => {
   try {
     const res = await api.get(`/vendor/request-status/${companyId}`);
-    setRequestSent(res.data.requested);
+    setRequestSent(res.data.status === "pending" || res.data.status === "approved");
   } catch (err) {
     console.error(err);
   }

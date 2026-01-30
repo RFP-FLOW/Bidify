@@ -32,49 +32,52 @@ import ForgotPassword from "./pages/Password-reset/ForgotPassword.jsx";
 import VerifyOtp from "./pages/OTP/Verify-otp.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoutes.jsx";
-
-
+import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 
 
 function App() {
   return (
     <BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} />
-    
+
       <Routes>
 
         <Route path="/" element={
-           <PublicRoute>
-               <LandingPage />
-            </PublicRoute>
-            } />
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
+        } />
 
-        <Route path="/company/login"  element={
-           <PublicRoute>
-               <CompanyLogin />
-            </PublicRoute>
-            }  />
-        <Route path="/manager/dashboard" 
-             element={ <ProtectedRoute allowedrole="manager">
-                     <ManagerDashboard />   
-                  </ProtectedRoute>
-                 } />
+        <Route path="/company/login" element={
+          <PublicRoute>
+            <CompanyLogin />
+          </PublicRoute>
+        } />
+        <Route path="/manager/dashboard"
+          element={<ProtectedRoute allowedrole="manager">
+            <ManagerDashboard />
+          </ProtectedRoute>
+          } />
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
         <Route path="/manager/vendors" element={<AcceptedVendors />} />
+        <Route
+          path="/employee/set-password/:token"
+          element={<EmployeeSetPassword />}
+        />
 
 
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/create-rfp" element={<CreateRFP />} />
 
-        <Route path="/vendor/login"  element={
-           <PublicRoute>
-               <VendorLogin />
-            </PublicRoute>
-            } />
+        <Route path="/vendor/login" element={
+          <PublicRoute>
+            <VendorLogin />
+          </PublicRoute>
+        } />
         <Route path="/vendor/register" element={<VendorRegister />} />
-        
+
         <Route
           path="/vendor/dashboard"
           element={
