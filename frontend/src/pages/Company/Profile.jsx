@@ -15,7 +15,6 @@ const Profile = () => {
         <ManagerLayout>
           <div className="space-y-6">
             <CompanyProfileCard />
-            <ManagerProfileCard />
           </div>
         </ManagerLayout>
       </div>

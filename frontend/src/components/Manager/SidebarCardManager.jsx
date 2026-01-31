@@ -1,11 +1,15 @@
+import Navbar from "../Navbar";
 import ManagerSidebar from "./SidebarManager";
 
 function ManagerLayout({ children }) {
+  const user=JSON.parse(localStorage.getItem("user"));
+  const companyName=user?.companyName || "Company";
   return (
-    <div className="min-h-screen bg-[#fff5d7] flex">
-      <ManagerSidebar />
+    <div className="bg-[#fff5d7] ">
+      <Navbar/>
+      <ManagerSidebar companyName={companyName} />
 
-      <main className="flex-1 p-8">
+      <main className="ml-64 min-h-[calc(100vh-4rem)] overflow-y-auto p-8">
         {children}
       </main>
     </div>

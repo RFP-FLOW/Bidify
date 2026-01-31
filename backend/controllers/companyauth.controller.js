@@ -155,6 +155,12 @@ export const loginCompany = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
+    
+    const company = await Company.findById(user.companyId);
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
 
     const token = jwt.sign(
       { _id: user._id, role: user.role,companyId: user.companyId },
@@ -167,10 +173,11 @@ export const loginCompany = async (req, res) => {
       token,
       user: {
         _id: user._id,
-        username: user.username,
+        username: user.name,
         email: user.email,
         role: user.role,
         companyId:user.companyId,
+        companyName:company.companyName,
       },
     });
   } catch (error) {
