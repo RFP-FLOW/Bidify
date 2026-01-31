@@ -75,6 +75,12 @@ function VendorLogin() {
           </div>
 
           {/* FORM */}
+          <p
+  onClick={() => navigate("/")}
+  className="text-center text-xs text-gray-400 mt-4 cursor-pointer hover:text-black"
+>
+  ← Back to Home
+</p>
           <div className="p-8">
             <h2 className="text-2xl font-bold text-center mb-8">
               Vendor Login
@@ -153,6 +159,15 @@ function VendorLogin() {
             </form>
 
             {/* SIGNUP LINK */}
+            <p className="text-center text-sm text-gray-600 mt-3">
+  Are you a company?{" "}
+  <span
+    onClick={() => navigate("/company/login")}
+    className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+  >
+    Login here
+  </span>
+</p>
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
               <button

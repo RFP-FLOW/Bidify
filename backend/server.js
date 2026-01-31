@@ -31,7 +31,6 @@ app.use(cors({
 }));
 
 // Routes
-app.use("/api/auth", vendorauthRoutes );
 app.use("/api/protected", protectedRoutes);
 app.use("/api/company", companyauthRoutes);
 app.use("/api/rfp", rfpRoutes);
