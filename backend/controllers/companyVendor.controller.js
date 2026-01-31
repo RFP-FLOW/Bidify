@@ -108,22 +108,27 @@ export const rejectVendorRequest = async (req, res) => {
 //----------GET ACCEPTED VENDOR------------
 export const getAcceptedVendors = async (req, res) => {
   try {
-    const companyId = req.user.companyId;
+    console.log("companyId from token:", req.user.companyId);
 
-   const vendors = await VendorRequest.find({
-  companyId,
-  status: "APPROVED",
-}).populate(
-  "vendorId",
-  "name email phone gstNumber businessName description address"
-);
+    const vendors = await VendorRequest.find({
+      vendorId: { $exists: true },
+      status: "APPROVED",
+      companyId: req.user.companyId,
+    }).populate(
+      "vendorId",
+      "name email phone gstNumber businessName description address"
+    );
 
-res.status(200).json({
-  success: true,
-  data: vendors.map(v => v.vendorId),
-});
-
+    res.status(200).json({
+      success: true,
+      data: vendors.map(v => v.vendorId),
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("GET ACCEPTED VENDORS ERROR:", error); // 👈 IMPORTANT
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
+
