@@ -7,7 +7,7 @@ export const sendVendorRequest = async (req, res) => {
     const { companyId } = req.body;
 
     // 🔥 get Vendor profile (NOT user)
-    const vendor = await Vendor.findOne({ email: req.user.email });
+    const vendor = await Vendor.findById(req.user.id);
 
     if (!vendor) {
       return res.status(404).json({
@@ -44,7 +44,7 @@ export const sendVendorRequest = async (req, res) => {
 /* GET VENDOR REQUESTS */
 export const getVendorRequests = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ email: req.user.email });
+    const vendor = await Vendor.findById(req.user.id);
 
     if (!vendor) {
       return res.status(404).json({
@@ -67,7 +67,7 @@ export const checkRequestStatus = async (req, res) => {
   try {
     const { companyId } = req.params;
 
-    const vendor = await Vendor.findOne({ email: req.user.email });
+    const vendor = await Vendor.findById(req.user.id);
 
     if (!vendor) {
       return res.status(404).json({

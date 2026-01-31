@@ -8,13 +8,13 @@ const VendorDashboard = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [requestSent, setRequestSent] = useState(false);
   const checkRequestStatus = async (companyId) => {
-  try {
-    const res = await api.get(`/vendor/request-status/${companyId}`);
-    setRequestSent(res.data.status === "pending" || res.data.status === "approved");
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      const res = await api.get(`/vendor/request-status/${companyId}`);
+      setRequestSent(res.data.requested);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -29,11 +29,6 @@ const VendorDashboard = () => {
     };
     fetchCompanies();
   }, []);
-  useEffect(() => {
-    if (selectedCompany) {
-      setRequestSent(false);
-    }
-  }, [selectedCompany]);
   const handleSendRequest = async () => {
     if (!selectedCompany) return;
 
@@ -74,9 +69,9 @@ const VendorDashboard = () => {
           <div
             key={company._id}
             onClick={() => {
-  setSelectedCompany(company);
-  checkRequestStatus(company._id);
-}}
+              setSelectedCompany(company);
+              checkRequestStatus(company._id);
+            }}
             className="bg-white border border-gray-200 rounded-xl p-6
                        cursor-pointer transition
                        hover:shadow-lg hover:-translate-y-1"
@@ -102,7 +97,14 @@ const VendorDashboard = () => {
       {/* ================= MODAL ================= */}
       {selectedCompany && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-[420px]">
+          <div className="relative bg-white rounded-xl p-6 w-[420px]">
+            {/* ❌ CLOSE ICON */}
+            <button
+              onClick={() => setSelectedCompany(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-black text-xl"
+            >
+              ✕
+            </button>
             <h3 className="text-xl font-semibold">
               {selectedCompany.companyName}
             </h3>
@@ -120,7 +122,7 @@ const VendorDashboard = () => {
                 onClick={() => setSelectedCompany(null)}
                 className="px-4 py-2 border rounded-md"
               >
-                Cancel
+                Back
               </button>
 
               <button
