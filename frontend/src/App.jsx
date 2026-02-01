@@ -33,7 +33,7 @@ import VerifyOtp from "./pages/OTP/Verify-otp.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
-import EmployeesList from "./pages/Company/EmployessList.jsx";
+
 
 
 function App() {
@@ -59,8 +59,8 @@ function App() {
             <ManagerDashboard />
           </ProtectedRoute>
           } />
-        <Route  path="/company/manager/employees"   element={<EmployeesList />}
-/>
+        
+
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />

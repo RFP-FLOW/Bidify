@@ -57,7 +57,7 @@ const handleLogout = () => {
         />
         <SidebarItem
           icon={<Users size={18} />}
-          label="Add Employee"
+          label="Employee"
           to="/company/manager/add-employee"
           collapsed={collapsed}
         />

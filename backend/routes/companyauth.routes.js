@@ -8,12 +8,11 @@ import {
   resetPassword,
   verifyOtp,
   registerInit,
-  getManagerProfile,
-  updateManagerProfile,
-  updateCompanyProfile,
   getAllCompanies,
   getCompanyById,
   getMyEmployees,
+  getCompanyProfile,
+  updateCompanyProfile,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -35,11 +34,10 @@ router.post("/reset-password/:token", resetPassword);
 router.post("/register-init", registerInit);
 router.post("/verify-otp", verifyOtp);
 
-router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
 router.get("/manager/employees",authMiddleware,managerOnly,getMyEmployees);
+router.put("/profile", authMiddleware, managerOnly, updateCompanyProfile);
 
-// UPDATE phone number
-router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
+router.get("/profile",authMiddleware,managerOnly,getCompanyProfile);
 
 router.get("/get-AllCompany",authMiddleware,vendorOnly,getAllCompanies);
 router.get("/:id", authMiddleware, getCompanyById);

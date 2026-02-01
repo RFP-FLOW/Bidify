@@ -432,64 +432,7 @@ export const resetPassword = async (req, res) => {
 
 
 
-//-----GET DETAILS------
 
-export const getManagerProfile = async (req, res) => {
-  try {
-    // req.user.id comes from auth middleware
-    const manager = await User.findById(req.user.id).select(
-      "name email phone"
-    );
-
-    if (!manager) {
-      return res.status(404).json({ message: "Manager not found" });
-    }
-
-    res.status(200).json(manager);
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-//-----------UPDATE phone
-export const updateManagerProfile = async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    const manager = await User.findByIdAndUpdate(
-      req.user.id,
-      { phone },
-      { new: true }
-    ).select("name email phone");
-
-    res.status(200).json(manager);
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-};
-export const updateCompanyProfile = async (req, res) => {
-  try {
-    const { address, description, gstNumber } = req.body;
-
-    const company = await Company.findOneAndUpdate(
-      { createdBy: req.user.id }, // manager ki company
-      {
-        address,
-        description,
-        gstNumber,
-      },
-      { new: true }
-    );
-
-    if (!company) {
-      return res.status(404).json({ message: "Company not found" });
-    }
-
-    res.json(company);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // GET SINGLE COMPANY BY ID (FOR VENDOR)
 export const getCompanyById = async (req, res) => {
@@ -555,4 +498,55 @@ export const getMyEmployees = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+// UPDATE COMPANY PROFILE
+export const updateCompanyProfile = async (req, res) => {
+  try {
+    const { address, description, gstNumber, phone, website } = req.body;
+
+    const company = await Company.findOneAndUpdate(
+      { createdBy: req.user._id },   // ✅ IMPORTANT FIX
+      {
+        address,
+        description,
+        gstNumber,
+        website,
+        phone,
+      },
+      { new: true }
+    );
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json(company);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//GET COMPANY PROFILE
+export const getCompanyProfile = async (req, res) => {
+  try {
+    const company = await Company.findOne({ createdBy: req.user._id });
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json({
+      companyName: company.companyName,
+      gstNumber: company.gstNumber || "",
+      website: company.website || "",
+      phone: company.phone || "",
+      address: company.address || "",
+      description: company.description || "",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
