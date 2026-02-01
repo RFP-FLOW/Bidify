@@ -12,7 +12,7 @@ function ManagerDashboard() {
     fetchVendorRequests();
 
   }, []);
-
+ 
   const fetchVendorRequests = async () => {
     const res = await getPendingRequests();
     setVendorRequests(res.data.data);
@@ -33,6 +33,9 @@ function ManagerDashboard() {
     );
     setSelectedRequest(null);
   };
+   
+     const user = JSON.parse(localStorage.getItem("user"));
+    const name = user?.name || user?.username || user?.companyName || "User";
 
     return (
     <ManagerLayout>
@@ -41,15 +44,12 @@ function ManagerDashboard() {
       <main className="flex-1 p-8">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            Welcome, Manager <span>👋</span>
+            Welcome, {name} <span>👋</span>
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Here’s what’s happening in your company today
-          </p>
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
           <StatCard title="Active RFPs" value="6" />
           <StatCard title="Confirmed RFPs" value="2" />
         </div>

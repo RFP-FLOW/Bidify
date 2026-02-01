@@ -26,7 +26,7 @@ const handleLogout = () => {
   return (
 
     <aside
-  className={`fixed top-16 left-0 z-40 bg-white border-r border-gray-200 transition-all duration-300
+  className={`top-16 left-0 z-40 sticky top-0 bg-white border-r border-gray-200 transition-all duration-300
   ${collapsed ? "w-24" : "w-64"} px-4 py-6 h-[calc(100vh-4rem)] flex flex-col`}
 >
 
