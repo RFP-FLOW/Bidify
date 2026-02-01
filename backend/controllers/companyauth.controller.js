@@ -242,6 +242,17 @@ export const addEmployee = async (req, res) => {
         }
     
     //Case3: Expired -> RE-Invite
+     
+     if (
+          existingUser &&
+          existingUser.status === "invited" &&
+          existingUser.resetTokenExpiry &&
+         existingUser.resetTokenExpiry < Date.now()
+        ) {
+          existingUser.status = "expired";
+          await existingUser.save();
+        }
+
     if (existingUser && existingUser.status === "expired") {
       const resetToken = crypto.randomBytes(32).toString("hex");
 

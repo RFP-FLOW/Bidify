@@ -20,4 +20,4 @@ export const rejectRequest = (id) =>
   api.patch(`/manager-vendor/vendor-requests/${id}/reject`);
 
 export const getAcceptedVendors = () =>
-  api.get("/manager-vendor/vendors");
+  api.get("/manager-vendor/vendors/approved");
