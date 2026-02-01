@@ -63,6 +63,13 @@ const userSchema = new mongoose.Schema(
     default: false,
   },
 
+  status: {
+  type: String,
+  enum: ["invited", "active","expired"],
+  default: "invited",
+},
+
+
   },
   { timestamps: true }
 );

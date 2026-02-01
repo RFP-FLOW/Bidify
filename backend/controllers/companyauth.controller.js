@@ -210,9 +210,69 @@ export const addEmployee = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+
+    //CASE 1: ACTIVE EMPLOYEE
+    if (existingUser && existingUser.status==="active") {
       return res.status(400).json({ message: "Employee already exists" });
     }
+
+
+    //Case 2: Invited (RESEND)
+    if (
+          existingUser &&
+          existingUser.status === "invited" &&
+          existingUser.resetTokenExpiry > Date.now()
+        ) {
+          const resetLink = `${process.env.CLIENT_URL}/set-password/${existingUser.resetToken}`;
+
+          await sendEmail({
+        to: email,
+        subject: "Set your password – Bidify",
+        html: `
+          <h3>Hello ${existingUser.name},</h3>
+          <p>Your invitation is still valid.</p>
+          <a href="${resetLink}">${resetLink}</a>
+        `,
+      });
+
+      return res.json({
+        message: "Invitation re-sent successfully",
+      });
+
+        }
+    
+    //Case3: Expired -> RE-Invite
+    if (existingUser && existingUser.status === "expired") {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+
+      existingUser.resetToken = resetToken;
+      existingUser.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
+      existingUser.status = "invited";
+      existingUser.managerId = manager._id;
+      existingUser.companyId = manager.companyId;
+
+      await existingUser.save();
+
+      const resetLink = `${process.env.CLIENT_URL}/set-password/${resetToken}`;
+
+      await sendEmail({
+        to: email,
+        subject: "Set your password – Bidify",
+        html: `
+          <h3>Hello ${existingUser.name},</h3>
+          <p>You have been re-invited to join the company.</p>
+          <p>Click below to set your password:</p>
+          <a href="${resetLink}" target="_blank">${resetLink}</a>
+          <p>This link is valid for 15 minutes.</p>
+        `,
+      });
+
+      return res.status(200).json({
+        message: "Employee re-invited successfully. Password link sent.",
+      });
+    }
+
+    //Case4: Completely NEW employee
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -223,6 +283,7 @@ export const addEmployee = async (req, res) => {
       managerId: manager._id,
       companyId: manager.companyId, // ✅ NOW VALID
       isActive: false,
+      status:"invited",
       resetToken,
       resetTokenExpiry: Date.now() + 15 * 60 * 1000,
     });
@@ -274,6 +335,8 @@ export const setEmployeePassword = async (req, res) => {
     employee.password = await bcrypt.hash(password, 10);
     employee.isActive = true;
     employee.resetToken = undefined;
+    employee.status="active";
+    employee.isEmailVerified="true";
     employee.resetTokenExpiry = undefined;
 
     await employee.save();
@@ -462,3 +525,34 @@ export const getAllCompanies = async (req, res) => {
     });
   }
 };
+
+
+/* ================= GET ALL EMPLOYEES OF MANAGER ================= */
+export const getMyEmployees = async (req, res) => {
+  try {
+    const managerId = req.user._id;
+
+    const manager = await User.findById(managerId);
+
+    if (!manager || manager.role !== "manager") {
+      return res.status(403).json({ message: "Only manager can access this" });
+    }
+
+    const employees = await User.find({
+      managerId: managerId,
+      role: "employee",
+    })
+      .select("name email status isActive createdAt")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: employees.length,
+      employees,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

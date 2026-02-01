@@ -13,6 +13,7 @@ import {
   updateCompanyProfile,
   getAllCompanies,
   getCompanyById,
+  getMyEmployees,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -35,6 +36,7 @@ router.post("/register-init", registerInit);
 router.post("/verify-otp", verifyOtp);
 
 router.get("/manager/profile", authMiddleware,managerOnly, getManagerProfile);
+router.get("/manager/employees",authMiddleware,managerOnly,getMyEmployees);
 
 // UPDATE phone number
 router.put("/manager/profile", authMiddleware, managerOnly,updateManagerProfile);
