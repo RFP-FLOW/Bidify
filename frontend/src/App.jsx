@@ -35,6 +35,7 @@ import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -58,6 +59,8 @@ function App() {
             <ManagerDashboard />
           </ProtectedRoute>
           } />
+        
+
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
