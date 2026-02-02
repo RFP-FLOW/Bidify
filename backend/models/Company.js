@@ -49,7 +49,7 @@ const companySchema = new mongoose.Schema(
   {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor",
-    unique:true,
+    default:[],
   },
 ],
 

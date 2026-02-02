@@ -13,6 +13,7 @@ import {
   getMyEmployees,
   getCompanyProfile,
   updateCompanyProfile,
+  resendOtp,
 } from "../controllers/companyauth.controller.js";
 
 
@@ -33,6 +34,8 @@ router.post("/reset-password/:token", resetPassword);
 //email verified by otp 
 router.post("/register-init", registerInit);
 router.post("/verify-otp", verifyOtp);
+router.post("/resend-otp", resendOtp);
+
 
 router.get("/manager/employees",authMiddleware,managerOnly,getMyEmployees);
 router.put("/profile", authMiddleware, managerOnly, updateCompanyProfile);

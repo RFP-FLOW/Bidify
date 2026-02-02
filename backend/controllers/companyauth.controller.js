@@ -70,18 +70,49 @@ export const registerInit = async (req, res) => {
     }
 
     const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: "Email already registered" });
+
+    //Case 1: User exists and already verified->BLOCK
+    if (existing && existing.companyId) {
+      return res.status(400).json({ message: "Email already registered. Please login!" });
     }
+    
+     // Case 2: User exists but NOT verified → resend / regenerate OTP
+if (existing && !existing.companyId) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+  existing.otp = otp;
+  existing.otpExpiry = Date.now() + 10 * 60 * 1000;
+  await existing.save();
+
+  await sendEmail({
+    to: email,
+    subject: "Verify your email – Bidify",
+    html: `
+      <h3>Your OTP is:</h3>
+      <h2>${otp}</h2>
+      <p>Valid for 10 minutes</p>
+    `,
+  });
+
+  return res.json({
+    message:
+      existing.otpExpiry && existing.otpExpiry < Date.now()
+        ? "Previous OTP expired. New OTP sent."
+        : "OTP re-sent. Please verify your email.",
+  });
+}
+
+
+    //Fresh Registration   
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
+    const hashedPassword=await bcrypt.hash(password,10);
     // temporary user
     await User.create({
       name:username,
       email,
-      password, // hash later
+      password:hashedPassword, // hash later
       role: "manager",
+      companyName,
       otp,
       otpExpiry: Date.now() + 10 * 60 * 1000, // 10 min
       isEmailVerified: false,
@@ -119,19 +150,31 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    user.password = await bcrypt.hash(user.password, 10);
-    user.isEmailVerified = true;
-    user.otp = undefined;
-    user.otpExpiry = undefined;
+    if (user.companyId) {
+      return res.status(400).json({
+        message: "Registration already completed. Please login.",
+      });
+    }
+
+   
+    
 
     await user.save();
 
     const company = await Company.create({
       companyName,
       createdBy: user._id,
+      acceptedVendors: [], 
     });
 
+    user.isEmailVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    user.isActive=true;
+    user.status="active";
     user.companyId = company._id;
+
+
     await user.save();
 
     res.json({ message: "Company registered successfully" });
@@ -140,6 +183,55 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+//---------------------RESEND OTP----------------------
+export const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // 🔐 Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save();
+
+    await sendEmail({
+      to: email,
+      subject: "Your new OTP – Bidify",
+      html: `
+        <h3>Email Verification</h3>
+        <p>Your new OTP is:</p>
+        <h2>${otp}</h2>
+        <p>Valid for 10 minutes</p>
+      `,
+    });
+
+    res.json({ message: "OTP resent successfully" });
+
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 
 /* ================= LOGIN COMPANY ================= */
 export const loginCompany = async (req, res) => {
