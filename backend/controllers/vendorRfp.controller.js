@@ -1,5 +1,5 @@
 import RFP from "../models/RFP.js";
-
+// Vendor ko kaunse RFPs mile hain wo dikhana
 /**
  * @desc    Get Open RFPs for logged-in Vendor
  * @route   GET /api/vendor/open-rfps

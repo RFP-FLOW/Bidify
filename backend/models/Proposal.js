@@ -5,17 +5,44 @@ const proposalSchema = new mongoose.Schema(
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
+      required: true,
     },
+
     rfpId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RFP",
+      required: true,
     },
-    quotedPrice: Number,
-    message: String,
+
+    quotedPrice: {
+      type: Number,
+    },
+
+    message: {
+      type: String,
+      required: true,
+    },
+
     status: {
       type: String,
       enum: ["PENDING", "ACCEPTED", "REJECTED"],
       default: "PENDING",
+    },
+
+    replyMode: {
+      type: String,
+      enum: ["EMAIL", "PLATFORM"],
+      default: "PLATFORM",
+    },
+
+    repliedAt: {
+      type: Date,
+      default: Date.now,
+    },
+
+    employeeNotified: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

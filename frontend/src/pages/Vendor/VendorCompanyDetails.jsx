@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
-import VendorLayout from "../../components/Vendor-Sidebar/Layout";
+import VendorLayout from "../../components/Vendor/Layout";
 
 const VendorCompanyDetails = () => {
   const { id } = useParams();

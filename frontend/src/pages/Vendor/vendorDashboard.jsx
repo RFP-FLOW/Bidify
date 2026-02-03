@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import VendorLayout from "../../components/Vendor-Sidebar/Layout";
+import VendorLayout from "../../components/Vendor/Layout";
 import { getAllCompanies } from "../../services/companyService";
 import api from "../../services/api";
 

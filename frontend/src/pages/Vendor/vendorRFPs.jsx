@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import VendorSidebar from "../../components/Vendor-Sidebar/VendorSidebar";
-
+import VendorSidebar from "../../components/Vendor/VendorSidebar";
+import ReplyModal from "../../components/Vendor/ReplyModal";
 function VendorRFPs() {
   const [rfps, setRfps] = useState([]);
   const navigate = useNavigate();
+  const [openReply, setOpenReply] = useState(false);
+const [selectedRfpId, setSelectedRfpId] = useState(null);
+const [repliedRfpIds, setRepliedRfpIds] = useState([]);
 
   useEffect(() => {
     const fetchRFPs = async () => {
@@ -119,17 +122,17 @@ function VendorRFPs() {
 
               {/* CARD FOOTER */}
               <div className="flex justify-end px-5 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                <button
-  onClick={(e) => e.preventDefault()}
-  className="
-    px-4 py-1.5 text-sm font-medium rounded-md
-    bg-gray-200 text-gray-600
-    cursor-not-allowed
-    hover:bg-gray-300 hover:text-gray-700
-    transition
-  "
+               <button
+  disabled={repliedRfpIds.includes(rfp._id)}
+  onClick={() => {
+    setSelectedRfpId(rfp._id);
+    setOpenReply(true);
+  }}
+  className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white 
+  hover:bg-blue-700 active:scale-95 transition 
+  disabled:opacity-50 disabled:cursor-not-allowed"
 >
-  Reply
+  {repliedRfpIds.includes(rfp._id) ? "Replied" : "Reply"}
 </button>
               </div>
             </div>
@@ -137,6 +140,14 @@ function VendorRFPs() {
         </div>
       )}
     </main>
+   <ReplyModal
+  open={openReply}
+  rfpId={selectedRfpId}
+  onClose={() => setOpenReply(false)}
+  onSuccess={(rfpId) =>
+    setRepliedRfpIds((prev) => [...prev, rfpId])
+  }
+/>
   </div>
 );
 }
