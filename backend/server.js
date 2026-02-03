@@ -14,7 +14,8 @@ import protectedRoutes from "./routes/protected.routes.js";
 import companyauthRoutes from "./routes/companyauth.routes.js"; 
 import rfpRoutes from "./routes/rfpRoutes.js"; 
 import managerVendor from "./routes/managerVendor.routes.js"
-
+import vendorRfpRoutes from "./routes/vendorRfp.routes.js";
+import vendorReplyRoutes from "./routes/vendorReply.routes.js";
 
 dotenv.config();
 console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
@@ -34,9 +35,10 @@ app.use(cors({
 app.use("/api/protected", protectedRoutes);
 app.use("/api/company", companyauthRoutes);
 app.use("/api/rfp", rfpRoutes);
-app.use("/api/vendor", vendorauthRoutes);
+app.use("/api/auth", vendorauthRoutes);
 app.use("/api/manager-vendor",managerVendor);
-  
+app.use("/api/vendor", vendorRfpRoutes);
+  app.use("/api/vendor-reply", vendorReplyRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.send("Bidify API running");

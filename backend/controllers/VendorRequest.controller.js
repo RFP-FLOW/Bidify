@@ -1,6 +1,13 @@
 import Vendor from "../models/Vendor.js";
 import VendorRequest from "../models/vendorRequest.js";
 
+
+/* Vendor company ko request bhejta hai
+
+Company accept / reject karti hai
+
+Vendor approved vendor list me aata hai */
+
 /* SEND REQUEST TO COMPANY */
 export const sendVendorRequest = async (req, res) => {
   try {

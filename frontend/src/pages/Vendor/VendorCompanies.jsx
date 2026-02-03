@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllCompanies } from "../../services/companyService";
 import { useNavigate } from "react-router-dom";
-import VendorLayout from "../../components/Vendor-Sidebar/Layout";
+import VendorLayout from "../../components/Vendor/Layout";
 
 const VendorCompanies = () => {
   const [companies, setCompanies] = useState([]);

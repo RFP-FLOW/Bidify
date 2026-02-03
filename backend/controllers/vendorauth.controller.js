@@ -2,6 +2,7 @@ import Vendor from "../models/Vendor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+/*  registerthe vendor, login the vendor, getvendors stats, getvendorrfps
 /* ================= REGISTER ================= */
 export const registerVendor = async (req, res) => {
   try {

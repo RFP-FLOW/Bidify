@@ -1,4 +1,4 @@
-import VendorLayout from "../../components/Vendor-Sidebar/Layout";
+import VendorLayout from "../../components/Vendor/Layout";
 
 
 const VendorRequests = () => {

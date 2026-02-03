@@ -60,7 +60,7 @@ function VendorSidebar() {
         <SidebarItem
           icon={<Inbox size={18} />}
           label="My Bids"
-          to="/vendor/bids"
+          to="/vendor/open-rfps"
           collapsed={collapsed}
         />
         <SidebarItem
