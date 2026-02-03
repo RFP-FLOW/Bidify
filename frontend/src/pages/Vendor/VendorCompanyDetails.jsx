@@ -16,7 +16,7 @@ const VendorCompanyDetails = () => {
   }, [id]);
 
   const sendRequest = async () => {
-    await api.post("/vendor/request", {
+    await api.post("/auth/request", {
       companyId: id,
     });
     alert("Request sent to company");

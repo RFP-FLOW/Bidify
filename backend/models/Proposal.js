@@ -20,7 +20,6 @@ const proposalSchema = new mongoose.Schema(
 
     message: {
       type: String,
-      required: true,
     },
 
     status: {

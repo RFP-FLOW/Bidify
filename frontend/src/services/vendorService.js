@@ -13,6 +13,6 @@ api.interceptors.request.use((req) => {
 });
 
 export const getVendorStats = () =>
-  api.get("/vendor/dashboard/stats");
+  api.get("/auth/dashboard/stats");
 export const sendVendorRequest = (companyId) =>
-  api.post("/vendor/request", { companyId });
+  api.post("/auth/request", { companyId });
