@@ -106,9 +106,7 @@ export const getRFPById = async (req, res) => {
 export const sendRFPToVendors = async (req, res) => {
   try {
     if (!req.user || !req.user.companyId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     const { rfpId } = req.params;
@@ -120,7 +118,6 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
-    // 🔍 Find RFP
     const rfp = await RFP.findById(rfpId);
 
     if (!rfp) {
@@ -133,49 +130,47 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
-    // 🔁 CREATE PROPOSALS (🔥 MAIN LOGIC)
-    const proposals = vendorIds.map((vendorId) => ({
-      vendorId,
-      rfpId,
-      status: "PENDING",
-    }));
-
-    await Proposal.insertMany(proposals);
-
-    // 🔄 Update RFP
+    // ✅ UPDATE RFP STATUS & TARGET VENDORS
     rfp.status = "SENT";
     rfp.sentToVendors = vendorIds;
     await rfp.save();
 
-    // 📧 Fetch vendor details
-const vendors = await Vendor.find({
-  _id: { $in: vendorIds },
-});
+    // 📧 FETCH VENDORS
+    const vendors = await Vendor.find({
+      _id: { $in: vendorIds },
+    });
 
-// 📧 Send email to each vendor
-for (const vendor of vendors) {
-  await sendEmail({
-  to: vendor.email,
-  subject: `New RFP Received – ${rfp.title}`,
-  replyTo: req.user.email, // 🔥 EMPLOYEE EMAIL
-  html: `
-    <h2>Hello ${vendor.name},</h2>
+    // 📧 SEND EMAILS (SAFE LOOP)
+    for (const vendor of vendors) {
+      if (!vendor.email) continue;
 
-    <p>You have received a new <strong>Request for Proposal</strong>.</p>
+      try {
+        await sendEmail({
+          to: vendor.email,
+          subject: `New RFP Received – ${rfp.title}`,
+          replyTo: req.user.email,
+          html: `
+            <h2>Hello ${vendor.name},</h2>
 
-    <p><strong>Title:</strong> ${rfp.title}</p>
-    <p><strong>Description:</strong> ${rfp.description}</p>
+            <p>You have received a new <strong>Request for Proposal</strong>.</p>
 
-    <p>
-      You can directly reply to this email with your proposal.
-    </p>
+            <p><strong>Title:</strong> ${rfp.title}</p>
+            <p><strong>Description:</strong> ${rfp.description}</p>
 
-    <br/>
-    <p>— Team Bidify</p>
-  `,
-});
-}
+            <p>Please login to Bidify to submit your proposal.</p>
 
+            <br/>
+            <p>— Team Bidify</p>
+          `,
+        });
+      } catch (mailErr) {
+        console.error(
+          "Email failed for vendor:",
+          vendor._id,
+          mailErr.message
+        );
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -188,6 +183,7 @@ for (const vendor of vendors) {
     });
   }
 };
+
 
 export const updateRFP = async (req, res) => {
   try {

@@ -4,23 +4,32 @@ import Vendor from "../models/Vendor.js";
 import sendEmail from "../utils/sendEmail.js";
 
 /**
- * @desc    Vendor replies to an RFP (Platform reply)
- * @route   POST /api/vendor/reply
+ * @desc    Create or update vendor reply to an RFP (Platform reply)
+ * @route   POST /api/vendor-reply/replies
  * @access  Vendor
  */
 export const submitVendorReply = async (req, res) => {
   try {
-    const vendorId = req.user._id;
+    // 🔐 Auth middleware injects vendor
+    const vendorId = req.user?._id;
     const { rfpId, message, quotedPrice } = req.body;
 
-    if (!rfpId || !message) {
+    /* ----------------------- Basic validation ----------------------- */
+    if (!vendorId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized vendor",
+      });
+    }
+
+    if (!rfpId || !message?.trim()) {
       return res.status(400).json({
         success: false,
         message: "RFP ID and message are required",
       });
     }
 
-    // 🔍 Check RFP exists
+    /* ----------------------- Verify RFP ----------------------------- */
     const rfp = await RFP.findById(rfpId).populate(
       "createdBy",
       "name email"
@@ -33,7 +42,7 @@ export const submitVendorReply = async (req, res) => {
       });
     }
 
-    // 🔍 Check vendor exists
+    /* ----------------------- Verify Vendor -------------------------- */
     const vendor = await Vendor.findById(vendorId);
 
     if (!vendor) {
@@ -43,75 +52,103 @@ export const submitVendorReply = async (req, res) => {
       });
     }
 
-    // ❌ Prevent duplicate replies
-    const existingReply = await Proposal.findOne({
-      vendorId,
-      rfpId,
-    });
+    /* ---------------- Create or Update Proposal --------------------- */
+    const proposal = await Proposal.findOneAndUpdate(
+      { vendorId, rfpId },
+      {
+        vendorId,
+        rfpId,
+        message: message.trim(),
+        quotedPrice: quotedPrice ? Number(quotedPrice) : undefined,
+        replyMode: "PLATFORM",
+        status: "PENDING",
+        repliedAt: new Date(),
+        employeeNotified: true,
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
 
-    if (existingReply) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already replied to this RFP",
+    /* ----------------------- Email Notification --------------------- */
+    try {
+      console.log("📧 EMAIL DEBUG START");
+console.log("➡️ Employee Name:", rfp.createdBy?.name);
+console.log("➡️ Employee Email:", rfp.createdBy?.email);
+console.log("➡️ Vendor Name:", vendor.businessName || vendor.name);
+console.log("➡️ From EMAIL_USER:", process.env.EMAIL_USER);
+
+      await sendEmail({
+        to: rfp.createdBy.email,
+        subject: `New vendor reply for RFP: ${rfp.title}`,
+        html: `
+          <h3>Hello ${rfp.createdBy.name},</h3>
+
+          <p>A vendor has submitted a reply to your RFP.</p>
+
+          <p><strong>Vendor:</strong> ${
+            vendor.businessName || vendor.name
+          }</p>
+
+          <p><strong>RFP:</strong> ${rfp.title}</p>
+
+          <p><strong>Message:</strong></p>
+          <blockquote>${message}</blockquote>
+
+          ${
+            quotedPrice
+              ? `<p><strong>Quoted Price:</strong> ₹${quotedPrice}</p>`
+              : ""
+          }
+
+          <br/>
+          <p>— Team Bidify</p>
+        `,
       });
+    } catch (emailError) {
+      console.error("❌ EMAIL FULL ERROR:", emailError);
+      // Email failure should not break main flow
     }
 
-    // ✅ Save proposal (reply)
-    const proposal = await Proposal.create({
-      vendorId,
-      rfpId,
-      message,
-      quotedPrice: quotedPrice ? Number(quotedPrice) : undefined,
-      replyMode: "PLATFORM",
-      status: "PENDING",
-      employeeNotified: true,
-      repliedAt: new Date(),
-    });
-
-    // 📧 Send email to employee
-try {
-  await sendEmail({
-    to: rfp.createdBy.email,
-    subject: `New reply received for RFP: ${rfp.title}`,
-    html: `
-      <h3>Hello ${rfp.createdBy.name},</h3>
-
-      <p>You have received a new reply from a vendor.</p>
-
-      <p><strong>Vendor:</strong> ${vendor.businessName || vendor.name}</p>
-      <p><strong>RFP:</strong> ${rfp.title}</p>
-
-      <p><strong>Message:</strong></p>
-      <blockquote>${message}</blockquote>
-
-      ${
-        quotedPrice
-          ? `<p><strong>Quoted Price:</strong> ₹${quotedPrice}</p>`
-          : ""
-      }
-
-      <br/>
-      <p>— Team Bidify</p>
-    `,
-  });
-
-  console.log("✅ EMAIL SENT TO:", rfp.createdBy.email);
-
-} catch (emailError) {
-  console.error("❌ EMAIL FAILED:", emailError.message);
-}
-
-
-    res.status(201).json({
+    /* ----------------------- Final Response ------------------------- */
+    return res.status(201).json({
       success: true,
-      message: "Reply submitted successfully and email sent",
+      message: "Vendor reply submitted successfully",
       data: proposal,
     });
   } catch (error) {
     console.error("SUBMIT VENDOR REPLY ERROR:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to submit reply",
+      message: "Failed to submit vendor reply",
     });
   }
 };
+
+export const getOpenRFPsForVendor = async (req, res) => {
+  try {
+    const vendorId = req.user._id;
+
+    const rfps = await RFP.find({
+      status: "SENT",                 // 👈 company ne send ki ho
+      sentToVendors: vendorId,        // 👈 is vendor ko hi send hui ho
+    })
+      .populate("companyId", "companyName")
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: rfps,
+    });
+  } catch (error) {
+    console.error("GET OPEN RFPS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch open RFPs",
+    });
+  }
+};
+
+
