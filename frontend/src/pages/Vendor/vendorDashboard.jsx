@@ -9,7 +9,7 @@ const VendorDashboard = () => {
   const [requestSent, setRequestSent] = useState(false);
   const checkRequestStatus = async (companyId) => {
     try {
-      const res = await api.get(`/vendor/request-status/${companyId}`);
+      const res = await api.get(`/auth/request-status/${companyId}`);
       setRequestSent(res.data.requested);
     } catch (err) {
       console.error(err);
@@ -33,7 +33,7 @@ const VendorDashboard = () => {
     if (!selectedCompany) return;
 
     try {
-      await api.post("/vendor/request", {
+      await api.post("/auth/request", {
         companyId: selectedCompany._id,
       });
 
