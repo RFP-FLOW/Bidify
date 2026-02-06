@@ -6,6 +6,7 @@ import {
   getRFPById,
   sendRFPToVendors,
   updateRFP,
+  getEmployeeBids,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -26,6 +27,12 @@ router.get("/stats", authMiddleware, getRFPStats);
  * Employee RFPs
  */
 router.get("/employee", authMiddleware, getEmployeeRFPs);
+
+/**
+ * Employee Bids (SENT RFPs + bid count)
+ */
+router.get("/bids", authMiddleware, getEmployeeBids);
+
 
 /**
  * Get single RFP

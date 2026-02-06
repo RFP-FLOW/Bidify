@@ -17,6 +17,7 @@ import AcceptedVendors from "./pages/Company/AcceptedVendor.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
+import Bids from "./pages/Employee/Bids.jsx";
 
 //Vendor
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
@@ -114,6 +115,14 @@ function App() {
         />
 
         <Route path="/vendor/rfps" element={<VendorRFPs />} />
+<Route
+  path="/employee/bids"
+  element={
+    <ProtectedRoute>
+      <Bids />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/vendor/companies/:id"

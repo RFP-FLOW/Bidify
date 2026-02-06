@@ -83,6 +83,7 @@ console.log("➡️ From EMAIL_USER:", process.env.EMAIL_USER);
       await sendEmail({
         to: rfp.createdBy.email,
         subject: `New vendor reply for RFP: ${rfp.title}`,
+         replyTo: req.user.email, // 👈 employee email
         html: `
           <h3>Hello ${rfp.createdBy.name},</h3>
 

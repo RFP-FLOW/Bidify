@@ -17,7 +17,7 @@ export default function Sidebar() {
     >
       {/* TOP */}
       <div>
-        <h1 className="text-xl font-bold mb-8">RFP Manager</h1>
+        <h1 className="text-xl font-bold mb-8">RFP Management</h1>
 
         <ul className="space-y-4">
           <li
@@ -35,10 +35,10 @@ export default function Sidebar() {
           </li>
 
           <li
-            onClick={() => navigate("/employee/vendors")}
+            onClick={() => navigate("/employee/bids")}
             className="cursor-pointer hover:opacity-80"
           >
-            Vendors
+            Vendor Bids
           </li>
         </ul>
       </div>

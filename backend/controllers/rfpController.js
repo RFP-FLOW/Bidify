@@ -216,3 +216,61 @@ export const updateRFP = async (req, res) => {
 };
 
 
+/**
+ * @desc    Get SENT RFPs with proposal (bid) count for employee
+ * @route   GET /api/rfp/bids
+ * @access  Employee
+ */
+export const getEmployeeBids = async (req, res) => {
+  try {
+    //  console.log("BIDS API HIT");
+    // console.log("USER ID:", req.user._id);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    // 1️⃣ Only SENT RFPs created by logged-in employee
+    const rfps = await RFP.find({
+      createdBy: req.user._id,
+      status: "SENT",
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await RFP.countDocuments({
+      createdBy: req.user._id,
+      status: "SENT",
+    });
+
+    // 2️⃣ Get proposal count per RFP (aggregation)
+    const rfpIds = rfps.map((r) => r._id);
+
+    const proposalCounts = await Proposal.aggregate([
+      { $match: { rfpId: { $in: rfpIds } } },
+      { $group: { _id: "$rfpId", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    proposalCounts.forEach((p) => {
+      countMap[p._id.toString()] = p.count;
+    });
+
+    // 3️⃣ Attach bidCount to each RFP
+    const result = rfps.map((rfp) => ({
+      ...rfp.toObject(),
+      bidCount: countMap[rfp._id.toString()] || 0,
+    }));
+
+    res.status(200).json({
+      rfps: result,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Get Employee Bids Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
