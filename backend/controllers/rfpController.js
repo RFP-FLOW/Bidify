@@ -273,4 +273,36 @@ export const getEmployeeBids = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get all vendor proposals for a specific RFP (employee)
+ * @route   GET /api/rfp/:rfpId/proposals
+ * @access  Employee
+ */
+export const getRfpProposals = async (req, res) => {
+  try {
+    const { rfpId } = req.params;
+
+    // Ensure RFP belongs to logged-in employee
+    const rfp = await RFP.findOne({
+      _id: rfpId,
+      createdBy: req.user._id,
+    });
+
+    if (!rfp) {
+      return res.status(404).json({ message: "RFP not found or access denied" });
+    }
+
+    const proposals = await Proposal.find({ rfpId })
+      .populate("vendorId", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      rfpTitle: rfp.title,
+      proposals,
+    });
+  } catch (error) {
+    console.error("Get RFP Proposals Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 

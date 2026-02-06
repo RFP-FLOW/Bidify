@@ -7,6 +7,7 @@ import {
   sendRFPToVendors,
   updateRFP,
   getEmployeeBids,
+   getRfpProposals,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -46,6 +47,8 @@ router.post("/", authMiddleware, createRFP);
 
 
 router.put("/:id", authMiddleware, updateRFP);
+router.get("/:rfpId/proposals", authMiddleware, getRfpProposals);
+
 
 /**
  * 🚀 SEND RFP TO VENDORS (FIXED)

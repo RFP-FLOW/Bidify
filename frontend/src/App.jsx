@@ -18,6 +18,7 @@ import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
 import Bids from "./pages/Employee/Bids.jsx";
+import RfpProposals from "./pages/Employee/RfpProposals.jsx";
 
 //Vendor
 import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
@@ -60,7 +61,14 @@ function App() {
             <ManagerDashboard />
           </ProtectedRoute>
           } />
-        
+        <Route
+  path="/employee/rfp/:rfpId/proposals"
+  element={
+    <ProtectedRoute>
+      <RfpProposals />
+    </ProtectedRoute>
+  }
+/>
 
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />

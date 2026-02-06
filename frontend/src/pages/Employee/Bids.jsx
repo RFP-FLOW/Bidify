@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
+import { useNavigate } from "react-router-dom";
 
 const Bids = () => {
+    const navigate = useNavigate();
     const [rfps, setRfps] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -75,34 +77,33 @@ const Bids = () => {
 
                 {/* RFP CARDS */}
                 {!loading &&
-                    rfps.map((rfp) => (
-                        <div
-                            key={rfp._id}
-                            className="bg-white rounded-xl p-5 mb-4 flex justify-between items-center hover:shadow-sm transition"
-                        >
-                            <div>
-                                <h3 className="font-semibold text-gray-800">
-                                    {rfp.title}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    {rfp.description || "No description"}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    {new Date(rfp.createdAt).toLocaleDateString()}
-                                </p>
-                            </div>
+  rfps.map((rfp) => (
+    <div
+      key={rfp._id}
+      onClick={() => navigate(`/employee/rfp/${rfp._id}/proposals`)}
+      className="cursor-pointer bg-white rounded-xl p-5 mb-4 flex justify-between items-center hover:bg-gray-50 hover:shadow-sm transition"
+    >
+      <div>
+        <h3 className="font-semibold text-gray-800">
+          {rfp.title}
+        </h3>
 
-                            {/* CIRCULAR BID COUNT */}
-                            <div className="flex flex-col items-center">
-                                <div className="w-12 h-12 rounded-full bg-[#5b3df5] text-white flex items-center justify-center font-bold">
-                                    {rfp.bidCount}
-                                </div>
-                                <span className="text-xs text-gray-500 mt-1">
-                                    Bids
-                                </span>
-                            </div>
-                        </div>
-                    ))}
+        <p className="text-sm text-gray-500">
+          {rfp.description || "No description"}
+        </p>
+
+        <p className="text-xs text-gray-400 mt-1">
+          {new Date(rfp.createdAt).toLocaleDateString()}
+        </p>
+      </div>
+
+      <div className="text-right">
+        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+          {rfp.bidCount} Bids
+        </span>
+      </div>
+    </div>
+  ))}
 
                 {/* PAGINATION */}
                 {!loading && totalPages > 1 && (
