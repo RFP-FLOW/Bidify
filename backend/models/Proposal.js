@@ -16,10 +16,13 @@ const proposalSchema = new mongoose.Schema(
 
     quotedPrice: {
       type: Number,
+      min: 0,
     },
 
     message: {
       type: String,
+      required: true,
+      trim: true,
     },
 
     status: {
@@ -46,5 +49,17 @@ const proposalSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+/* ----------------------- Indexes ----------------------- */
+
+// One vendor can reply only once to one RFP
+proposalSchema.index(
+  { vendorId: 1, rfpId: 1 },
+  { unique: true }
+);
+
+// Query optimization
+proposalSchema.index({ rfpId: 1 });
+proposalSchema.index({ vendorId: 1 });
 
 export default mongoose.model("Proposal", proposalSchema);

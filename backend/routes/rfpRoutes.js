@@ -6,6 +6,8 @@ import {
   getRFPById,
   sendRFPToVendors,
   updateRFP,
+  getEmployeeBids,
+   getRfpProposals,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -28,6 +30,12 @@ router.get("/stats", authMiddleware, getRFPStats);
 router.get("/employee", authMiddleware, getEmployeeRFPs);
 
 /**
+ * Employee Bids (SENT RFPs + bid count)
+ */
+router.get("/bids", authMiddleware, getEmployeeBids);
+
+
+/**
  * Get single RFP
  */
 router.get("/:id", authMiddleware, getRFPById);
@@ -39,6 +47,8 @@ router.post("/", authMiddleware, createRFP);
 
 
 router.put("/:id", authMiddleware, updateRFP);
+router.get("/:rfpId/proposals", authMiddleware, getRfpProposals);
+
 
 /**
  * 🚀 SEND RFP TO VENDORS (FIXED)

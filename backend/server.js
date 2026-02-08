@@ -38,7 +38,7 @@ app.use("/api/rfp", rfpRoutes);
 app.use("/api/auth", vendorauthRoutes);
 app.use("/api/manager-vendor",managerVendor);
 app.use("/api/vendor", vendorRfpRoutes);
-  app.use("/api/vendor-reply", vendorReplyRoutes);
+app.use("/api/vendor-reply", vendorReplyRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.send("Bidify API running");

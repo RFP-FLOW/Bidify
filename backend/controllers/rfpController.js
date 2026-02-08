@@ -106,9 +106,7 @@ export const getRFPById = async (req, res) => {
 export const sendRFPToVendors = async (req, res) => {
   try {
     if (!req.user || !req.user.companyId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     const { rfpId } = req.params;
@@ -120,7 +118,6 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
-    // 🔍 Find RFP
     const rfp = await RFP.findById(rfpId);
 
     if (!rfp) {
@@ -133,49 +130,47 @@ export const sendRFPToVendors = async (req, res) => {
       });
     }
 
-    // 🔁 CREATE PROPOSALS (🔥 MAIN LOGIC)
-    const proposals = vendorIds.map((vendorId) => ({
-      vendorId,
-      rfpId,
-      status: "PENDING",
-    }));
-
-    await Proposal.insertMany(proposals);
-
-    // 🔄 Update RFP
+    // ✅ UPDATE RFP STATUS & TARGET VENDORS
     rfp.status = "SENT";
     rfp.sentToVendors = vendorIds;
     await rfp.save();
 
-    // 📧 Fetch vendor details
-const vendors = await Vendor.find({
-  _id: { $in: vendorIds },
-});
+    // 📧 FETCH VENDORS
+    const vendors = await Vendor.find({
+      _id: { $in: vendorIds },
+    });
 
-// 📧 Send email to each vendor
-for (const vendor of vendors) {
-  await sendEmail({
-  to: vendor.email,
-  subject: `New RFP Received – ${rfp.title}`,
-  replyTo: req.user.email, // 🔥 EMPLOYEE EMAIL
-  html: `
-    <h2>Hello ${vendor.name},</h2>
+    // 📧 SEND EMAILS (SAFE LOOP)
+    for (const vendor of vendors) {
+      if (!vendor.email) continue;
 
-    <p>You have received a new <strong>Request for Proposal</strong>.</p>
+      try {
+        await sendEmail({
+          to: vendor.email,
+          subject: `New RFP Received – ${rfp.title}`,
+          replyTo: req.user.email,
+          html: `
+            <h2>Hello ${vendor.name},</h2>
 
-    <p><strong>Title:</strong> ${rfp.title}</p>
-    <p><strong>Description:</strong> ${rfp.description}</p>
+            <p>You have received a new <strong>Request for Proposal</strong>.</p>
 
-    <p>
-      You can directly reply to this email with your proposal.
-    </p>
+            <p><strong>Title:</strong> ${rfp.title}</p>
+            <p><strong>Description:</strong> ${rfp.description}</p>
 
-    <br/>
-    <p>— Team Bidify</p>
-  `,
-});
-}
+            <p>Please login to Bidify to submit your proposal.</p>
 
+            <br/>
+            <p>— Team Bidify</p>
+          `,
+        });
+      } catch (mailErr) {
+        console.error(
+          "Email failed for vendor:",
+          vendor._id,
+          mailErr.message
+        );
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -188,6 +183,7 @@ for (const vendor of vendors) {
     });
   }
 };
+
 
 export const updateRFP = async (req, res) => {
   try {
@@ -219,4 +215,94 @@ export const updateRFP = async (req, res) => {
   }
 };
 
+
+/**
+ * @desc    Get SENT RFPs with proposal (bid) count for employee
+ * @route   GET /api/rfp/bids
+ * @access  Employee
+ */
+export const getEmployeeBids = async (req, res) => {
+  try {
+    //  console.log("BIDS API HIT");
+    // console.log("USER ID:", req.user._id);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    // 1️⃣ Only SENT RFPs created by logged-in employee
+    const rfps = await RFP.find({
+      createdBy: req.user._id,
+      status: "SENT",
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await RFP.countDocuments({
+      createdBy: req.user._id,
+      status: "SENT",
+    });
+
+    // 2️⃣ Get proposal count per RFP (aggregation)
+    const rfpIds = rfps.map((r) => r._id);
+
+    const proposalCounts = await Proposal.aggregate([
+      { $match: { rfpId: { $in: rfpIds } } },
+      { $group: { _id: "$rfpId", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = {};
+    proposalCounts.forEach((p) => {
+      countMap[p._id.toString()] = p.count;
+    });
+
+    // 3️⃣ Attach bidCount to each RFP
+    const result = rfps.map((rfp) => ({
+      ...rfp.toObject(),
+      bidCount: countMap[rfp._id.toString()] || 0,
+    }));
+
+    res.status(200).json({
+      rfps: result,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Get Employee Bids Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * @desc    Get all vendor proposals for a specific RFP (employee)
+ * @route   GET /api/rfp/:rfpId/proposals
+ * @access  Employee
+ */
+export const getRfpProposals = async (req, res) => {
+  try {
+    const { rfpId } = req.params;
+
+    // Ensure RFP belongs to logged-in employee
+    const rfp = await RFP.findOne({
+      _id: rfpId,
+      createdBy: req.user._id,
+    });
+
+    if (!rfp) {
+      return res.status(404).json({ message: "RFP not found or access denied" });
+    }
+
+    const proposals = await Proposal.find({ rfpId })
+      .populate("vendorId", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      rfpTitle: rfp.title,
+      proposals,
+    });
+  } catch (error) {
+    console.error("Get RFP Proposals Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
