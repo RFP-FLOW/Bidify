@@ -9,7 +9,7 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
         pass: process.env.EMAIL_PASS,
       },
     });
-
+ await transporter.verify();
     await transporter.sendMail({
       from: `"Bidify" <${process.env.EMAIL_USER}>`,
       to,

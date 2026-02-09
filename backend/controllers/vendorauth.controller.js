@@ -1,6 +1,9 @@
 import Vendor from "../models/Vendor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { randomBytes } from "crypto";
+import sendEmail from "../utils/sendEmail.js";
+
 
 /*  registerthe vendor, login the vendor, getvendors stats, getvendorrfps
 /* ================= REGISTER ================= */
@@ -67,7 +70,7 @@ export const loginVendor = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     res.json({
@@ -112,8 +115,6 @@ export const getVendorStats = async (req, res) => {
   });
 };
 
-
-
 export const getVendorRFPs = async (req, res) => {
   // res.json([
   //   {
@@ -125,5 +126,3 @@ export const getVendorRFPs = async (req, res) => {
   //   },
   // ]);
 };
-
-

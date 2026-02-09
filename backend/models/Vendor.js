@@ -8,17 +8,24 @@ const vendorSchema = new mongoose.Schema(
     businessName: String,
     gstNumber: { type: String, unique: true },
     email: {
-  type: String,
-  unique: true,
-  required: true,
-  lowercase: true,
-  trim: true,
-},
+      type: String,
+      unique: true,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
     password: {
-  type: String,
-  select: false,
-},
-     description: {
+      type: String,
+      select: false,
+    },
+    resetToken: {
+      type: String,
+    },
+
+    resetTokenExpiry: {
+      type: Date,
+    },
+    description: {
       type: String,
       trim: true,
     },
@@ -32,7 +39,7 @@ const vendorSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    
+
     role: {
       type: String,
       default: "vendor",
@@ -40,7 +47,7 @@ const vendorSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum:  ["PENDING", "APPROVED", "REJECTED"],
+      enum: ["PENDING", "APPROVED", "REJECTED"],
       default: "PENDING",
     },
 
@@ -58,8 +65,7 @@ const vendorSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
 
 export default mongoose.model("Vendor", vendorSchema);

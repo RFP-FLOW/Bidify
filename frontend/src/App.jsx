@@ -28,6 +28,9 @@ import VendorRequests from "./pages/Vendor/VendorRequests.jsx";
 import VendorCompanies from "./pages/Vendor/VendorCompanies.jsx";
 import VendorCompanyDetails from "./pages/Vendor/VendorCompanyDetails.jsx";
 import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
+import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
+import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
+
 //Auth
 import SetPassword from "./pages/Password-reset/SetPassword.jsx";
 import ForgotPassword from "./pages/Password-reset/ForgotPassword.jsx";
@@ -36,39 +39,45 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 
-
-
 function App() {
   return (
     <BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Routes>
-
-        <Route path="/" element={
-          <PublicRoute>
-            <LandingPage />
-          </PublicRoute>
-        } />
-
-        <Route path="/company/login" element={
-          <PublicRoute>
-            <CompanyLogin />
-          </PublicRoute>
-        } />
-        <Route path="/manager/dashboard"
-          element={<ProtectedRoute allowedrole="manager">
-            <ManagerDashboard />
-          </ProtectedRoute>
-          } />
         <Route
-  path="/employee/rfp/:rfpId/proposals"
-  element={
-    <ProtectedRoute>
-      <RfpProposals />
-    </ProtectedRoute>
-  }
-/>
+          path="/"
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/company/login"
+          element={
+            <PublicRoute>
+              <CompanyLogin />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/manager/dashboard"
+          element={
+            <ProtectedRoute allowedrole="manager">
+              <ManagerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee/rfp/:rfpId/proposals"
+          element={
+            <ProtectedRoute>
+              <RfpProposals />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
@@ -79,15 +88,17 @@ function App() {
           element={<EmployeeSetPassword />}
         />
 
-
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/create-rfp" element={<CreateRFP />} />
 
-        <Route path="/vendor/login" element={
-          <PublicRoute>
-            <VendorLogin />
-          </PublicRoute>
-        } />
+        <Route
+          path="/vendor/login"
+          element={
+            <PublicRoute>
+              <VendorLogin />
+            </PublicRoute>
+          }
+        />
         <Route path="/vendor/register" element={<VendorRegister />} />
 
         <Route
@@ -123,14 +134,14 @@ function App() {
         />
 
         <Route path="/vendor/rfps" element={<VendorRFPs />} />
-<Route
-  path="/employee/bids"
-  element={
-    <ProtectedRoute>
-      <Bids />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/employee/bids"
+          element={
+            <ProtectedRoute>
+              <Bids />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/vendor/companies/:id"
@@ -139,6 +150,14 @@ function App() {
               <VendorCompanyDetails />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/vendor/forgot-password"
+          element={<VendorForgotPassword />}
+        />
+        <Route
+          path="/vendor/reset-password/:token"
+          element={<VendorResetPassword />}
         />
       </Routes>
     </BrowserRouter>
