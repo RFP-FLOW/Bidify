@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useRef } from "react";
 
 const ReplyModal = ({
   open,
@@ -12,6 +13,8 @@ const ReplyModal = ({
   const [quotedPrice, setQuotedPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [file, setFile] = useState(null);
+  const fileRef = useRef();
 
   const isEditMode = Boolean(existingReply);
 
@@ -40,18 +43,21 @@ const ReplyModal = ({
 
       const token = localStorage.getItem("token");
 
+      const formData = new FormData();
+      formData.append("rfpId", rfpId);
+      formData.append("message", message);
+      if (quotedPrice) formData.append("quotedPrice", quotedPrice);
+      if (file) formData.append("attachment", file);
+
       await axios.post(
         "http://localhost:5000/api/vendor-reply/replies",
-        {
-          rfpId,
-          message,
-          quotedPrice,
-        },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            // ❌ DO NOT set Content-Type
           },
-        }
+        },
       );
 
       onSuccess?.(rfpId);
@@ -83,9 +89,7 @@ const ReplyModal = ({
         {/* BODY */}
         <div className="px-6 py-4 space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Message
-            </label>
+            <label className="text-sm font-medium text-gray-700">Message</label>
             <textarea
               rows="4"
               value={message}
@@ -109,10 +113,31 @@ const ReplyModal = ({
               placeholder="Enter quoted amount"
             />
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current.click()}
+              className="text-xl text-blue-600 hover:scale-110 transition"
+              title="Attach file"
+            >
+              📎
+            </button>
 
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+            {file && (
+              <span className="text-xs text-gray-600 truncate max-w-[200px]">
+                {file.name}
+              </span>
+            )}
+
+            <input
+              ref={fileRef}
+              type="file"
+              hidden
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+          </div>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
         {/* FOOTER */}
@@ -133,11 +158,7 @@ const ReplyModal = ({
             hover:bg-blue-700 active:scale-95 transition 
             disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading
-              ? "Saving..."
-              : isEditMode
-              ? "Update Reply"
-              : "Send Reply"}
+            {loading ? "Saving..." : isEditMode ? "Update Reply" : "Send Reply"}
           </button>
         </div>
       </div>

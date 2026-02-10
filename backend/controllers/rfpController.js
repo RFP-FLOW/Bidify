@@ -282,27 +282,22 @@ export const getRfpProposals = async (req, res) => {
   try {
     const { rfpId } = req.params;
 
-    // Ensure RFP belongs to logged-in employee
-    const rfp = await RFP.findOne({
-      _id: rfpId,
-      createdBy: req.user._id,
-    });
-
-    if (!rfp) {
-      return res.status(404).json({ message: "RFP not found or access denied" });
-    }
-
     const proposals = await Proposal.find({ rfpId })
-      .populate("vendorId", "name email")
+      .populate("vendorId", "name email businessName")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
-      rfpTitle: rfp.title,
+      success: true,
+      rfpTitle: proposals[0]?.rfpId?.title,
       proposals,
     });
   } catch (error) {
-    console.error("Get RFP Proposals Error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("GET RFP PROPOSALS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch proposals",
+    });
   }
 };
+
 

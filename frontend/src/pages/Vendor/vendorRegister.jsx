@@ -30,10 +30,6 @@ function VendorRegister() {
       value.includes(" ")
     )
       return;
-    if (!gstRegex.test(formData.gstNumber)) {
-      toast.error("Invalid GST number");
-      return;
-    }
 
     // auto-uppercase GST
     if (name === "gstNumber") {
@@ -46,16 +42,6 @@ function VendorRegister() {
 
   const isInvalidName = (value) =>
     /^\d+$/.test(value) || value.trim().length < 3;
-
-  if (isInvalidName(formData.name)) {
-    toast.error("Owner name must be at least 3 characters");
-    return;
-  }
-
-  if (isInvalidName(formData.businessName)) {
-    toast.error("Business name must be at least 3 characters");
-    return;
-  }
 
   const floatingLabel = (value) =>
     value
@@ -74,6 +60,20 @@ function VendorRegister() {
       !formData.confirmPassword
     ) {
       toast.error("Please fill all fields");
+      return;
+    }
+
+    if (isInvalidName(formData.name)) {
+      toast.error("Owner name must be at least 3 characters");
+      return;
+    }
+
+    if (isInvalidName(formData.businessName)) {
+      toast.error("Business name must be at least 3 characters");
+      return;
+    }
+    if (!gstRegex.test(formData.gstNumber)) {
+      toast.error("Invalid GST number");
       return;
     }
 
