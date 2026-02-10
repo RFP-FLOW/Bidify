@@ -47,9 +47,10 @@ function VendorLogin() {
 
       // ✅ REDIRECT TO DASHBOARD
       navigate("/vendor/dashboard");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
-    }
+    } catch (err) {
+  console.log("LOGIN ERROR FULL:", err.response?.data);
+  toast.error(err.response?.data?.message || "Login failed");
+}
   };
 
   return (

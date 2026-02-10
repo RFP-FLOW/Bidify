@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 function CompanyLogin() {
   const navigate = useNavigate();
@@ -58,10 +59,10 @@ console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
     } else if (formData.role === "employee") {
       navigate("/employee/dashboard",{replace:true});
     }
-  } catch (error) {
-    console.error("Login error:", error);
-    alert("Something went wrong");
-  }
+  } catch (err) {
+  console.log("LOGIN ERROR FULL:", err.response?.data);
+  toast.error(err.response?.data?.message || "Login failed");
+}
 };
 
 
