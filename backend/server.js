@@ -17,6 +17,7 @@ import managerVendor from "./routes/managerVendor.routes.js";
 import vendorRfpRoutes from "./routes/vendorRfp.routes.js";
 import vendorReplyRoutes from "./routes/vendorReply.routes.js";
 import commonPasswordRoutes from "./routes/commonPassword.routes.js";
+import vendorCompanyRoutes from "./routes/vendorCompany.routes.js";
 
 
 dotenv.config();
@@ -45,6 +46,7 @@ app.use("/api/manager-vendor", managerVendor);
 app.use("/api/vendor", vendorauthRoutes);
 app.use("/api/vendor/rfp", vendorRfpRoutes);
 app.use("/api/vendor-reply", vendorReplyRoutes);
+app.use("/api/vendor-company", vendorCompanyRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.send("Bidify API running");
