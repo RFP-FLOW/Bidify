@@ -50,6 +50,16 @@ const vendorSchema = new mongoose.Schema(
       enum: ["PENDING", "APPROVED", "REJECTED"],
       default: "PENDING",
     },
+    otp: String,
+    otpExpiry: Date,
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
 
     requestedCompanies: [
       {

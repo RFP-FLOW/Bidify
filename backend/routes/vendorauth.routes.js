@@ -1,10 +1,12 @@
 import express from "express";
-import { registerVendor, loginVendor, getVendorRFPs, getVendorStats } from "../controllers/vendorauth.controller.js";
+import { loginVendor, getVendorRFPs, getVendorStats, resendVendorOtp, verifyVendorOtp, vendorRegisterInit } from "../controllers/vendorauth.controller.js";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
 import { sendVendorRequest,getVendorRequests,checkRequestStatus } from "../controllers/VendorRequest.controller.js";
 const router = express.Router();
 
-router.post("/register", registerVendor);
+router.post("/register-init", vendorRegisterInit);
+router.post("/verify-otp", verifyVendorOtp);
+router.post("/resend-otp", resendVendorOtp);
 router.post("/login", loginVendor);
 router.get("/dashboard/stats", authMiddleware, vendorOnly, getVendorStats);
 router.get("/rfps", authMiddleware, vendorOnly, getVendorRFPs);

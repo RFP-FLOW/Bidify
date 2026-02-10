@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  registerCompany,
   loginCompany,
   addEmployee,
   setEmployeePassword,
@@ -19,7 +18,6 @@ import authMiddleware,{managerOnly,vendorOnly} from "../middlewares/auth.middlew
 
 const router = express.Router();
 
-router.post("/register", registerCompany);
 router.post("/login", loginCompany);
 
 // manager protected routes
