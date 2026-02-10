@@ -1,6 +1,7 @@
 import express from "express";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
-import { submitVendorReply, getOpenRFPsForVendor } from "../controllers/vendorReply.controller.js";
+import { submitVendorReply, getVendorOpenRFPs } from "../controllers/vendorReply.controller.js";
+import  upload  from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.post(
   "/replies",
   authMiddleware,
   vendorOnly,
+  upload.single("attachment"),
   submitVendorReply
 );
 
@@ -20,7 +22,7 @@ router.get(
   "/open-rfps",
   authMiddleware,
   vendorOnly,
-  getOpenRFPsForVendor
+  getVendorOpenRFPs
 );
 
 export default router;

@@ -26,7 +26,7 @@ function SetPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           password,
-          role: "company", // ✅ ADD THIS
+          role: "vendor", // ✅ ADD THIS
         }),
       },
     );
@@ -37,7 +37,7 @@ function SetPassword() {
       toast.error(data.message);
     } else {
       toast.success("Password set successfully 🎉");
-      navigate("/company/login");
+      navigate("/vendor/login");
     }
 
     setLoading(false);

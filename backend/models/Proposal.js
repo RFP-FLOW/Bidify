@@ -41,22 +41,22 @@ const proposalSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    attachment: {
+      type: String, // file path
+    },
 
     employeeNotified: {
       type: Boolean,
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /* ----------------------- Indexes ----------------------- */
 
 // One vendor can reply only once to one RFP
-proposalSchema.index(
-  { vendorId: 1, rfpId: 1 },
-  { unique: true }
-);
+proposalSchema.index({ vendorId: 1, rfpId: 1 }, { unique: true });
 
 // Query optimization
 proposalSchema.index({ rfpId: 1 });

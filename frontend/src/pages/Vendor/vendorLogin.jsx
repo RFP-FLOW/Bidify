@@ -8,10 +8,9 @@ function VendorLogin() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-  email: "",
-  password: "",
-});
-
+    email: "",
+    password: "",
+  });
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,39 +23,35 @@ function VendorLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-    if (!formData.email || !formData.password ) {
-    toast.error("Please fill all fields");
-    return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill all fields");
+      return;
     }
 
-  if (!formData.email.includes("@")) {
-    toast.error("Please enter a valid email");
-    return;
-  }
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/auth/login",
-      {
+    if (!formData.email.includes("@")) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    try {
+      const res = await axios.post("http://localhost:5000/api/vendor/login", {
         email: formData.email,
         password: formData.password,
-      }
-    );
+      });
 
-    // ✅ SAVE TOKEN (MOST IMPORTANT)
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", "vendor");
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+      // ✅ SAVE TOKEN (MOST IMPORTANT)
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", "vendor");
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
-    // ✅ REDIRECT TO DASHBOARD
-    navigate("/vendor/dashboard");
-
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Login failed");
-  }
-};
-
+      // ✅ REDIRECT TO DASHBOARD
+      navigate("/vendor/dashboard");
+    } catch (err) {
+  console.log("LOGIN ERROR FULL:", err.response?.data);
+  toast.error(err.response?.data?.message || "Login failed");
+}
+  };
 
   return (
     <div className="min-h-screen bg-[#fff5d7]">
@@ -64,7 +59,6 @@ function VendorLogin() {
 
       <div className="flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] bg-white">
-
           {/* IMAGE */}
           <div className="hidden md:block">
             <img
@@ -76,18 +70,17 @@ function VendorLogin() {
 
           {/* FORM */}
           <p
-  onClick={() => navigate("/")}
-  className="text-center text-xs text-gray-400 mt-4 cursor-pointer hover:text-black"
->
-  ← Back to Home
-</p>
+            onClick={() => navigate("/")}
+            className="text-center text-xs text-gray-400 mt-4 cursor-pointer hover:text-black"
+          >
+            ← Back to Home
+          </p>
           <div className="p-8">
             <h2 className="text-2xl font-bold text-center mb-8">
               Vendor Login
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* EMAIL */}
               <div className="relative">
                 <input
@@ -156,18 +149,26 @@ function VendorLogin() {
               >
                 Login
               </button>
+              <p className="text-sm text-center mt-3">
+                <span
+                  onClick={() => navigate("/vendor/forgot-password")}
+                  className="text-[#3a2d97] cursor-pointer hover:underline"
+                >
+                  Forgot Password?
+                </span>
+              </p>
             </form>
 
             {/* SIGNUP LINK */}
             <p className="text-center text-sm text-gray-600 mt-3">
-  Are you a company?{" "}
-  <span
-    onClick={() => navigate("/company/login")}
-    className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
-  >
-    Login here
-  </span>
-</p>
+              Are you a company?{" "}
+              <span
+                onClick={() => navigate("/company/login")}
+                className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+              >
+                Login here
+              </span>
+            </p>
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
               <button
@@ -177,7 +178,6 @@ function VendorLogin() {
                 Sign up here
               </button>
             </p>
-
           </div>
         </div>
       </div>

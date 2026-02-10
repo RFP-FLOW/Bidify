@@ -6,60 +6,7 @@ import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
 
-/* ================= REGISTER COMPANY (MANAGER) ================= */
-export const registerCompany = async (req, res) => {
-  try {
-    const { companyName, username, email, password } = req.body;
-
-    if (!companyName || !username || !email || !password ) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    // if(password!=confirmPassword){
-    //   return res.status(400).json({message:"Passwords do not match"});
-    // }
-    const existingUser = await User.findOne({email});
-    
-    if (existingUser) {
-      console.log("absvj");
-      return res
-        .status(400)
-        .json({ message: "Email already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const manager=await User.create({
-    
-      name:username,
-      email,
-      password: hashedPassword,
-      role: "manager",
-      isActive: true,
-    });
-     
-    const company = await Company.create({
-      companyName,
-      createdBy: manager._id,
-    });
-
-    manager.companyId = company._id;
-    await manager.save();
-
-    res.status(201).json({ message: "Company registered successfully",
-      managerId:manager._id,
-      companyId:company._id
-     });
-  } catch (error) {
-     if (error.code === 11000) {
-    return res.status(400).json({
-      message: "User already exists with this email",
-    });
-  }
-    res.status(500).json({ message: error.message });
-  }
-};
-
-//--------------------Register INIT ...SEND OTP
+//---------------Register INIT--SEND OTP---------------
 
 export const registerInit = async (req, res) => {
   try {
@@ -135,7 +82,7 @@ if (existing && !existing.companyId) {
   }
 };
 
-//------VERIFY OTP------
+//---------------------VERIFY OTP----------------------
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp, companyName } = req.body;
@@ -155,11 +102,6 @@ export const verifyOtp = async (req, res) => {
         message: "Registration already completed. Please login.",
       });
     }
-
-   
-    
-
-    await user.save();
 
     const company = await Company.create({
       companyName,
@@ -184,8 +126,6 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-
-
 //---------------------RESEND OTP----------------------
 export const resendOtp = async (req, res) => {
   try {
@@ -201,7 +141,7 @@ export const resendOtp = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (user.isVerified) {
+    if (user.isEmailVerified) {
       return res.status(400).json({ message: "Email already verified" });
     }
 
@@ -230,7 +170,6 @@ export const resendOtp = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 
 /* ================= LOGIN COMPANY ================= */
@@ -449,92 +388,6 @@ export const setEmployeePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-///////////////FORGET PASSWORD--------------
-export const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
-
-    const user = await User.findOne({ email });
-
-    // 🔐 Security best practice:
-    // Always return success even if user not found
-    if (!user) {
-      return res.json({
-        message: "If the email exists, a reset link has been sent",
-      });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 min
-    await user.save();
-
-    const resetLink = `http://localhost:5173/set-password/${resetToken}`;
-
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your password – Bidify",
-      html: `
-        <p>You requested a password reset.</p>
-        <p>Click below to set a new password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link expires in 15 minutes.</p>
-      `,
-    });
-
-    res.json({
-      message: "If the email exists, a reset link has been sent",
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-///------------------RESET PASSWORD------------
-export const resetPassword = async (req, res) => {
-  try {
-    const { token } = req.params;
-    const { password } = req.body;
-
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
-    }
-
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid or expired reset link",
-      });
-    }
-
-    user.password = await bcrypt.hash(password, 10);
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    user.isActive = true;
-
-    await user.save();
-
-    res.json({ message: "Password reset successful" });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-
 
 
 // GET SINGLE COMPANY BY ID (FOR VENDOR)

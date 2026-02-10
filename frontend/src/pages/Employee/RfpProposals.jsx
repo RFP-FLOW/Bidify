@@ -18,7 +18,7 @@ const RfpProposals = () => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
 
         setProposals(res.data.proposals);
@@ -33,77 +33,79 @@ const RfpProposals = () => {
     fetchProposals();
   }, [rfpId]);
 
- return (
-  <div className="flex min-h-screen bg-[#f6f7fb]">
-    <Sidebar />
+  return (
+    <div className="flex min-h-screen bg-[#f6f7fb]">
+      <Sidebar />
 
-    <main className="flex-1 p-8">
-      {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {rfpTitle}
-        </h1>
-        <p className="text-gray-500">
-          Vendor Proposals
-        </p>
-      </div>
-
-      {loading && (
-        <p className="text-gray-500">Loading proposals...</p>
-      )}
-
-      {!loading && proposals.length === 0 && (
-        <div className="bg-white rounded-xl p-8 text-center text-gray-500 shadow-sm">
-          <div className="text-4xl mb-3">📭</div>
-          <p className="font-medium">
-            No proposals received yet
-          </p>
-          <p className="text-sm mt-1">
-            Proposals will appear here once vendors respond.
-          </p>
+      <main className="flex-1 p-8">
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-800">{rfpTitle}</h1>
+          <p className="text-gray-500">Vendor Proposals</p>
         </div>
-      )}
 
-      {/* PROPOSALS LIST */}
-      {!loading &&
-        proposals.map((p) => (
-          <div
-            key={p._id}
-            className="bg-white rounded-xl p-6 mb-5 shadow-sm hover:shadow-md transition"
-          >
-            {/* TOP ROW */}
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-gray-800">
-                  {p.vendorId?.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {p.vendorId?.email}
-                </p>
+        {loading && <p className="text-gray-500">Loading proposals...</p>}
+
+        {!loading && proposals.length === 0 && (
+          <div className="bg-white rounded-xl p-8 text-center text-gray-500 shadow-sm">
+            <div className="text-4xl mb-3">📭</div>
+            <p className="font-medium">No proposals received yet</p>
+            <p className="text-sm mt-1">
+              Proposals will appear here once vendors respond.
+            </p>
+          </div>
+        )}
+
+        {/* PROPOSALS LIST */}
+        {!loading &&
+          proposals.map((p) => (
+            <div
+              key={p._id}
+              className="bg-white rounded-xl p-6 mb-5 shadow-sm hover:shadow-md transition"
+            >
+              {/* TOP ROW */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-gray-800">
+                    {p.vendorId?.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">{p.vendorId?.email}</p>
+                </div>
+
+                {p.quotedPrice && (
+                  <span className="px-4 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+                    ₹{p.quotedPrice}
+                  </span>
+                )}
               </div>
 
-              {p.quotedPrice && (
-                <span className="px-4 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
-                  ₹{p.quotedPrice}
-                </span>
+              {/* MESSAGE */}
+              <div className="mt-4 bg-gray-50 p-4 rounded-lg text-gray-700 text-sm leading-relaxed">
+                {p.message}
+              </div>
+              {/* ATTACHMENT */}
+              {p.attachment && (
+                <div className="mt-3">
+                  <a
+                    href={`http://localhost:5000${p.attachment}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                  >
+                    📎 View Attachment
+                  </a>
+                </div>
               )}
-            </div>
 
-            {/* MESSAGE */}
-            <div className="mt-4 bg-gray-50 p-4 rounded-lg text-gray-700 text-sm leading-relaxed">
-              {p.message}
+              {/* FOOTER */}
+              <div className="mt-3 text-xs text-gray-400">
+                Received on {new Date(p.updatedAt).toLocaleString()}
+              </div>
             </div>
-
-            {/* FOOTER */}
-            <div className="mt-3 text-xs text-gray-400">
-              Received on{" "}
-              {new Date(p.createdAt).toLocaleString()}
-            </div>
-          </div>
-        ))}
-    </main>
-  </div>
-);
+          ))}
+      </main>
+    </div>
+  );
 };
 
 export default RfpProposals;

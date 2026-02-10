@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import axios from "axios";
 import { toast } from "react-toastify";
 
 function VendorRegister() {
@@ -51,44 +50,69 @@ function VendorRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     if (!formData.email || !formData.password || !formData.confirmPassword || !formData.businessName||!formData.gstNumber) {
-    toast.error("Please fill all fields");
-    return;
-    }
 
-    if (!formData.email.includes("@")) {
-    toast.error("Please enter a valid email");
-    return;
-    }
- 
-    if (isInvalidName(formData.businessName)) {
-      toast.error("Business name must contain letters and be at least 3 characters.");
+    if (
+      !formData.name ||
+      !formData.businessName ||
+      !formData.email ||
+      !formData.gstNumber ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      toast.error("Please fill all fields");
       return;
     }
 
+    if (isInvalidName(formData.name)) {
+      toast.error("Owner name must be at least 3 characters");
+      return;
+    }
+
+    if (isInvalidName(formData.businessName)) {
+      toast.error("Business name must be at least 3 characters");
+      return;
+    }
     if (!gstRegex.test(formData.gstNumber)) {
-      toast.error("Invalid GST number. Example: 22AAAAA0000A1Z5");
+      toast.error("Invalid GST number");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        name: formData.name,
-        businessName: formData.businessName,
-        gstNumber: formData.gstNumber,
-        email: formData.email,
-        password: formData.password,
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/vendor/register-init",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            businessName: formData.businessName,
+            email: formData.email,
+            gstNumber: formData.gstNumber,
+            password: formData.password,
+          }),
+        },
+      );
 
-      toast.success("Vendor registered successfully");
-      navigate("/vendor/login");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message);
+        return;
+      }
+
+      toast.success("OTP sent to your email 📩");
+
+      navigate("/vendor/verify-otp", {
+        state: { email: formData.email },
+      });
+    } catch (err) {
+      console.log(err);
+      toast.error("Server error");
     }
   };
 
