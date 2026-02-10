@@ -15,14 +15,14 @@ function ForgotPassword() {
 
     setLoading(true);
 
-    const res = await fetch(
-      "http://localhost:5000/api/vendor/forgot-password",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      }
-    );
+    const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        role: "vendor",
+      }),
+    });
 
     const data = await res.json();
 
@@ -41,9 +41,7 @@ function ForgotPassword() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Forgot Password
-        </h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Forgot Password</h2>
 
         <input
           type="email"

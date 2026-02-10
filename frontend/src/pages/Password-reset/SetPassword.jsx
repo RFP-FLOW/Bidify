@@ -20,12 +20,15 @@ function SetPassword() {
     setLoading(true);
 
     const res = await fetch(
-      `http://localhost:5000/api/company/reset-password/${token}`,
+      `http://localhost:5000/api/auth/reset-password/${token}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      }
+        body: JSON.stringify({
+          password,
+          role: "company", // ✅ ADD THIS
+        }),
+      },
     );
 
     const data = await res.json();
@@ -46,9 +49,7 @@ function SetPassword() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md"
       >
-        <h2 className="text-xl font-bold mb-6 text-center">
-          Set New Password
-        </h2>
+        <h2 className="text-xl font-bold mb-6 text-center">Set New Password</h2>
 
         <input
           type="password"
