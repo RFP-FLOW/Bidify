@@ -8,6 +8,9 @@ const RfpProposals = () => {
   const [proposals, setProposals] = useState([]);
   const [rfpTitle, setRfpTitle] = useState("");
   const [loading, setLoading] = useState(true);
+  const [aiResult, setAiResult] = useState(null);
+const [aiLoading, setAiLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -33,6 +36,28 @@ const RfpProposals = () => {
     fetchProposals();
   }, [rfpId]);
 
+  const handleAICompare = async () => {
+  try {
+    setAiLoading(true);
+
+    const res = await axios.post(
+      `http://localhost:5000/api/ai/recommend/${rfpId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+   setAiResult(res.data.recommendation);
+  } catch (err) {
+    console.error("AI compare error", err);
+  } finally {
+    setAiLoading(false);
+  }
+};
+
   return (
     <div className="flex min-h-screen bg-[#f6f7fb]">
       <Sidebar />
@@ -43,6 +68,72 @@ const RfpProposals = () => {
           <h1 className="text-2xl font-bold text-gray-800">{rfpTitle}</h1>
           <p className="text-gray-500">Vendor Proposals</p>
         </div>
+
+<button
+  onClick={handleAICompare}
+  disabled={proposals.length < 2}
+  className="mb-6 px-6 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 disabled:opacity-50"
+>
+  🤖 Compare & Recommend using AI
+</button>
+
+{aiLoading && (
+  <div className="bg-white p-4 rounded-lg shadow mb-4">
+    🤖 AI is analyzing vendor proposals...
+  </div>
+)}
+
+{aiResult && (
+  <div className="bg-white p-6 rounded-xl shadow mb-6">
+    <h2 className="text-lg font-bold mb-3">
+      🏆 Top Recommendations
+    </h2>
+
+    {aiResult.topRecommendations?.map((vendor, index) => (
+      <div
+        key={index}
+        className={`p-3 mb-2 rounded-lg ${
+          index === 0 ? "bg-green-50 border border-green-300" : "bg-gray-50"
+        }`}
+      >
+        <p className="font-semibold">
+          {index + 1}. {vendor.vendor}
+        </p>
+        <p className="text-sm text-gray-600">
+          {vendor.email}
+        </p>
+        <p className="text-sm font-semibold text-green-700">
+          ₹{vendor.grandTotal}
+        </p>
+      </div>
+    ))}
+
+    <div className="mt-4">
+      <h3 className="font-semibold mb-2">📊 Detailed Analysis</h3>
+
+      {aiResult.vendorsAnalysis?.map((v, i) => (
+        <div key={i} className="mb-3 p-3 bg-gray-50 rounded-lg">
+          <p className="font-semibold">{v.vendor}</p>
+
+          {v.itemBreakdown?.map((item, idx) => (
+            <p key={idx} className="text-sm text-gray-600">
+              {item.item} — ₹{item.totalItemPrice}
+            </p>
+          ))}
+
+          <p className="text-sm">
+            Delivery: ₹{v.deliveryCharge}
+          </p>
+
+          <p className="font-semibold text-purple-700">
+            Grand Total: ₹{v.grandTotal}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
         {loading && <p className="text-gray-500">Loading proposals...</p>}
 
