@@ -2,6 +2,8 @@ import { generateRFPWithAI, compareVendorsWithAI } from "../services/gemini.serv
 import Proposal from "../models/Proposal.js";
 import RFP from "../models/RFP.js";
 import { extractTextFromPDF } from "../utils/pdf.utils.js";
+import { extractTextFromFile } from "../utils/fileParser.js";
+
 
 
 /**
@@ -74,8 +76,8 @@ for (const p of proposals) {
 
   // If attachment exists → extract text
   if (p.attachment) {
-    const pdfText = await extractTextFromPDF(p.attachment);
-    fullContent += "\n\nAttachment Content:\n" + pdfText;
+    const extractedText = await extractTextFromFile(p.attachment);
+     fullContent += "\n\nAttachment Content:\n" + extractedText;
   }
 
   normalizedProposals.push({

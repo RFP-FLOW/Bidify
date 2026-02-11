@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-
 export const extractTextFromPDF = async (storedPath) => {
   try {
     if (!storedPath) return "";
