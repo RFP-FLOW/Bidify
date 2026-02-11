@@ -18,7 +18,7 @@ import vendorRfpRoutes from "./routes/vendorRfp.routes.js";
 import vendorReplyRoutes from "./routes/vendorReply.routes.js";
 import commonPasswordRoutes from "./routes/commonPassword.routes.js";
 import vendorCompanyRoutes from "./routes/vendorCompany.routes.js";
-
+import aiRoutes from "./routes/ai.routes.js";
 
 dotenv.config();
 console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
@@ -48,6 +48,7 @@ app.use("/api/vendor/rfp", vendorRfpRoutes);
 app.use("/api/vendor-reply", vendorReplyRoutes);
 app.use("/api/vendor-company", vendorCompanyRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use("/api/ai", aiRoutes);
 
 // Test route
 app.get("/", (req, res) => {
