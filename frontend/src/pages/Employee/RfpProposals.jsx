@@ -178,7 +178,7 @@ const [aiLoading, setAiLoading] = useState(false);
               {p.attachment && (
                 <div className="mt-3">
                   <a
-                    href={`http://localhost:5000${p.attachment}`}
+                    href={p.attachment}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"

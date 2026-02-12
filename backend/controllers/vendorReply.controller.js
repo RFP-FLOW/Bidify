@@ -50,7 +50,7 @@ export const submitVendorReply = async (req, res) => {
     }
 
     /* ---------------- Create or Update Proposal --------------------- */
-    const attachment = req.file ? `/uploads/${req.file.filename}` : null;
+    const attachment = req.file ? req.file.path : null;
     const proposal = await Proposal.findOneAndUpdate(
       { vendorId, rfpId },
       {
@@ -125,7 +125,7 @@ export const submitVendorReply = async (req, res) => {
   }
 };
 
-export const getVendorOpenRFPs  = async (req, res) => {
+export const getVendorOpenRFPs = async (req, res) => {
   try {
     const vendorId = req.user._id;
 
