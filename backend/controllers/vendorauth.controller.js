@@ -204,3 +204,62 @@ export const getVendorRFPs = async (req, res) => {
   //   },
   // ]);
 };
+
+export const getVendorProfile = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.user._id).select("-password");
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      vendor,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch profile",
+    });
+  }
+};
+
+export const updateVendorProfile = async (req, res) => {
+  try {
+    const vendorId = req.user._id;
+
+    const { name, businessName } = req.body;
+
+    const vendor = await Vendor.findByIdAndUpdate(
+      vendorId,
+      {
+        name,
+        businessName,
+      },
+      { new: true }
+    );
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: vendor,
+    });
+  } catch (error) {
+    console.error("UPDATE VENDOR PROFILE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+    });
+  }
+};
