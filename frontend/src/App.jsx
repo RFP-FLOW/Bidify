@@ -39,6 +39,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 import VendorVerifyOtp from "./pages/OTP/VendorVerifyOtp.jsx";
+import VendorProfile from "./pages/Vendor/VendorProfile.jsx";
 
 function App() {
   return (
@@ -161,6 +162,8 @@ function App() {
           element={<VendorResetPassword />}
         />
         <Route path="/vendor/verify-otp" element={<VendorVerifyOtp />} />
+        <Route path="/vendor/profile" element={<VendorProfile />} />
+
       </Routes>
     </BrowserRouter>
   );
