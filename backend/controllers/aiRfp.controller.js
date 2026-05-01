@@ -112,8 +112,13 @@ IMPORTANT RULES:
 
 5. Rank vendors from BEST to WORST.
 
-6. Recommend top 3 vendors.
-   - If vendors <= 3, recommend all.
+6. Generate a detailed explanation for each vendor including:
+   - Price comparison (lowest / higher than others)
+   - Delivery comparison (faster / slower)
+   - Final justification (why this vendor is better or worse)
+
+7. Recommend top 2 vendors.
+   - If vendors <= 2, recommend all.
    - Best vendor must be first.
 
 Return ONLY valid JSON.
