@@ -2,19 +2,19 @@ import path from "path";
 import fs from "fs";
 import { extractTextFromPDF, extractDetailsFromText } from "./pdf.utils.js";
 import mammoth from "mammoth";
-import * as XLSX from "xlsx";
-import xml2js from "xml2js";
-import Tesseract from "tesseract.js";
+import textract from "textract";
 import fetch from "node-fetch";
 import os from "os";
 
 /* =====================================================
-   🔽 DOWNLOAD FILE (for Cloudinary / URL)
+   🔽 DOWNLOAD FILE (for Cloudinary)
 ===================================================== */
 const downloadFile = async (url) => {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
-  return response.buffer();
+  if (!response.ok) throw new Error("Download failed");
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 };
 
 /* =====================================================
@@ -26,7 +26,7 @@ export const parseFile = async (storedPath) => {
       return { text: "", total: 0, deliveryDays: 0 };
     }
 
-    const isRemoteUrl =
+    const isRemote =
       storedPath.startsWith("http://") ||
       storedPath.startsWith("https://");
 
@@ -35,30 +35,23 @@ export const parseFile = async (storedPath) => {
     let absolutePath;
 
     /* ===============================
-       📁 HANDLE PATH CORRECTLY (FIXED)
+       📁 HANDLE PATH
     =============================== */
-    if (isRemoteUrl) {
+    if (isRemote) {
       const tempDir = os.tmpdir();
       const tempFile = path.join(tempDir, `temp-${Date.now()}${ext}`);
 
-      const fileBuffer = await downloadFile(storedPath);
-      fs.writeFileSync(tempFile, fileBuffer);
+      const buffer = await downloadFile(storedPath);
+      fs.writeFileSync(tempFile, buffer);
 
       absolutePath = tempFile;
-
     } else {
-      // 🔥 FIX: handle both full path and relative path
-
-      if (fs.existsSync(storedPath)) {
-        absolutePath = storedPath;
-      } else {
-        absolutePath = path.join(process.cwd(), storedPath);
-      }
+      absolutePath = fs.existsSync(storedPath)
+        ? storedPath
+        : path.join(process.cwd(), storedPath);
     }
 
-    // 🔍 DEBUG
-    console.log("FILE PATH RECEIVED:", storedPath);
-    console.log("FINAL PATH USED:", absolutePath);
+    console.log("FINAL PATH:", absolutePath);
 
     let text = "";
 
@@ -67,7 +60,6 @@ export const parseFile = async (storedPath) => {
     =============================== */
     switch (ext) {
       case ".pdf":
-        // 🔥 FIX: use absolutePath (NOT storedPath)
         text = await extractTextFromPDF(absolutePath);
         break;
 
@@ -78,38 +70,29 @@ export const parseFile = async (storedPath) => {
         text = docxResult.value;
         break;
 
-      case ".xlsx":
-      case ".xls":
-        const workbook = XLSX.readFile(absolutePath);
-        workbook.SheetNames.forEach((name) => {
-          text += XLSX.utils.sheet_to_csv(workbook.Sheets[name]) + " ";
+      case ".doc":
+      case ".ppt":
+      case ".pptx":
+        text = await new Promise((resolve, reject) => {
+          textract.fromFileWithPath(absolutePath, (err, data) => {
+            if (err) reject(err);
+            else resolve(data);
+          });
         });
-        break;
-
-      case ".xml":
-        const xmlData = fs.readFileSync(absolutePath, "utf-8");
-        const parser = new xml2js.Parser();
-        const parsed = await parser.parseStringPromise(xmlData);
-        text = JSON.stringify(parsed);
         break;
 
       case ".txt":
         text = fs.readFileSync(absolutePath, "utf-8");
         break;
 
-      case ".jpg":
-      case ".jpeg":
-      case ".png":
-        const ocr = await Tesseract.recognize(absolutePath, "eng");
-        text = ocr.data.text;
-        break;
-
       default:
         text = "";
     }
 
+    console.log("EXTRACTED TEXT:", text.slice(0, 200));
+
     /* ===============================
-       🧠 EXTRACT DATA
+       🧠 EXTRACT DETAILS
     =============================== */
     const { total, deliveryDays } = extractDetailsFromText(text);
 

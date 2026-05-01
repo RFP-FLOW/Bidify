@@ -141,6 +141,12 @@ const [aiLoading, setAiLoading] = useState(false);
           <p className="font-semibold text-purple-700">
             Grand Total: ₹{v.grandTotal}
           </p>
+          {v.reason && (
+  <p className="mt-2 text-sm text-gray-700 bg-gray-100 p-2 rounded">
+    💡 {v.reason}
+  </p>
+)}
+
         </div>
       ))}
     </div>
