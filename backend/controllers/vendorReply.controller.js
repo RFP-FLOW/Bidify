@@ -2,6 +2,7 @@ import Proposal from "../models/Proposal.js";
 import RFP from "../models/RFP.js";
 import Vendor from "../models/Vendor.js";
 import sendEmail from "../utils/sendEmail.js";
+import { parseFile } from "../utils/fileParser.js";
 
 /**
  * @desc    Create or update vendor reply to an RFP (Platform reply)
@@ -51,13 +52,25 @@ export const submitVendorReply = async (req, res) => {
 
     /* ---------------- Create or Update Proposal --------------------- */
     const attachment = req.file ? req.file.path : null;
+
+// 🔥 Parse file if uploaded
+let parsedData = { total: 0, deliveryDays: 0 };
+
+if (attachment) {
+  parsedData = await parseFile(attachment);
+}
+
     const proposal = await Proposal.findOneAndUpdate(
       { vendorId, rfpId },
       {
         vendorId,
         rfpId,
         message: message.trim(),
-        quotedPrice: quotedPrice ? Number(quotedPrice) : undefined,
+quotedPrice: quotedPrice
+  ? Number(quotedPrice)
+  : parsedData.total || undefined,
+
+deliveryDays: parsedData.deliveryDays || undefined,
         replyMode: "PLATFORM",
         status: "PENDING",
         repliedAt: new Date(),

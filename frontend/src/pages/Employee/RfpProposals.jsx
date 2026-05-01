@@ -3,6 +3,19 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 
+// helpers (top of file)
+const getFileLabel = (url) => {
+  if (!url) return "📁 Download File";
+  const lower = url.toLowerCase();
+
+  if (lower.includes(".pdf")) return "📄 View PDF";
+  if (lower.includes(".doc") || lower.includes(".docx")) return "📝 View Document";
+  if (lower.includes(".xls") || lower.includes(".xlsx")) return "📊 View Excel";
+  if (lower.includes(".ppt")) return "📽 View Presentation";
+
+  return "📁 Download File";
+};
+
 const RfpProposals = () => {
   const { rfpId } = useParams();
   const [proposals, setProposals] = useState([]);
@@ -183,7 +196,7 @@ const [aiLoading, setAiLoading] = useState(false);
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
                   >
-                    📎 View Attachment
+                    {getFileLabel(p.attachment)}
                   </a>
                 </div>
               )}
