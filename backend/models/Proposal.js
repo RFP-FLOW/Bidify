@@ -8,6 +8,10 @@ const proposalSchema = new mongoose.Schema(
       required: true,
     },
 
+     deliveryDays: {
+  type: Number,
+},
+
     rfpId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RFP",
