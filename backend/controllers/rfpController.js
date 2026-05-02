@@ -481,6 +481,8 @@ export const getForwardedRFPs = async (req, res) => {
       managerId: req.user._id,
       role: "employee",
     }).select("_id");
+//     console.log("Manager ID:", req.user._id);
+// console.log("Employees found:", employees.length);
 
     const employeeIds = employees.map((e) => e._id);
 

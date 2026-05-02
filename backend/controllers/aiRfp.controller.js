@@ -129,6 +129,15 @@ Format:
     {
       "vendor": "",
       "email": "",
+      "itemBreakdown": [
+        {
+          "item": "",
+          "quantity": number,
+          "unitPrice": number,
+          "totalItemPrice": number
+        }
+      ],
+      "deliveryCharge": number,
       "grandTotal": number,
       "deliveryDays": number,
       "reason": ""

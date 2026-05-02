@@ -35,7 +35,7 @@ router.get("/employee", authMiddleware, getEmployeeRFPs);
  * Employee Bids (SENT RFPs + bid count)
  */
 router.get("/bids", authMiddleware, getEmployeeBids);
-
+router.get("/forwarded", authMiddleware, getForwardedRFPs);
 
 /**
  * Get single RFP
@@ -50,9 +50,10 @@ router.post("/", authMiddleware, createRFP);
 
 router.put("/:id", authMiddleware, updateRFP);
 router.get("/:rfpId/proposals", authMiddleware, getRfpProposals);
-router.get("/forwarded", authMiddleware, getForwardedRFPs);
+
 
 router.post("/:rfpId/forward-to-manager", authMiddleware, forwardToManager);
+
 /**
  * 🚀 SEND RFP TO VENDORS (FIXED)
  */
