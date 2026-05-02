@@ -474,4 +474,32 @@ export const forwardToManager = async (req, res) => {
   }
 };
 
+export const getForwardedRFPs = async (req, res) => {
+  try {
+    // Step 1: Manager ke saare employees dhundho
+    const employees = await User.find({
+      managerId: req.user._id,
+      role: "employee",
+    }).select("_id");
+
+    const employeeIds = employees.map((e) => e._id);
+
+    // Step 2: In employees ke FORWARDED RFPs fetch karo
+    const rfps = await RFP.find({
+      createdBy: { $in: employeeIds },
+      status: "FORWARDED",
+    })
+      .populate("createdBy", "name email")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({ success: true, rfps });
+  } catch (error) {
+    console.error("getForwardedRFPs error:", error);
+    res.status(500).json({ message: "Failed to fetch forwarded RFPs" });
+  }
+};
+
+
+
+
 

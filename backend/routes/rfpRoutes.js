@@ -7,7 +7,8 @@ import {
   sendRFPToVendors,
   updateRFP,
   getEmployeeBids,
-  forwardToManager
+  forwardToManager ,
+  getForwardedRFPs
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -49,6 +50,7 @@ router.post("/", authMiddleware, createRFP);
 
 router.put("/:id", authMiddleware, updateRFP);
 router.get("/:rfpId/proposals", authMiddleware, getRfpProposals);
+router.get("/forwarded", authMiddleware, getForwardedRFPs);
 
 router.post("/:rfpId/forward-to-manager", authMiddleware, forwardToManager);
 /**

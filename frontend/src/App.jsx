@@ -41,6 +41,7 @@ import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 import VendorVerifyOtp from "./pages/OTP/VendorVerifyOtp.jsx";
 import VendorProfile from "./pages/Vendor/VendorProfile.jsx";
+import ManagerRecommendations from "./pages/Company/ManagerRecommendations.jsx";
 
 function App() {
   return (
@@ -99,6 +100,15 @@ function App() {
           path="/employee/set-password/:token"
           element={<EmployeeSetPassword />}
         />
+
+        <Route
+  path="/manager/recommendations"
+  element={
+    <ProtectedRoute allowedrole="manager">
+      <ManagerRecommendations />
+    </ProtectedRoute>
+  }
+/>
 
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/create-rfp" element={<CreateRFP />} />
