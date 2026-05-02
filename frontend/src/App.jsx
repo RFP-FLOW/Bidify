@@ -18,6 +18,7 @@ import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
 import Bids from "./pages/Employee/Bids.jsx";
+import ForwardToManager from "./pages/Employee/ForwardToManager.jsx";
 import RfpProposals from "./pages/Employee/RfpProposals.jsx";
 
 //Vendor
@@ -80,6 +81,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/employee/rfp/:rfpId/forward"
+  element={
+    <ProtectedRoute>
+      <ForwardToManager />
+    </ProtectedRoute>
+  }
+/>
 
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />

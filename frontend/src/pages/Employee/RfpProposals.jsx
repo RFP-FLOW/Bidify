@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 
@@ -18,6 +18,7 @@ const getFileLabel = (url) => {
 
 const RfpProposals = () => {
   const { rfpId } = useParams();
+  const navigate = useNavigate();
   const [proposals, setProposals] = useState([]);
   const [rfpTitle, setRfpTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -69,6 +70,12 @@ const [aiLoading, setAiLoading] = useState(false);
   } finally {
     setAiLoading(false);
   }
+};
+
+const handleForwardToManager = () => {
+  navigate(`/employee/rfp/${rfpId}/forward`, {
+    state: { aiResult, rfpTitle },
+  });
 };
 
   return (
@@ -150,6 +157,15 @@ const [aiLoading, setAiLoading] = useState(false);
         </div>
       ))}
     </div>
+    <div className="mt-5 border-t border-gray-100 pt-4 flex items-center justify-between">
+  <p className="text-sm text-gray-500">Ready to send these to your manager?</p>
+  <button
+    onClick={handleForwardToManager}
+    className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg font-semibold hover:bg-green-700"
+  >
+    📤 Forward to Manager
+  </button>
+</div>
   </div>
 )}
 
