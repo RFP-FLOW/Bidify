@@ -85,6 +85,12 @@ const handleLogout = () => {
           to="/company/profile"
           collapsed={collapsed}
         />
+        <SidebarItem
+  icon={<BadgeCheck size={18} />}
+  label="Recommendations"
+  to="/manager/recommendations"
+  collapsed={collapsed}
+/>
       </nav>
 
       <div className="my-6 border-t border-gray-200" />

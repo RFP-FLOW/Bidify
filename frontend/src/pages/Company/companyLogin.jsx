@@ -48,7 +48,7 @@ const handleSubmit = async (e) => {
 
     // 🔥 FIX HERE
     localStorage.setItem("token", data.token);
-    localStorage.setItem("role", "manager");
+    localStorage.setItem("role", formData.role);
     
 console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
     localStorage.setItem("user", JSON.stringify(data.user));

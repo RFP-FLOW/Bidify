@@ -13,7 +13,7 @@ const callOpenRouter = async (prompt) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openrouter/auto", // ✅ safe fallback
+        model: "nvidia/nemotron-3-super-120b-a12b:free", 
         messages: [
           {
             role: "user",
@@ -94,10 +94,10 @@ ${userPrompt}
     const text =
       data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (!text) {
-      console.error("Gemini raw response:", data);
-      throw new Error("No response from Gemini");
-    }
+    // if (!text) {
+    //   console.error("Gemini raw response:", data);
+    //   throw new Error("No response from Gemini");
+    // }
 
     const json = text.slice(
       text.indexOf("{"),
@@ -107,7 +107,7 @@ ${userPrompt}
     return JSON.parse(json);
 
   } catch (err) {
-    console.log("⚠️ Gemini failed → switching to OpenRouter");
+   // console.log("⚠️ Gemini failed → switching to OpenRouter");
 
     const fallbackText = await callOpenRouter(userPrompt);
 
@@ -149,10 +149,10 @@ export const compareVendorsWithAI = async (prompt) => {
     const text =
       data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (!text) {
-      console.error("Gemini raw response:", data);
-      throw new Error("No response from Gemini");
-    }
+    // if (!text) {
+    //   console.error("Gemini raw response:", data);
+    //   throw new Error("No response from Gemini");
+    // }
 
     let cleaned = text.trim();
 
@@ -174,7 +174,7 @@ export const compareVendorsWithAI = async (prompt) => {
     return JSON.parse(finalJson);
 
   } catch (err) {
-    console.log("⚠️ Gemini failed → switching to OpenRouter");
+   // console.log("⚠️ Gemini failed → switching to OpenRouter");
 
     const fallbackText = await callOpenRouter(prompt);
 

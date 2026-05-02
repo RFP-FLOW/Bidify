@@ -18,6 +18,7 @@ import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
 import Bids from "./pages/Employee/Bids.jsx";
+import ForwardToManager from "./pages/Employee/ForwardToManager.jsx";
 import RfpProposals from "./pages/Employee/RfpProposals.jsx";
 
 //Vendor
@@ -40,6 +41,7 @@ import PublicRoute from "./components/PublicRoutes.jsx";
 import EmployeeSetPassword from "./pages/Employee/EmployeeSetPassword.jsx";
 import VendorVerifyOtp from "./pages/OTP/VendorVerifyOtp.jsx";
 import VendorProfile from "./pages/Vendor/VendorProfile.jsx";
+import ManagerRecommendations from "./pages/Company/ManagerRecommendations.jsx";
 
 function App() {
   return (
@@ -81,6 +83,15 @@ function App() {
           }
         />
 
+        <Route
+  path="/employee/rfp/:rfpId/forward"
+  element={
+    <ProtectedRoute>
+      <ForwardToManager />
+    </ProtectedRoute>
+  }
+/>
+
         <Route path="/company/register" element={<CompanyRegister />} />
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
@@ -89,6 +100,15 @@ function App() {
           path="/employee/set-password/:token"
           element={<EmployeeSetPassword />}
         />
+
+        <Route
+  path="/manager/recommendations"
+  element={
+    <ProtectedRoute allowedrole="manager">
+      <ManagerRecommendations />
+    </ProtectedRoute>
+  }
+/>
 
         <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
         <Route path="/employee/create-rfp" element={<CreateRFP />} />
