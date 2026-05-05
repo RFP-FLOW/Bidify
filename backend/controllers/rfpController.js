@@ -459,8 +459,12 @@ export const forwardToManager = async (req, res) => {
       replyTo: employee.email,
     });
 
-    // Mark RFP as FORWARDED
-    await RFP.findByIdAndUpdate(rfpId, { status: "FORWARDED" });
+    // Mark RFP as FORWARDED and save AI cache so manager page loads instantly
+    await RFP.findByIdAndUpdate(rfpId, {
+      status: "FORWARDED",
+      aiRecommendationCache: aiResult,
+      aiRecommendationCachedAt: new Date(),
+    });
 
    res.status(200).json({
   success: true,
@@ -481,18 +485,17 @@ export const getForwardedRFPs = async (req, res) => {
       managerId: req.user._id,
       role: "employee",
     }).select("_id");
-//     console.log("Manager ID:", req.user._id);
-// console.log("Employees found:", employees.length);
 
     const employeeIds = employees.map((e) => e._id);
 
-    // Step 2: In employees ke FORWARDED RFPs fetch karo
+    // Step 2: In employees ke FORWARDED RFPs fetch karo — include AI cache
     const rfps = await RFP.find({
       createdBy: { $in: employeeIds },
       status: "FORWARDED",
     })
       .populate("createdBy", "name email")
-      .sort({ updatedAt: -1 });
+      .sort({ updatedAt: -1 })
+      .select("title status createdBy updatedAt aiRecommendationCache aiRecommendationCachedAt");
 
     res.status(200).json({ success: true, rfps });
   } catch (error) {
@@ -500,8 +503,3 @@ export const getForwardedRFPs = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch forwarded RFPs" });
   }
 };
-
-
-
-
-
