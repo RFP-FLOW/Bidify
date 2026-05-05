@@ -54,7 +54,7 @@ const ForwardToManager = () => {
     setError("");
     try {
       setSending(true);
-      await axios.post(
+      const res = await axios.post(
         `http://localhost:5000/api/rfp/${rfpId}/forward-to-manager`,
         {
           note,
