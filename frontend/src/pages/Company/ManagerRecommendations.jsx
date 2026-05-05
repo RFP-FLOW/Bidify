@@ -189,6 +189,9 @@ function DetailView({ rfp, onBack }) {
   );
   const [loading, setLoading] = useState(!isCacheValid(rfp));
 
+  // 🔴 ADDED: state for approval
+  const [approvedId, setApprovedId] = useState(null);
+
   useEffect(() => {
     if (isCacheValid(rfp)) return;
 
@@ -204,6 +207,26 @@ function DetailView({ rfp, onBack }) {
       .finally(() => setLoading(false));
   }, [rfp._id]);
 
+  // 🔴 ADDED: approve function
+  const handleApprove = async (proposalId) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:5000/api/rfp/proposal/approve/${proposalId}`,
+        {},
+        { headers: authHeader() }
+      );
+
+      if (res.data.success) {
+        setApprovedId(proposalId);
+        alert("Vendor Approved ✅");
+      } else {
+        alert(res.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const top3 = aiData?.topRecommendations?.slice(0, 3) || [];
   const analysisMap = {};
   aiData?.vendorsAnalysis?.forEach((v) => {
@@ -216,7 +239,7 @@ function DetailView({ rfp, onBack }) {
     "border-orange-300",
   ];
   const rankBg = ["bg-green-500", "bg-blue-500", "bg-orange-400"];
-
+   console.log("TOP3 DATA:", top3);
   return (
     <div>
       <button
@@ -225,7 +248,7 @@ function DetailView({ rfp, onBack }) {
       >
         ← Back to Recommendations
       </button>
-
+      
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800">{rfp.title}</h2>
         <p className="text-sm text-gray-400 mt-1">
@@ -248,7 +271,7 @@ function DetailView({ rfp, onBack }) {
           No AI analysis available for this RFP.
         </p>
       )}
-
+      
       <div className="space-y-4">
         {top3.map((vendor, index) => {
           const analysis = analysisMap[vendor.vendor] || {};
@@ -280,7 +303,19 @@ function DetailView({ rfp, onBack }) {
                     <p className="text-xs text-gray-400">
                       {vendor.deliveryDays} days delivery
                     </p>
+
                   )}
+                  {vendor.status === "ACCEPTED" && (
+    <p className="text-green-600 font-semibold text-sm mt-1">
+      Approved ✅
+    </p>
+  )}
+
+  {vendor.status === "REJECTED" && (
+    <p className="text-red-500 font-semibold text-sm mt-1">
+      Rejected ❌
+    </p>
+  )}
                 </div>
               </div>
 
@@ -352,6 +387,18 @@ function DetailView({ rfp, onBack }) {
                     </tfoot>
                   </table>
                 </div>
+              )}
+
+              {/* 🔴 ADDED: approve button (NO UI disturbed) */}
+              {vendor.status === "PENDING" && (
+  <button
+    onClick={() => handleApprove(vendor.proposalId)}
+    className="mt-4 px-4 py-2 rounded-lg text-sm bg-green-600 text-white hover:bg-green-700"
+  >
+                {approvedId === vendor.proposalId
+                  ? "Approved ✅"
+                  : "Approve"}
+              </button>
               )}
             </div>
           );

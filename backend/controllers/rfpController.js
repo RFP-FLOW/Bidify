@@ -480,7 +480,6 @@ export const forwardToManager = async (req, res) => {
 
 export const getForwardedRFPs = async (req, res) => {
   try {
-    // Step 1: Manager ke saare employees dhundho
     const employees = await User.find({
       managerId: req.user._id,
       role: "employee",
@@ -488,16 +487,34 @@ export const getForwardedRFPs = async (req, res) => {
 
     const employeeIds = employees.map((e) => e._id);
 
-    // Step 2: In employees ke FORWARDED RFPs fetch karo — include AI cache
     const rfps = await RFP.find({
       createdBy: { $in: employeeIds },
       status: "FORWARDED",
     })
       .populate("createdBy", "name email")
       .sort({ updatedAt: -1 })
-      .select("title status createdBy updatedAt aiRecommendationCache aiRecommendationCachedAt");
+      .select(
+        "title status createdBy updatedAt aiRecommendationCache aiRecommendationCachedAt"
+      );
 
-    res.status(200).json({ success: true, rfps });
+    // 🔴 FILTER OUT APPROVED RFPs
+    const filteredRfps = [];
+
+    for (const rfp of rfps) {
+      const approved = await Proposal.findOne({
+        rfpId: rfp._id,
+        status: "ACCEPTED",
+      });
+
+      if (!approved) {
+        filteredRfps.push(rfp);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      rfps: filteredRfps,
+    });
   } catch (error) {
     console.error("getForwardedRFPs error:", error);
     res.status(500).json({ message: "Failed to fetch forwarded RFPs" });

@@ -161,3 +161,104 @@ export const getVendorOpenRFPs = async (req, res) => {
     });
   }
 };
+
+
+
+export const approveProposal = async (req, res) => {
+  try {
+    const { proposalId } = req.params;
+
+    const proposal = await Proposal.findById(proposalId)
+      .populate("vendorId")
+      .populate("rfpId","title");
+
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    // ✅ Security check
+    if (proposal.rfpId.companyId.toString() !== req.user.companyId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized action",
+      });
+    }
+
+    // 🔴 IMPORTANT: reject all other proposals of same RFP
+    await Proposal.updateMany(
+      { rfpId: proposal.rfpId, _id: { $ne: proposalId } },
+      { status: "REJECTED" }
+    );
+
+    // ✅ approve selected
+    proposal.status = "ACCEPTED";
+    await proposal.save();
+
+    // ✅ Email
+  await sendEmail({
+  to: proposal.vendorId.email,
+  subject: "Your Proposal has been Approved 🎉",
+
+  html: `
+    <h2>🎉 Proposal Approved</h2>
+
+    <p>Hello <b>${proposal.vendorId.name || "Vendor"}</b>,</p>
+
+    <p>Your proposal has been <b style="color:green;">APPROVED</b>.</p>
+
+    <hr/>
+
+    <p><b>RFP ID:</b> ${proposal.rfpId._id}</p>
+    <p><b>RFP Title:</b> ${proposal.rfpId.title}</p>
+    <p><b>Quoted Price:</b> ₹${proposal.quotedPrice}</p>
+    <p><b>Delivery Days:</b> ${proposal.deliveryDays}</p>
+
+    <p><b>Your Message:</b></p>
+    <blockquote>${proposal.message}</blockquote>
+
+    <br/>
+    <p>Regards,<br/>Bidify Team</p>
+  `,
+});
+    res.status(200).json({
+      success: true,
+      message: "Proposal approved successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+/* -------- GET APPROVED PROPOSALS (VENDOR) -------- */
+export const getApprovedProposals = async (req, res) => {
+  try {
+    const vendorId = req.user._id;
+
+    const proposals = await Proposal.find({
+      vendorId,
+      status: "ACCEPTED",
+    })
+      .populate("rfpId", "title description")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: proposals.length,
+      data: proposals,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

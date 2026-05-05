@@ -1,16 +1,9 @@
 import { generateRFPWithAI, compareVendorsWithAI } from "../services/gemini.service.js";
 import Proposal from "../models/Proposal.js";
 import RFP from "../models/RFP.js";
-//import { extractTextFromPDF } from "../utils/pdf.utils.js";
 import { parseFile } from "../utils/fileParser.js";
 
-
-
-/**
- * @desc    Generate RFP structure using AI
- * @route   POST /api/rfp/generate
- * @access  Employee
- */
+/* ================= GENERATE RFP ================= */
 export const generateRFP = async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -39,11 +32,7 @@ export const generateRFP = async (req, res) => {
 };
 
 
-/**
- * @desc    Compare vendor proposals using AI and recommend best vendor
- * @route   POST /api/ai/recommend/:rfpId
- * @access  Employee
- */
+/* ================= RECOMMEND VENDORS ================= */
 export const recommendVendorsByAI = async (req, res) => {
   try {
     const { rfpId } = req.params;
@@ -57,133 +46,80 @@ export const recommendVendorsByAI = async (req, res) => {
       });
     }
 
-    // 2. Return cached result if still valid (7-day TTL)
-    const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-    const cacheAge = rfp.aiRecommendationCachedAt
-      ? Date.now() - new Date(rfp.aiRecommendationCachedAt).getTime()
-      : Infinity;
+    // ❌ DISABLED CACHE (important for now)
+    // comment/remove cache block to avoid stale data
 
-    if (rfp.aiRecommendationCache && cacheAge < CACHE_TTL_MS) {
-      return res.status(200).json({
-        success: true,
-        recommendation: rfp.aiRecommendationCache,
-        cached: true,
-      });
-    }
-
-    // 3. Cache expired or missing — fetch proposals and call AI
-    const proposals = await Proposal.find({ rfpId }).populate("vendorId", "name email");
+    // 2. Get proposals
+   const proposals = await Proposal.find({
+  rfpId,
+  status: "PENDING", // 🔴 ONLY pending
+}).populate("vendorId", "name email");
 
     if (!proposals || proposals.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "At least two vendor proposals are required for comparison",
+        message: "At least two vendor proposals are required",
       });
     }
 
-    // 3. Normalize proposal data
-   const normalizedProposals = [];
+    // 3. Normalize for AI
+    const normalizedProposals = [];
 
-for (const p of proposals) {
-  let fullContent = p.message || "";
+    for (const p of proposals) {
+      let fullContent = p.message || "";
 
-  // If attachment exists → extract text
- if (p.attachment) {
-  const { text } = await parseFile(p.attachment);
+      if (p.attachment) {
+        const { text } = await parseFile(p.attachment);
+        fullContent += "\n\nAttachment Content:\n" + text;
+      }
 
-  fullContent += "\n\nAttachment Content:\n" + text;
-}
-
-  normalizedProposals.push({
-    vendor: p.vendorId?.name,
-    email: p.vendorId?.email,
-    content: fullContent,
-
-      extractedPrice: p.quotedPrice || 0,
-  deliveryDays: p.deliveryDays || 0
-
-  });
-}
-
-
-    // 4. Call AI for comparison
-const prompt = `
-You are an enterprise procurement decision engine.
-
-Your job is to compare vendor proposals and recommend the best vendors.
-
-IMPORTANT RULES:
-
-1. If "extractedPrice" is provided, ALWAYS use it as the final price.
-   Do NOT recalculate from text unless it is missing or zero.
-
-2. Use "deliveryDays" if provided.
-
-3. Lower total price is better.
-
-4. If two vendors have similar price, prefer faster delivery.
-
-5. Rank vendors from BEST to WORST.
-
-6. Generate a detailed explanation for each vendor including:
-   - Price comparison (lowest / higher than others)
-   - Delivery comparison (faster / slower)
-   - Final justification (why this vendor is better or worse)
-
-7. Recommend top 2 vendors.
-   - If vendors <= 2, recommend all.
-   - Best vendor must be first.
-
-Return ONLY valid JSON.
-
-Format:
-{
-  "vendorsAnalysis": [
-    {
-      "vendor": "",
-      "email": "",
-      "itemBreakdown": [
-        {
-          "item": "",
-          "quantity": number,
-          "unitPrice": number,
-          "totalItemPrice": number
-        }
-      ],
-      "deliveryCharge": number,
-      "grandTotal": number,
-      "deliveryDays": number,
-      "reason": ""
+      normalizedProposals.push({
+        vendor: p.vendorId?.name,
+        email: p.vendorId?.email,
+        content: fullContent,
+        extractedPrice: p.quotedPrice || 0,
+        deliveryDays: p.deliveryDays || 0,
+      });
     }
-  ],
-  "topRecommendations": [
-    {
-      "vendor": "",
-      "email": "",
-      "grandTotal": number
-    }
-  ]
-}
 
-RFP Items:
-${JSON.stringify(rfp.items)}
+    // 4. AI call (only for analysis, NOT for IDs)
+    const prompt = `
+Compare vendor proposals and rank best vendors.
+
+Return ONLY JSON with:
+- vendorsAnalysis
+- topRecommendations (vendor, email, grandTotal)
 
 Vendor Proposals:
 ${JSON.stringify(normalizedProposals)}
 `;
 
-const aiResult = await compareVendorsWithAI(prompt);
+    const aiResult = await compareVendorsWithAI(prompt);
 
-    // Save to cache with current timestamp — will be valid for next 7 days
-    await RFP.findByIdAndUpdate(rfpId, {
-      aiRecommendationCache: aiResult,
-      aiRecommendationCachedAt: new Date(),
+    // 🔴 🔥 CRITICAL FIX: FORCE attach proposalId from DB
+    const proposalMap = {};
+
+    proposals.forEach((p) => {
+      const key = p.vendorId?.name?.trim().toLowerCase();
+      proposalMap[key] = p;
     });
 
-   return res.status(200).json({
-  success: true,
-  recommendation: aiResult,
-});
+    aiResult.topRecommendations = proposals.map((p) => ({
+  vendor: p.vendorId?.name,
+  email: p.vendorId?.email,
+  grandTotal: p.quotedPrice,
+  deliveryDays: p.deliveryDays,
+   status: p.status,
+  proposalId: p._id // ✅ GUARANTEED
+}));
+
+    // 🔴 DEBUG (check in terminal)
+    console.log("FINAL RESPONSE:", aiResult.topRecommendations);
+
+    return res.status(200).json({
+      success: true,
+      recommendation: aiResult,
+    });
 
   } catch (error) {
     console.error("AI Vendor Comparison Error:", error);
