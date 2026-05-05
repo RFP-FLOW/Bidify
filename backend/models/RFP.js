@@ -66,6 +66,16 @@ deadline: {
         ref: "Vendor",
       },
     ],
+
+    // AI recommendation cache (7-day TTL)
+    aiRecommendationCache: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    aiRecommendationCachedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

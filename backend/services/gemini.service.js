@@ -13,7 +13,7 @@ const callOpenRouter = async (prompt) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "nvidia/nemotron-3-super-120b-a12b:free", 
+        model: "openrouter/auto",
         messages: [
           {
             role: "user",
@@ -24,7 +24,31 @@ const callOpenRouter = async (prompt) => {
     }
   );
 
-  const data = await response.json();
+  let data = null;
+
+try {
+  const text = await response.text();
+  console.log("RAW AI RESPONSE:");
+console.log(text);
+
+  if (text) {
+    data = JSON.parse(text);
+  }
+} catch (err) {
+  console.error("JSON parse error:", err);
+}
+ if (!response.ok || !data) {
+  console.log("AI FAILED OR EMPTY RESPONSE");
+
+  return {
+    recommendation: {
+      topRecommendations: [],
+      vendorsAnalysis: [],
+      note: "AI temporarily unavailable"
+    }
+  };
+}
+
 
   const text = data?.choices?.[0]?.message?.content;
 

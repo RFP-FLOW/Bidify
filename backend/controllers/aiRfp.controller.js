@@ -57,9 +57,22 @@ export const recommendVendorsByAI = async (req, res) => {
       });
     }
 
-    // 2. Fetch vendor proposals
-    const proposals = await Proposal.find({ rfpId })
-  .populate("vendorId", "name email");
+    // 2. Return cached result if still valid (7-day TTL)
+    const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const cacheAge = rfp.aiRecommendationCachedAt
+      ? Date.now() - new Date(rfp.aiRecommendationCachedAt).getTime()
+      : Infinity;
+
+    if (rfp.aiRecommendationCache && cacheAge < CACHE_TTL_MS) {
+      return res.status(200).json({
+        success: true,
+        recommendation: rfp.aiRecommendationCache,
+        cached: true,
+      });
+    }
+
+    // 3. Cache expired or missing — fetch proposals and call AI
+    const proposals = await Proposal.find({ rfpId }).populate("vendorId", "name email");
 
     if (!proposals || proposals.length < 2) {
       return res.status(400).json({
@@ -160,7 +173,13 @@ ${JSON.stringify(normalizedProposals)}
 `;
 
 const aiResult = await compareVendorsWithAI(prompt);
-//console.log("AI RESULT:", aiResult);
+
+    // Save to cache with current timestamp — will be valid for next 7 days
+    await RFP.findByIdAndUpdate(rfpId, {
+      aiRecommendationCache: aiResult,
+      aiRecommendationCachedAt: new Date(),
+    });
+
    return res.status(200).json({
   success: true,
   recommendation: aiResult,
@@ -175,4 +194,3 @@ const aiResult = await compareVendorsWithAI(prompt);
     });
   }
 };
-
