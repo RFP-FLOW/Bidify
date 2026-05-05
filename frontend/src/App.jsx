@@ -12,6 +12,7 @@ import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import AddCompanyProfile from "./pages/Company/Profile.jsx";
 import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import AcceptedVendors from "./pages/Company/AcceptedVendor.jsx";
+import ConfirmedRFPs from "./pages/Company/ConfirmedRFP.jsx";
 
 //Employee
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
@@ -96,6 +97,7 @@ function App() {
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
         <Route path="/manager/vendors" element={<AcceptedVendors />} />
+        <Route path="/manager/confirmed" element={<ConfirmedRFPs />} />
         <Route
           path="/employee/set-password/:token"
           element={<EmployeeSetPassword />}

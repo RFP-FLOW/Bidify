@@ -520,3 +520,36 @@ export const getForwardedRFPs = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch forwarded RFPs" });
   }
 };
+
+
+export const getConfirmedRFPs = async (req, res) => {
+  try {
+    const proposals = await Proposal.find({
+      status: "ACCEPTED",
+    })
+      .populate("rfpId", "title")
+      .populate("vendorId", "name email");
+
+    console.log("CONFIRMED PROPOSALS:", proposals); // 🔴 DEBUG
+
+    const data = proposals.map((p) => ({
+      rfpId: p.rfpId?._id || null,
+      title: p.rfpId?.title || "No Title",
+      vendorName: p.vendorId?.name || "Unknown",
+      vendorEmail: p.vendorId?.email || "",
+      price: p.quotedPrice || 0,
+      deliveryDays: p.deliveryDays || 0,
+        attachment: p.attachment,
+    }));
+     console.log("CONFIRMED DATA:", data);
+    res.status(200).json({
+      success: true,
+      rfps: data,
+    });
+  } catch (error) {
+    console.error("getConfirmedRFPs error:", error); // 🔴 IMPORTANT
+    res.status(500).json({
+      message: "Failed to fetch confirmed RFPs",
+    });
+  }
+};
