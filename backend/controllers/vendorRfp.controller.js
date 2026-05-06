@@ -14,7 +14,10 @@ export const getRfpProposals = async (req, res) => {
 
     const proposals = await Proposal.find({ rfpId })
       .populate("vendorId", "name email businessName")
+      .select("vendorId message quotedPrice deliveryDays attachment status updatedAt")
       .sort({ createdAt: -1 });
+
+    console.log("getRfpProposals - Found", proposals.length, "proposals");
 
     res.status(200).json({
       rfpTitle: rfp.title,

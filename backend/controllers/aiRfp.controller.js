@@ -49,16 +49,24 @@ export const recommendVendorsByAI = async (req, res) => {
     // ❌ DISABLED CACHE (important for now)
     // comment/remove cache block to avoid stale data
 
-    // 2. Get proposals
-   const proposals = await Proposal.find({
-  rfpId,
-  status: "PENDING", // 🔴 ONLY pending
-}).populate("vendorId", "name email");
+    // 2. Get proposals (ALL statuses, not just PENDING)
+    const proposals = await Proposal.find({ rfpId })
+      .populate("vendorId", "name email")
+      .lean();
 
-    if (!proposals || proposals.length < 2) {
+    console.log("DEBUG - Raw proposals from DB count:", proposals.length);
+    if (proposals.length > 0) {
+      console.log("First proposal:", {
+        vendor: proposals[0].vendorId?.name,
+        quotedPrice: proposals[0].quotedPrice,
+        deliveryDays: proposals[0].deliveryDays
+      });
+    }
+
+    if (!proposals || proposals.length < 1) {
       return res.status(400).json({
         success: false,
-        message: "At least two vendor proposals are required",
+        message: "At least one vendor proposal is required",
       });
     }
 
@@ -104,17 +112,37 @@ ${JSON.stringify(normalizedProposals)}
       proposalMap[key] = p;
     });
 
-    aiResult.topRecommendations = proposals.map((p) => ({
-  vendor: p.vendorId?.name,
-  email: p.vendorId?.email,
-  grandTotal: p.quotedPrice,
-  deliveryDays: p.deliveryDays,
-   status: p.status,
-  proposalId: p._id // ✅ GUARANTEED
-}));
+    // Enrich vendorsAnalysis with delivery days and grandTotal from DB proposals
+    if (aiResult.vendorsAnalysis) {
+      aiResult.vendorsAnalysis = aiResult.vendorsAnalysis.map((v) => {
+        const dbProposal = proposalMap[v.vendor?.trim().toLowerCase()];
+        return {
+          ...v,
+          deliveryDays: Number(dbProposal?.deliveryDays) || 0,
+          grandTotal: Number(v.grandTotal) || 0,
+        };
+      });
+    }
+
+    // Build topRecommendations from AI analysis (which has extracted prices)
+    // Instead of using DB quotedPrice (which is often empty)
+    aiResult.topRecommendations = (aiResult.vendorsAnalysis || [])
+      .map((v) => {
+        const dbProposal = proposalMap[v.vendor?.trim().toLowerCase()];
+        return {
+          vendor: v.vendor,
+          email: dbProposal?.vendorId?.email || "",
+          grandTotal: Number(v.grandTotal) || 0,
+          extractedPrice: Number(v.grandTotal) || 0,
+          deliveryDays: Number(v.deliveryDays) || 0,
+          status: dbProposal?.status || "PENDING",
+          proposalId: dbProposal?._id || "",
+        };
+      })
+      .sort((a, b) => a.grandTotal - b.grandTotal);
 
     // 🔴 DEBUG (check in terminal)
-    console.log("FINAL RESPONSE:", aiResult.topRecommendations);
+    console.log("✅ AI Analysis Complete - Top Recs:", aiResult.topRecommendations?.length || 0);
 
     return res.status(200).json({
       success: true,
