@@ -66,7 +66,7 @@ function VendorSidebar() {
         <SidebarItem
           icon={<CheckCircle size={18} />}
           label="Won Contracts"
-          to="/vendor/contracts"
+          to="/vendor/getApprovedProposals"
           collapsed={collapsed}
         />
         <SidebarItem

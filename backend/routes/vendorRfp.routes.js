@@ -1,7 +1,7 @@
 import express from "express";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
 import { getVendorOpenRFPs } from "../controllers/vendorReply.controller.js";
-
+//import { getApprovedProposals } from "../controllers/vendorRfp.controller.js";
 const router = express.Router();
 
 /**
@@ -13,5 +13,6 @@ router.get(
   vendorOnly,
   getVendorOpenRFPs
 );
+
 
 export default router;

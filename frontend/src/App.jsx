@@ -32,6 +32,7 @@ import VendorCompanyDetails from "./pages/Vendor/VendorCompanyDetails.jsx";
 import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
 import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
 import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
+import ApprovedProposals from "./pages/Vendor/ApprovedProposals.jsx";
 
 //Auth
 import SetPassword from "./pages/Password-reset/SetPassword.jsx";
@@ -124,7 +125,7 @@ function App() {
           }
         />
         <Route path="/vendor/register" element={<VendorRegister />} />
-
+        <Route path="/vendor/getApprovedProposals" element={<ApprovedProposals />} />
         <Route
           path="/vendor/dashboard"
           element={

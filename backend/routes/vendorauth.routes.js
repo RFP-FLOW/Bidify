@@ -2,6 +2,8 @@ import express from "express";
 import { loginVendor, getVendorRFPs, getVendorStats, resendVendorOtp, verifyVendorOtp, vendorRegisterInit, getVendorProfile, updateVendorProfile } from "../controllers/vendorauth.controller.js";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
 import { sendVendorRequest,getVendorRequests,checkRequestStatus } from "../controllers/VendorRequest.controller.js";
+import { getApprovedProposals } from "../controllers/vendorRfp.controller.js";
+
 const router = express.Router();
 
 router.post("/register-init", vendorRegisterInit);
@@ -17,7 +19,7 @@ router.get("/request-status/:companyId", authMiddleware, vendorOnly, checkReques
 
 router.get("/profile", authMiddleware, vendorOnly, getVendorProfile);
 router.put("/profile", authMiddleware, vendorOnly, updateVendorProfile);
-
+router.get("/approved", authMiddleware, getApprovedProposals);
 
 
 export default router;
