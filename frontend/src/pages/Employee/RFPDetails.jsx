@@ -4,6 +4,8 @@ import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { toast } from "react-toastify";
 import SelectVendorsModal from "../../components/SelectVendorsModal";
+import { PageLayout, PageContent, Card, StatusBadge, SectionLabel } from "../../components/ui/Themed";
+import { Send, Package, Mail } from "lucide-react";
 
 function RFPDetails() {
   const { rfpId } = useParams();
@@ -11,179 +13,94 @@ function RFPDetails() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [vendors, setVendors] = useState([]);
-const [vendorsLoading, setVendorsLoading] = useState(false);
+  const [vendorsLoading, setVendorsLoading] = useState(false);
 
-const fetchApprovedVendors = async () => {
-  try {
-    setVendorsLoading(true);
-
-    const token = localStorage.getItem("token");
-
-    const res = await axios.get(
-       "http://localhost:5000/api/manager-vendor/vendors/approved",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
-
-    setVendors(res.data.data || []);
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to load vendors");
-  } finally {
-    setVendorsLoading(false);
-  }
-};
-
+  const fetchVendors = async () => {
+    try { setVendorsLoading(true);
+      const res = await axios.get("http://localhost:5000/api/manager-vendor/vendors/approved", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, withCredentials: true });
+      setVendors(res.data.data || []);
+    } catch (e) { console.error(e); toast.error("Failed to load vendors"); }
+    finally { setVendorsLoading(false); }
+  };
 
   useEffect(() => {
-    const fetchRFP = async () => {
+    (async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        const res = await axios.get(
-          `http://localhost:5000/api/rfp/${rfpId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            withCredentials: true,
-          }
-        );
-
+        const res = await axios.get(`http://localhost:5000/api/rfp/${rfpId}`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, withCredentials: true });
         setRfp(res.data);
-      } catch (error) {
-        console.error("Failed to fetch RFP:", error);
-        toast.error("Failed to load RFP details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRFP();
+      } catch (e) { console.error(e); toast.error("Failed to load RFP details"); }
+      finally { setLoading(false); }
+    })();
   }, [rfpId]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        Loading RFP details...
-      </div>
-    );
-  }
+  if (loading) return (
+    <PageLayout><Sidebar /><main className="page-content">
+      <div className="h-8 w-64 rounded-lg animate-shimmer mb-3" /><div className="h-4 w-32 rounded-md animate-shimmer mb-8" />
+      <div className="h-40 rounded-2xl animate-shimmer mb-6" /><div className="h-48 rounded-2xl animate-shimmer" />
+    </main></PageLayout>
+  );
 
-  if (!rfp) {
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        RFP not found
-      </div>
-    );
-  }
+  if (!rfp) return <PageLayout><Sidebar /><main className="page-content flex items-center justify-center"><p className="t-muted text-sm">RFP not found</p></main></PageLayout>;
 
   return (
-    <div className="flex">
-      {/* Sidebar */}
+    <PageLayout>
       <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 p-8 bg-gray-50 min-h-screen">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
+      <main className="page-content">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-8 animate-fadeIn">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              {rfp.title}
-            </h1>
-            <span className="text-sm text-yellow-600 font-medium">
-              {rfp.status}
-            </span>
+            <h1 className="t-primary text-2xl font-bold tracking-[-0.02em] mb-2">{rfp.title}</h1>
+            <StatusBadge status={rfp.status} />
           </div>
-
           <div className="flex gap-3">
-            <button className="px-4 py-2 border rounded hover:bg-gray-100">
-              Check Emails
-            </button>
-
-            <button
-              onClick={() => {
-  setShowModal(true);
-  fetchApprovedVendors(); }}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-            >
-              Send to Vendors
-            </button>
+            <button className="btn-secondary"><Mail size={15} /> Check Emails</button>
+            <button onClick={() => { setShowModal(true); fetchVendors(); }} className="btn-primary"><Send size={15} /> Send to Vendors</button>
           </div>
         </div>
 
-        {/* REQUIREMENTS */}
-        <div className="bg-white p-6 rounded shadow mb-6">
-          <h2 className="font-semibold mb-2">Requirements</h2>
-          <p className="text-gray-700">
-            {rfp.description || "No description provided"}
-          </p>
-        </div>
+        {/* Requirements */}
+        <Card className="p-6 mb-6" delay={80}>
+          <h2 className="t-primary text-sm font-semibold mb-3">Requirements</h2>
+          <p className="t-secondary text-sm leading-relaxed">{rfp.description || "No description provided"}</p>
+        </Card>
 
-        {/* STRUCTURED DATA */}
-        <div className="bg-white p-6 rounded shadow mb-6">
-          <h2 className="font-semibold mb-2">Structured Data</h2>
-          <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
-            {JSON.stringify(
-              {
-                title: rfp.title,
-                items: rfp.items,
-                budget: rfp.budget || null,
-                deadline: rfp.deadline || null,
-                paymentTerms: rfp.paymentTerms || null,
-                warranty: rfp.warranty || null,
-              },
-              null,
-              2
-            )}
-          </pre>
-        </div>
+        {/* Items */}
+        {rfp.items?.length > 0 && (
+          <Card className="p-6 mb-6" delay={160}>
+            <SectionLabel icon={Package}>Items ({rfp.items.length})</SectionLabel>
+            <div className="rounded-xl overflow-hidden b-default">
+              {rfp.items.map((item, idx) => (
+                <div key={idx} className={`px-4 py-3 flex items-center justify-between text-sm ${idx % 2 === 0 ? "bg-input" : "bg-card"}`}
+                  style={{ borderBottom: idx < rfp.items.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
+                  <span className="t-primary font-medium">{item.name}</span>
+                  <span className="t-muted text-xs font-semibold">Qty: {item.quantity}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
-        {/* PROPOSALS EMPTY STATE */}
-        <div className="bg-white p-8 rounded shadow text-center">
-          <div className="flex flex-col items-center gap-3 text-gray-400">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75M21.75 6.75A2.25 2.25 0 0019.5 4.5H4.5A2.25 2.25 0 002.25 6.75m19.5 0l-9.75 6.75L2.25 6.75"
-              />
-            </svg>
+        {/* Structured Data */}
+        <Card className="p-6 mb-6" delay={240}>
+          <details>
+            <summary className="t-secondary text-sm font-semibold cursor-pointer">View Structured Data</summary>
+            <pre className="mt-3 rounded-xl p-4 text-xs overflow-auto bg-input t-secondary b-subtle">
+              {JSON.stringify({ title: rfp.title, items: rfp.items, budget: rfp.budget || null, deadline: rfp.deadline || null, paymentTerms: rfp.paymentTerms || null, warranty: rfp.warranty || null }, null, 2)}
+            </pre>
+          </details>
+        </Card>
 
-            <h3 className="text-lg font-medium text-gray-600">
-              No proposals received yet
-            </h3>
-
-            <p className="text-sm text-gray-400">
-              Proposals will appear here once vendors respond
-            </p>
+        {/* Empty proposals */}
+        <Card className="py-12 text-center" delay={320}>
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+            <Mail size={22} />
           </div>
-        </div>
-      </div>
-
-      {/* ✅ MODAL MUST BE INSIDE RETURN */}
-   <SelectVendorsModal
-  isOpen={showModal}
-  onClose={() => setShowModal(false)}
-  vendors={vendors}
-  loading={vendorsLoading}
-  rfpId={rfp._id}   
- />
-
-
-
-    </div>
+          <p className="t-primary text-base font-semibold mb-1">No proposals received yet</p>
+          <p className="t-muted text-sm">Proposals will appear here once vendors respond</p>
+        </Card>
+      </main>
+      <SelectVendorsModal isOpen={showModal} onClose={() => setShowModal(false)} vendors={vendors} loading={vendorsLoading} rfpId={rfp._id} />
+    </PageLayout>
   );
 }
 

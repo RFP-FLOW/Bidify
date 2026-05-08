@@ -157,6 +157,77 @@ body {
   color: var(--accent-text);
 }
 
+/* ── Themed Utilities ── */
+@layer components {
+  /* Text */
+  .t-primary   { color: var(--text-primary); }
+  .t-secondary { color: var(--text-secondary); }
+  .t-muted     { color: var(--text-muted); }
+  .t-accent    { color: var(--accent-text); }
+
+  /* Backgrounds */
+  .bg-main     { background: var(--bg-main); }
+  .bg-card     { background: var(--bg-card); }
+  .bg-elevated { background: var(--bg-hover); }
+  .bg-input    { background: var(--bg-input); }
+
+  /* Card */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-xs);
+    border-radius: 1rem;
+  }
+
+  /* Border */
+  .b-default { border: 1px solid var(--border-color); }
+  .b-subtle  { border: 1px solid var(--border-subtle); }
+  .bt-default { border-top: 1px solid var(--border-color); }
+  .bb-subtle  { border-bottom: 1px solid var(--border-subtle); }
+
+  /* Buttons */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.625rem 1.25rem; border-radius: 0.75rem;
+    font-size: 0.875rem; font-weight: 600; color: #fff;
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.625rem 1rem; border-radius: 0.75rem;
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--bg-hover); }
+
+  /* Input */
+  .input-themed {
+    width: 100%; border-radius: 0.75rem;
+    padding: 0.75rem 1rem; font-size: 0.875rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary); caret-color: var(--accent);
+    resize: none; transition: all 0.2s;
+  }
+  .input-themed:focus { outline: none; box-shadow: 0 0 0 2px var(--accent-subtle); }
+
+  /* Page Layout */
+  .page-layout {
+    display: flex; min-height: 100vh;
+    background: var(--bg-main);
+    transition: background-color 0.35s ease;
+  }
+  .page-content { flex: 1; padding: 2.25rem 2.5rem; }
+}
+
 /* ── Animations ── */
 @layer utilities {
   @keyframes fadeIn {
