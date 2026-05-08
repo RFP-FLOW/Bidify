@@ -75,12 +75,20 @@ const ConfirmedRFPs = () => {
 
             {/* BOTTOM */}
             <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs text-gray-400">Total Cost</p>
-                <p className="text-xl font-bold text-green-600">
-                  ₹{Number(rfp.price || 0).toLocaleString("en-IN")}
-                </p>
-              </div>
+            <div>
+  <p className="text-xs text-gray-400">
+    Total Cost
+  </p>
+
+  <p className="text-xl font-bold text-green-600">
+    ₹{Number(
+      rfp.grandTotal ||
+      rfp.price ||
+      rfp.quotedPrice ||
+      0
+    ).toLocaleString("en-IN")}
+  </p>
+</div>
 
               <div className="text-right">
                 <p className="text-xs text-gray-400">Delivery</p>

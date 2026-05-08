@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ManagerLayout from "../../components/Manager/SidebarCardManager";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — must match backend
 
@@ -138,16 +141,14 @@ function RFPCard({ rfp, onView }) {
           {top2.map((vendor, i) => (
             <div
               key={i}
-              className={`flex-1 rounded-xl p-3 border-l-4 ${
-                i === 0
+              className={`flex-1 rounded-xl p-3 border-l-4 ${i === 0
                   ? "bg-green-50 border-green-400"
                   : "bg-gray-50 border-gray-200"
-              }`}
+                }`}
             >
               <p
-                className={`text-xs font-semibold mb-1 ${
-                  i === 0 ? "text-green-700" : "text-gray-400"
-                }`}
+                className={`text-xs font-semibold mb-1 ${i === 0 ? "text-green-700" : "text-gray-400"
+                  }`}
               >
                 #{i + 1} {i === 0 ? "Best" : ""}
               </p>
@@ -155,9 +156,8 @@ function RFPCard({ rfp, onView }) {
                 {vendor.vendor}
               </p>
               <p
-                className={`text-sm font-semibold mt-1 ${
-                  i === 0 ? "text-green-700" : "text-gray-600"
-                }`}
+                className={`text-sm font-semibold mt-1 ${i === 0 ? "text-green-700" : "text-gray-600"
+                  }`}
               >
                 ₹{fmt(vendor.grandTotal)}
               </p>
@@ -209,25 +209,66 @@ function DetailView({ rfp, onBack }) {
 
   // 🔴 ADDED: approve function
   const handleApprove = async (proposalId) => {
-    try {
-      const res = await axios.patch(
-        `http://localhost:5000/api/rfp/proposal/approve/${proposalId}`,
-        {},
-        { headers: authHeader() }
-      );
+  try {
+    const res = await axios.patch(
+      `http://localhost:5000/api/rfp/proposal/approve/${proposalId}`,
+      {},
+      { headers: authHeader() }
+    );
 
-      if (res.data.success) {
-        setApprovedId(proposalId);
-        alert("Vendor Approved ✅");
-      } else {
-        alert(res.data.message);
-      }
-    } catch (err) {
-      console.error(err);
+    if (res.data.success) {
+
+      // update local UI instantly
+      setAiData((prev) => {
+        const updated = { ...prev };
+
+        updated.topRecommendations =
+          updated.topRecommendations.map((v) => ({
+            ...v,
+            status:
+              v.proposalId === proposalId
+                ? "ACCEPTED"
+                : "REJECTED",
+          }));
+
+        updated.vendorsAnalysis =
+          updated.vendorsAnalysis.map((v) => ({
+            ...v,
+            status:
+              v.proposalId === proposalId
+                ? "ACCEPTED"
+                : "REJECTED",
+          }));
+
+        return updated;
+      });
+
+      setApprovedId(proposalId);
+
+      toast.success("Vendor Approved Successfully ✅");
+    } else {
+      toast.error(res.data.message);
     }
-  };
+  } catch (err) {
+    console.error(err);
 
-  const top3 = aiData?.topRecommendations?.slice(0, 3) || [];
+    toast.error("Failed to approve vendor ❌");
+  }
+};
+
+  const uniqueRecommendations = [];
+  const seen = new Set();
+
+  (aiData?.topRecommendations || []).forEach((vendor) => {
+    const key = vendor.email;
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueRecommendations.push(vendor);
+    }
+  });
+
+  const top3 = uniqueRecommendations.slice(0, 3);
   const analysisMap = {};
   aiData?.vendorsAnalysis?.forEach((v) => {
     analysisMap[v.vendor] = v;
@@ -239,7 +280,7 @@ function DetailView({ rfp, onBack }) {
     "border-orange-300",
   ];
   const rankBg = ["bg-green-500", "bg-blue-500", "bg-orange-400"];
-   console.log("TOP3 DATA:", top3);
+  console.log("TOP3 DATA:", top3);
   return (
     <div>
       <button
@@ -248,7 +289,7 @@ function DetailView({ rfp, onBack }) {
       >
         ← Back to Recommendations
       </button>
-      
+
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800">{rfp.title}</h2>
         <p className="text-sm text-gray-400 mt-1">
@@ -271,7 +312,7 @@ function DetailView({ rfp, onBack }) {
           No AI analysis available for this RFP.
         </p>
       )}
-      
+
       <div className="space-y-4">
         {top3.map((vendor, index) => {
           const analysis = analysisMap[vendor.vendor] || {};
@@ -299,23 +340,23 @@ function DetailView({ rfp, onBack }) {
                   <p className="text-lg font-bold text-green-600">
                     ₹{fmt(vendor.grandTotal)}
                   </p>
-                  {vendor.deliveryDays && (
+                  {vendor.deliveryDays !== undefined && (
                     <p className="text-xs text-gray-400">
                       {vendor.deliveryDays} days delivery
                     </p>
 
                   )}
                   {vendor.status === "ACCEPTED" && (
-    <p className="text-green-600 font-semibold text-sm mt-1">
-      Approved ✅
-    </p>
-  )}
+                    <p className="text-green-600 font-semibold text-sm mt-1">
+                      Approved ✅
+                    </p>
+                  )}
 
-  {vendor.status === "REJECTED" && (
-    <p className="text-red-500 font-semibold text-sm mt-1">
-      Rejected ❌
-    </p>
-  )}
+                  {vendor.status === "REJECTED" && (
+                    <p className="text-red-500 font-semibold text-sm mt-1">
+                      Rejected ❌
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -335,17 +376,21 @@ function DetailView({ rfp, onBack }) {
                         <th className="text-left px-3 py-2 rounded-tl-lg font-medium">
                           Item
                         </th>
+
                         <th className="text-center px-3 py-2 font-medium">
                           Qty
                         </th>
+
                         <th className="text-right px-3 py-2 font-medium">
                           Unit price
                         </th>
+
                         <th className="text-right px-3 py-2 rounded-tr-lg font-medium">
                           Total
                         </th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {analysis.itemBreakdown.map((item, idx) => (
                         <tr
@@ -353,33 +398,42 @@ function DetailView({ rfp, onBack }) {
                           className="border-t border-gray-50 text-gray-600"
                         >
                           <td className="px-3 py-2">{item.item}</td>
+
                           <td className="px-3 py-2 text-center">
                             {item.quantity ?? "—"}
                           </td>
+
                           <td className="px-3 py-2 text-right">
-                            {item.unitPrice ? `₹${fmt(item.unitPrice)}` : "—"}
+                            {item.unitPrice
+                              ? `₹${fmt(item.unitPrice)}`
+                              : "—"}
                           </td>
+
                           <td className="px-3 py-2 text-right font-medium">
                             ₹{fmt(item.totalItemPrice)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
+
                     <tfoot>
                       {analysis.deliveryCharge !== undefined && (
                         <tr className="border-t border-gray-100 text-gray-400 text-xs">
                           <td colSpan={3} className="px-3 py-2 text-right">
                             Delivery charges
                           </td>
+
                           <td className="px-3 py-2 text-right">
                             ₹{fmt(analysis.deliveryCharge)}
                           </td>
                         </tr>
                       )}
+
                       <tr className="border-t-2 border-gray-200 font-bold text-gray-800 text-sm">
                         <td colSpan={3} className="px-3 py-2 text-right">
                           Grand total
                         </td>
+
                         <td className="px-3 py-2 text-right text-green-600">
                           ₹{fmt(analysis.grandTotal || vendor.grandTotal)}
                         </td>
@@ -389,16 +443,31 @@ function DetailView({ rfp, onBack }) {
                 </div>
               )}
 
+              {/* VIEW FILE */}
+             {vendor.attachment && (
+  <div className="mt-4">
+    <a
+      href={vendor.attachment}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+    >
+      📄 View Proposal File
+    </a>
+  </div>
+)}
+
+
               {/* 🔴 ADDED: approve button (NO UI disturbed) */}
               {vendor.status === "PENDING" && (
-  <button
-    onClick={() => handleApprove(vendor.proposalId)}
-    className="mt-4 px-4 py-2 rounded-lg text-sm bg-green-600 text-white hover:bg-green-700"
-  >
-                {approvedId === vendor.proposalId
-                  ? "Approved ✅"
-                  : "Approve"}
-              </button>
+                <button
+                  onClick={() => handleApprove(vendor.proposalId)}
+                  className="mt-4 px-4 py-2 rounded-lg text-sm bg-green-600 text-white hover:bg-green-700"
+                >
+                  {approvedId === vendor.proposalId
+                    ? "Approved ✅"
+                    : "Approve"}
+                </button>
               )}
             </div>
           );

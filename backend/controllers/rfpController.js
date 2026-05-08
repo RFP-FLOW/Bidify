@@ -521,35 +521,110 @@ export const getForwardedRFPs = async (req, res) => {
   }
 };
 
-
 export const getConfirmedRFPs = async (req, res) => {
   try {
     const proposals = await Proposal.find({
       status: "ACCEPTED",
     })
-      .populate("rfpId", "title")
-      .populate("vendorId", "name email");
+      .populate(
+        "rfpId",
+        "title aiRecommendationCache"
+      )
+      .populate(
+        "vendorId",
+        "name email"
+      );
 
-    console.log("CONFIRMED PROPOSALS:", proposals); // 🔴 DEBUG
+    console.log(
+      "CONFIRMED PROPOSALS:",
+      proposals
+    );
 
-    const data = proposals.map((p) => ({
-      rfpId: p.rfpId?._id || null,
-      title: p.rfpId?.title || "No Title",
-      vendorName: p.vendorId?.name || "Unknown",
-      vendorEmail: p.vendorId?.email || "",
-      price: p.quotedPrice || 0,
-      deliveryDays: p.deliveryDays || 0,
-        attachment: p.attachment,
-    }));
-     console.log("CONFIRMED DATA:", data);
-    res.status(200).json({
+    const data = proposals.map((p) => {
+
+      let finalPrice =
+        Number(p.quotedPrice) || 0;
+
+      // ✅ fallback from AI cache
+      if (
+        !finalPrice &&
+        p.rfpId?.aiRecommendationCache
+      ) {
+        const vendorsAnalysis =
+          p.rfpId.aiRecommendationCache
+            ?.vendorsAnalysis ||
+          p.rfpId.aiRecommendationCache
+            ?.recommendation
+            ?.vendorsAnalysis ||
+          [];
+
+        const aiVendor =
+          vendorsAnalysis.find(
+            (v) =>
+              v.vendor
+                ?.replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase() ===
+              p.vendorId?.name
+                ?.replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase()
+          );
+
+        console.log(
+          "Matched AI Vendor:",
+          aiVendor
+        );
+
+        if (aiVendor?.grandTotal) {
+          finalPrice = Number(
+            aiVendor.grandTotal
+          );
+        }
+      }
+
+      return {
+        rfpId: p.rfpId?._id || null,
+
+        title:
+          p.rfpId?.title || "No Title",
+
+        vendorName:
+          p.vendorId?.name || "Unknown",
+
+        vendorEmail:
+          p.vendorId?.email || "",
+
+        grandTotal: finalPrice,
+
+        deliveryDays:
+          p.deliveryDays || 0,
+
+        attachment:
+          p.attachment || "",
+      };
+    });
+
+    console.log(
+      "CONFIRMED DATA:",
+      data
+    );
+
+    return res.status(200).json({
       success: true,
       rfps: data,
     });
+
   } catch (error) {
-    console.error("getConfirmedRFPs error:", error); // 🔴 IMPORTANT
-    res.status(500).json({
-      message: "Failed to fetch confirmed RFPs",
+    console.error(
+      "getConfirmedRFPs error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch confirmed RFPs",
     });
   }
 };
