@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { X, Package, Users } from "lucide-react";
 
 export default function RfpQuickView({ rfpId, onClose }) {
   const [rfp, setRfp] = useState(null);
@@ -10,16 +11,13 @@ export default function RfpQuickView({ rfpId, onClose }) {
         const token = localStorage.getItem("token");
         const res = await axios.get(
           `http://localhost:5000/api/rfp/${rfpId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setRfp(res.data);
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchRfp();
   }, [rfpId]);
 
@@ -29,46 +27,67 @@ export default function RfpQuickView({ rfpId, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0"
+        style={{ background: "var(--bg-overlay)" }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-[520px] rounded-2xl bg-white shadow-2xl p-6 animate-scaleIn border border-gray-100">
+      <div
+        className="relative z-10 w-[480px] max-h-[80vh] overflow-y-auto rounded-xl p-6 animate-scaleIn"
+        style={{
+          background: "var(--bg-modal)",
+          border: "1px solid var(--border-color)",
+          boxShadow: "var(--shadow-lg)",
+        }}
+      >
         {/* Header */}
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-5">
           <div>
-            <h2 className="text-lg font-bold text-[#5b3df5]">
+            <h2 className="text-[15px] font-semibold"
+              style={{ color: "var(--text-primary)" }}>
               {rfp.title}
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-[11px] mt-0.5 font-medium"
+              style={{ color: "var(--text-muted)" }}>
               Sent RFP Details
             </p>
           </div>
-
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 text-xl"
+            className="w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-150"
+            style={{ color: "var(--text-muted)", background: "var(--bg-hover)" }}
           >
-            ✕
+            <X size={14} />
           </button>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
-          {rfp.description}
-        </p>
+        <div className="rounded-lg p-3.5 mb-5"
+          style={{ background: "var(--bg-input)", border: "1px solid var(--border-subtle)" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {rfp.description}
+          </p>
+        </div>
 
         {/* Items */}
-        <div className="mb-4">
-          <h3 className="font-semibold text-sm mb-2 text-gray-700">
-            Items
-          </h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-5">
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <Package size={12} style={{ color: "var(--text-muted)" }} />
+            <h3 className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--text-muted)" }}>
+              Items
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
             {rfp.items.map((item, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 text-sm rounded-full bg-[#eef4ff] text-[#5b3df5]"
+                className="px-2.5 py-1 text-[11px] font-medium rounded-md"
+                style={{
+                  background: "var(--accent-subtle)",
+                  color: "var(--accent-text)",
+                }}
               >
                 {item.name} × {item.quantity}
               </span>
@@ -78,23 +97,28 @@ export default function RfpQuickView({ rfpId, onClose }) {
 
         {/* Vendors */}
         <div>
-          <h3 className="font-semibold text-sm mb-2 text-gray-700">
-            Sent To Vendors
-          </h3>
-
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <Users size={12} style={{ color: "var(--text-muted)" }} />
+            <h3 className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--text-muted)" }}>
+              Sent to Vendors
+            </h3>
+          </div>
           {rfp.sentToVendors?.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {rfp.sentToVendors.map((v) => (
-                <span
-                  key={v._id}
-                  className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700"
-                >
+                <span key={v._id}
+                  className="px-2.5 py-1 text-[11px] font-medium rounded-md"
+                  style={{
+                    background: "var(--status-fwd-bg)",
+                    color: "var(--status-fwd-text)",
+                  }}>
                   {v.name}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">
+            <p className="text-[12px]" style={{ color: "var(--text-muted)" }}>
               No vendors found
             </p>
           )}

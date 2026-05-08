@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-
+import { ThemeProvider } from "./context/ThemeContext"; 
 import LandingPage from "./pages/landing.jsx";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -47,6 +47,7 @@ import ManagerRecommendations from "./pages/Company/ManagerRecommendations.jsx";
 
 function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} />
 
@@ -189,7 +190,10 @@ function App() {
 
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
+  
   );
+
 }
 
 export default App;
