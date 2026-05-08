@@ -123,8 +123,13 @@ const handleForwardToManager = () => {
           {vendor.email}
         </p>
         <p className="text-sm font-semibold text-green-700">
-          ₹{vendor.grandTotal}
+          ₹{(vendor.grandTotal || 0).toLocaleString('en-IN')}
         </p>
+        {vendor.deliveryDays > 0 && (
+          <p className="text-xs text-gray-500 mt-1">
+            Delivery: {vendor.deliveryDays} days
+          </p>
+        )}
       </div>
     ))}
 
@@ -141,12 +146,12 @@ const handleForwardToManager = () => {
             </p>
           ))}
 
-          <p className="text-sm">
-            Delivery: ₹{v.deliveryCharge}
+          <p className="text-sm text-gray-600">
+            Delivery: {v.deliveryDays || 0} days
           </p>
 
           <p className="font-semibold text-purple-700">
-            Grand Total: ₹{v.grandTotal}
+            Grand Total: ₹{(v.grandTotal || 0).toLocaleString('en-IN')}
           </p>
           {v.reason && (
   <p className="mt-2 text-sm text-gray-700 bg-gray-100 p-2 rounded">

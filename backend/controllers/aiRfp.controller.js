@@ -1,16 +1,9 @@
 import { generateRFPWithAI, compareVendorsWithAI } from "../services/gemini.service.js";
 import Proposal from "../models/Proposal.js";
 import RFP from "../models/RFP.js";
-//import { extractTextFromPDF } from "../utils/pdf.utils.js";
 import { parseFile } from "../utils/fileParser.js";
 
-
-
-/**
- * @desc    Generate RFP structure using AI
- * @route   POST /api/rfp/generate
- * @access  Employee
- */
+/* ================= GENERATE RFP ================= */
 export const generateRFP = async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -39,17 +32,16 @@ export const generateRFP = async (req, res) => {
 };
 
 
-/**
- * @desc    Compare vendor proposals using AI and recommend best vendor
- * @route   POST /api/ai/recommend/:rfpId
- * @access  Employee
- */
+/* ================= RECOMMEND VENDORS ================= */
+const aiCache = new Map();
+
 export const recommendVendorsByAI = async (req, res) => {
   try {
     const { rfpId } = req.params;
 
     // 1. RFP validate
     const rfp = await RFP.findById(rfpId);
+
     if (!rfp) {
       return res.status(404).json({
         success: false,
@@ -57,140 +49,177 @@ export const recommendVendorsByAI = async (req, res) => {
       });
     }
 
-    // 2. Return cached result if still valid (7-day TTL)
-    const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-    const cacheAge = rfp.aiRecommendationCachedAt
-      ? Date.now() - new Date(rfp.aiRecommendationCachedAt).getTime()
-      : Infinity;
+    // ================= CACHE CHECK =================
+    const cached = aiCache.get(rfpId);
 
-    if (rfp.aiRecommendationCache && cacheAge < CACHE_TTL_MS) {
+    if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+      console.log("✅ Returning AI result from cache");
+
       return res.status(200).json({
         success: true,
-        recommendation: rfp.aiRecommendationCache,
+        recommendation: cached.data,
         cached: true,
       });
     }
 
-    // 3. Cache expired or missing — fetch proposals and call AI
-    const proposals = await Proposal.find({ rfpId }).populate("vendorId", "name email");
+    // 2. Get proposals
+    const proposals = await Proposal.find({ rfpId })
+      .populate("vendorId", "name email")
+      .lean();
 
-    if (!proposals || proposals.length < 2) {
+    console.log("DEBUG - Raw proposals count:", proposals.length);
+
+    if (!proposals || proposals.length < 1) {
       return res.status(400).json({
         success: false,
-        message: "At least two vendor proposals are required for comparison",
+        message: "At least one vendor proposal is required",
       });
     }
 
-    // 3. Normalize proposal data
-   const normalizedProposals = [];
+    // 3. Normalize proposals
+    const normalizedProposals = [];
 
-for (const p of proposals) {
-  let fullContent = p.message || "";
+    for (const p of proposals) {
+      let fullContent = p.message || "";
 
-  // If attachment exists → extract text
- if (p.attachment) {
-  const { text } = await parseFile(p.attachment);
+      if (p.attachment) {
+        try {
+          const { text } = await parseFile(p.attachment);
+          fullContent += "\n\nAttachment Content:\n" + text;
+        } catch (err) {
+          console.log("Attachment parse skipped");
+        }
+      }
 
-  fullContent += "\n\nAttachment Content:\n" + text;
-}
+      normalizedProposals.push({
+        vendor: p.vendorId?.name,
+        email: p.vendorId?.email,
+        content: fullContent,
+        extractedPrice: p.quotedPrice || 0,
+        deliveryDays: p.deliveryDays || 0,
+      });
+    }
 
-  normalizedProposals.push({
-    vendor: p.vendorId?.name,
-    email: p.vendorId?.email,
-    content: fullContent,
-
-      extractedPrice: p.quotedPrice || 0,
-  deliveryDays: p.deliveryDays || 0
-
-  });
-}
-
-
-    // 4. Call AI for comparison
-const prompt = `
-You are an enterprise procurement decision engine.
-
-Your job is to compare vendor proposals and recommend the best vendors.
-
-IMPORTANT RULES:
-
-1. If "extractedPrice" is provided, ALWAYS use it as the final price.
-   Do NOT recalculate from text unless it is missing or zero.
-
-2. Use "deliveryDays" if provided.
-
-3. Lower total price is better.
-
-4. If two vendors have similar price, prefer faster delivery.
-
-5. Rank vendors from BEST to WORST.
-
-6. Generate a detailed explanation for each vendor including:
-   - Price comparison (lowest / higher than others)
-   - Delivery comparison (faster / slower)
-   - Final justification (why this vendor is better or worse)
-
-7. Recommend top 2 vendors.
-   - If vendors <= 2, recommend all.
-   - Best vendor must be first.
+    // ================= AI PROMPT =================
+    const prompt = `
+Compare these vendor proposals and recommend the best vendors.
 
 Return ONLY valid JSON.
 
-Format:
+DO NOT write explanation text.
+DO NOT use markdown.
+DO NOT wrap in \`\`\`
+
+Required JSON structure:
+
 {
   "vendorsAnalysis": [
     {
       "vendor": "",
-      "email": "",
-      "itemBreakdown": [
-        {
-          "item": "",
-          "quantity": number,
-          "unitPrice": number,
-          "totalItemPrice": number
-        }
-      ],
-      "deliveryCharge": number,
-      "grandTotal": number,
-      "deliveryDays": number,
+      "grandTotal": 0,
+      "deliveryDays": 0,
       "reason": ""
-    }
-  ],
-  "topRecommendations": [
-    {
-      "vendor": "",
-      "email": "",
-      "grandTotal": number
     }
   ]
 }
-
-RFP Items:
-${JSON.stringify(rfp.items)}
 
 Vendor Proposals:
 ${JSON.stringify(normalizedProposals)}
 `;
 
-const aiResult = await compareVendorsWithAI(prompt);
+    // ================= AI CALL =================
+    let aiResultRaw = await compareVendorsWithAI(prompt);
 
-    // Save to cache with current timestamp — will be valid for next 7 days
-    await RFP.findByIdAndUpdate(rfpId, {
-      aiRecommendationCache: aiResult,
-      aiRecommendationCachedAt: new Date(),
+    // Fix invalid JSON response
+    if (typeof aiResultRaw === "string") {
+      aiResultRaw = aiResultRaw
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      aiResultRaw = JSON.parse(aiResultRaw);
+    }
+
+    const aiResult = aiResultRaw;
+
+    // ================= PROPOSAL MAP =================
+    const proposalMap = {};
+
+    proposals.forEach((p) => {
+      const key = p.vendorId?.name?.trim().toLowerCase();
+
+      proposalMap[key] = p;
     });
 
-   return res.status(200).json({
-  success: true,
-  recommendation: aiResult,
-});
+    // ================= ANALYSIS ENRICH =================
+    if (aiResult.vendorsAnalysis) {
+      aiResult.vendorsAnalysis = aiResult.vendorsAnalysis.map((v) => {
+        const dbProposal =
+          proposalMap[v.vendor?.trim().toLowerCase()];
 
+        return {
+          ...v,
+
+          vendor: v.vendor,
+
+          email: dbProposal?.vendorId?.email || "",
+
+          deliveryDays:
+            Number(dbProposal?.deliveryDays) || 0,
+
+          grandTotal:
+            Number(v.grandTotal) || 0,
+
+          proposalId:
+            dbProposal?._id || "",
+
+          attachment:
+            dbProposal?.attachment || "",
+
+          status:
+            dbProposal?.status || "PENDING",
+
+          reason:
+            v.reason ||
+            "Good pricing and delivery timeline",
+        };
+      });
+    }
+
+    // ================= TOP RECOMMENDATIONS =================
+    aiResult.topRecommendations = (
+      aiResult.vendorsAnalysis || []
+    )
+      .sort((a, b) => a.grandTotal - b.grandTotal)
+      .slice(0, 3);
+
+    // ================= SAVE CACHE =================
+    aiCache.set(rfpId, {
+      data: aiResult,
+      timestamp: Date.now(),
+    });
+
+    console.log("✅ AI result cached");
+
+    console.log(
+      "✅ AI Analysis Complete:",
+      aiResult.topRecommendations?.length || 0
+    );
+
+    return res.status(200).json({
+      success: true,
+      recommendation: aiResult,
+    });
   } catch (error) {
-    console.error("AI Vendor Comparison Error:", error);
+    console.error(
+      "AI Vendor Comparison Error:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to compare vendor proposals using AI",
+      message:
+        "Failed to compare vendor proposals using AI",
     });
   }
 };

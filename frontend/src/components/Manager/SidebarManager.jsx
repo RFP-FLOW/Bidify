@@ -62,12 +62,6 @@ const handleLogout = () => {
           collapsed={collapsed}
         />
         <SidebarItem
-          icon={<FileText size={18} />}
-          label="Active RFPs"
-          to="/manager/rfps"
-          collapsed={collapsed}
-        />
-        <SidebarItem
           icon={<CheckCircle size={18} />}
           label="Confirmed RFPs"
           to="/manager/confirmed"

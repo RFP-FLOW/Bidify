@@ -8,11 +8,13 @@ import {
   updateRFP,
   getEmployeeBids,
   forwardToManager ,
-  getForwardedRFPs
+  getForwardedRFPs,
+  getConfirmedRFPs
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { getRfpProposals } from "../controllers/vendorRfp.controller.js";
+import { approveProposal } from "../controllers/vendorReply.controller.js";
 
 const router = express.Router();
 
@@ -37,10 +39,6 @@ router.get("/employee", authMiddleware, getEmployeeRFPs);
 router.get("/bids", authMiddleware, getEmployeeBids);
 router.get("/forwarded", authMiddleware, getForwardedRFPs);
 
-/**
- * Get single RFP
- */
-router.get("/:id", authMiddleware, getRFPById);
 
 /**
  * Create RFP
@@ -52,11 +50,21 @@ router.put("/:id", authMiddleware, updateRFP);
 router.get("/:rfpId/proposals", authMiddleware, getRfpProposals);
 
 
+
 router.post("/:rfpId/forward-to-manager", authMiddleware, forwardToManager);
+router.patch("/proposal/approve/:proposalId", authMiddleware, approveProposal);
+router.get("/confirmed", authMiddleware, getConfirmedRFPs);
+
+/**
+ * Get single RFP
+ */
+router.get("/:id", authMiddleware, getRFPById);
 
 /**
  * 🚀 SEND RFP TO VENDORS (FIXED)
  */
 router.post("/:rfpId/send", authMiddleware, sendRFPToVendors);
+
+
 
 export default router;

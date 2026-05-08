@@ -12,6 +12,7 @@ import ManagerDashboard from "./pages/Company/ManagerDashboard.jsx";
 import AddCompanyProfile from "./pages/Company/Profile.jsx";
 import CompanyRegister from "./pages/Company/companyRegister.jsx";
 import AcceptedVendors from "./pages/Company/AcceptedVendor.jsx";
+import ConfirmedRFPs from "./pages/Company/ConfirmedRFP.jsx";
 
 //Employee
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
@@ -31,6 +32,7 @@ import VendorCompanyDetails from "./pages/Vendor/VendorCompanyDetails.jsx";
 import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
 import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
 import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
+import ApprovedProposals from "./pages/Vendor/ApprovedProposals.jsx";
 
 //Auth
 import SetPassword from "./pages/Password-reset/SetPassword.jsx";
@@ -96,6 +98,7 @@ function App() {
         <Route path="/company/manager/add-employee" element={<AddEmployee />} />
         <Route path="/company/profile" element={<AddCompanyProfile />} />
         <Route path="/manager/vendors" element={<AcceptedVendors />} />
+        <Route path="/manager/confirmed" element={<ConfirmedRFPs />} />
         <Route
           path="/employee/set-password/:token"
           element={<EmployeeSetPassword />}
@@ -122,7 +125,7 @@ function App() {
           }
         />
         <Route path="/vendor/register" element={<VendorRegister />} />
-
+        <Route path="/vendor/getApprovedProposals" element={<ApprovedProposals />} />
         <Route
           path="/vendor/dashboard"
           element={
