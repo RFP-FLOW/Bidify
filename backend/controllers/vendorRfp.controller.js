@@ -37,52 +37,119 @@ export const getApprovedProposals = async (req, res) => {
   try {
     const vendorId = req.user._id;
 
-    // 🔴 Fetch accepted proposals with RFP + Company
     const proposals = await Proposal.find({
       vendorId,
       status: "ACCEPTED",
     })
       .populate({
         path: "rfpId",
-        select: "title companyId",
+        select:
+          "title companyId aiRecommendationCache",
         populate: {
           path: "companyId",
-          select: "companyName gstNumber createdBy",
+          select:
+            "companyName gstNumber createdBy",
           populate: {
             path: "createdBy",
             select: "email",
           },
         },
       })
+      .populate("vendorId", "name")
       .sort({ updatedAt: -1 });
 
-    // 🔴 Format response (safe mapping)
-    const data = proposals.map((p) => ({
-      rfpTitle: p.rfpId?.title || "RFP",
+    const data = proposals.map((p) => {
 
-      // ✅ Company details
-      companyName: p.rfpId?.companyId?.companyName || "Company",
-      companyEmail: p.rfpId?.companyId?.createdBy?.email || "",
-      companyGst: p.rfpId?.companyId?.gstNumber || "N/A",
+      let finalPrice =
+        Number(p.quotedPrice) || 0;
 
-      // ✅ Proposal details
-      price: p.quotedPrice || 0,
-      deliveryDays: p.deliveryDays || 0,
-      attachment: p.attachment || null,
+      // ✅ fallback from AI cache
+      if (
+        !finalPrice &&
+        p.rfpId?.aiRecommendationCache
+      ) {
+        const vendorsAnalysis =
+          p.rfpId.aiRecommendationCache
+            ?.vendorsAnalysis ||
+          p.rfpId.aiRecommendationCache
+            ?.recommendation
+            ?.vendorsAnalysis ||
+          [];
 
-      // ✅ Meta
-      approvedAt: p.updatedAt,
-    }));
+        const aiVendor =
+          vendorsAnalysis.find(
+            (v) =>
+              v.vendor
+                ?.replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase() ===
+              p.vendorId?.name
+                ?.replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase()
+          );
 
-    res.status(200).json({
+        console.log(
+          "Matched AI Vendor:",
+          aiVendor
+        );
+
+        if (aiVendor?.grandTotal) {
+          finalPrice = Number(
+            aiVendor.grandTotal
+          );
+        }
+      }
+
+      return {
+        rfpTitle:
+          p.rfpId?.title || "RFP",
+
+        companyName:
+          p.rfpId?.companyId
+            ?.companyName || "Company",
+
+        companyEmail:
+          p.rfpId?.companyId
+            ?.createdBy?.email || "",
+
+        companyGst:
+          p.rfpId?.companyId
+            ?.gstNumber || "N/A",
+
+        price: finalPrice,
+
+        deliveryDays:
+          p.deliveryDays || 0,
+
+        attachment:
+          p.attachment || null,
+
+        approvedAt:
+          p.updatedAt,
+      };
+    });
+
+    console.log(
+      "APPROVED PROPOSALS:",
+      data
+    );
+
+    return res.status(200).json({
       success: true,
       proposals: data,
     });
+
   } catch (error) {
-    console.error("getApprovedProposals error:", error);
-    res.status(500).json({
+    console.error(
+      "getApprovedProposals error:",
+      error
+    );
+
+    return res.status(500).json({
       success: false,
-      message: "Failed to fetch approved proposals",
+      message:
+        "Failed to fetch approved proposals",
     });
   }
 };
