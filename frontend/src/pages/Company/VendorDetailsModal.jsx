@@ -1,69 +1,40 @@
+import { X, Check, XCircle } from "lucide-react";
+
 const VendorDetailsModal = ({ request, onClose, onApprove, onReject }) => {
   if (!request) return null;
-
   const { vendorId, _id } = request;
-    console.log("VENDOR OBJECT =>", vendorId);
+
+  const fields = [
+    { label: "GST No", value: vendorId?.gstNumber },
+    { label: "Phone", value: vendorId?.phone },
+    { label: "Address", value: vendorId?.address },
+    { label: "Description", value: vendorId?.description },
+  ];
 
   return (
-    
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-[440px] p-6 relative shadow-lg">
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-4 text-xl text-gray-400 hover:text-gray-600"
-        >
-          ×
-        </button>
-
-        {/* Header */}
-        <h2 className="text-xl font-semibold text-gray-900">
-          {vendorId?.businessName || vendorId?.name || "Vendor"}
-        </h2>
-
-        <p className="text-sm text-gray-500 mb-4">
-          {vendorId?.email || "No email provided"}
-        </p>
-
-        {/* Vendor Details */}
-        <div className="space-y-2 text-sm text-gray-700">
-          <p>
-            <span className="font-medium">GST No:</span>{" "}
-            {vendorId?.gstNumber || "—"}
-          </p>
-
-          <p>
-            <span className="font-medium">Phone:</span>{" "}
-            {vendorId?.phone || "—"}
-          </p>
-
-          <p>
-            <span className="font-medium">Address:</span>{" "}
-            {vendorId?.address || "—"}
-          </p>
-
-          <p>
-            <span className="font-medium">Description:</span>{" "}
-            {vendorId?.description || "—"}
-          </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0" style={{ background: "var(--bg-overlay)" }} onClick={onClose} />
+      <div className="relative z-10 w-[440px] card p-6 animate-scaleIn">
+        <div className="flex justify-between items-start mb-5">
+          <div>
+            <h2 className="t-primary text-base font-semibold">{vendorId?.businessName || vendorId?.name || "Vendor"}</h2>
+            <p className="t-muted text-xs mt-0.5">{vendorId?.email || "No email"}</p>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center t-muted bg-elevated"><X size={14} /></button>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            onClick={() => onReject(_id)}
-            className="px-4 py-2 rounded-md bg-red-500 text-white text-sm hover:bg-red-600"
-          >
-            Reject
-          </button>
+        <div className="space-y-3 mb-6">
+          {fields.map(({ label, value }) => (
+            <div key={label} className="rounded-lg px-3 py-2 bg-input b-subtle">
+              <p className="t-muted text-[11px] uppercase tracking-wider font-semibold">{label}</p>
+              <p className="t-primary text-sm font-medium mt-0.5">{value || "—"}</p>
+            </div>
+          ))}
+        </div>
 
-          <button
-            onClick={() => onApprove(_id)}
-            className="px-4 py-2 rounded-md bg-green-600 text-white text-sm hover:bg-green-700"
-          >
-            Approve
-          </button>
+        <div className="flex justify-end gap-3 pt-4 bt-default">
+          <button onClick={() => onReject(_id)} className="btn-secondary !text-red-500 hover:!bg-red-50"><XCircle size={14} /> Reject</button>
+          <button onClick={() => onApprove(_id)} className="btn-primary" style={{ background: "var(--stat-3-accent)" }}><Check size={14} /> Approve</button>
         </div>
       </div>
     </div>

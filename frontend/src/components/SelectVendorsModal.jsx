@@ -1,127 +1,65 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { X, Send, Loader2, Check } from "lucide-react";
 
-function SelectVendorsModal({
-  isOpen,
-  onClose,
-  vendors = [],
-  loading = false,
-  rfpId,
-}) {
+function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false, rfpId }) {
   const [selected, setSelected] = useState([]);
+  const [sending, setSending] = useState(false);
 
   if (!isOpen) return null;
 
-  const toggleVendor = (id) => {
-    setSelected((prev) =>
-      prev.includes(id)
-        ? prev.filter((v) => v !== id)
-        : [...prev, id]
-    );
-  };
+  const toggle = (id) => setSelected(prev => prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]);
+  const close = () => { setSelected([]); onClose(); };
 
   const handleSend = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await axios.post(
-        `http://localhost:5000/api/rfp/${rfpId}/send`,
-
-        { vendorIds: selected },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      toast.success("RFP sent to vendors 🚀");
-      setSelected([]);
-      onClose();
-    } catch (error) {
-      console.error("Send RFP Error:", error);
-      toast.error("Failed to send RFP");
-    }
+    try { setSending(true);
+      await axios.post(`http://localhost:5000/api/rfp/${rfpId}/send`, { vendorIds: selected }, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+      toast.success("RFP sent to vendors"); close();
+    } catch (e) { console.error(e); toast.error("Failed to send RFP"); }
+    finally { setSending(false); }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-      <div className="bg-white w-[420px] rounded-2xl p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0" style={{ background: "var(--bg-overlay)" }} onClick={close} />
+      <div className="relative z-10 w-[440px] card p-6 animate-scaleIn">
         {/* Header */}
-        <h2 className="text-xl font-bold text-purple-700 text-center">
-          Select Vendors
-        </h2>
-        <p className="text-sm text-gray-500 text-center mb-6">
-          Choose which vendors to send this RFP to
-        </p>
+        <div className="flex justify-between items-start mb-5">
+          <div><h2 className="t-primary text-base font-semibold">Select Vendors</h2><p className="t-muted text-xs mt-0.5">Choose which vendors to send this RFP to</p></div>
+          <button onClick={close} className="w-7 h-7 rounded-md flex items-center justify-center t-muted bg-elevated"><X size={14} /></button>
+        </div>
 
-        {loading && (
-          <p className="text-center text-gray-400 text-sm">
-            Loading approved vendors...
-          </p>
+        {loading && <div className="py-8 text-center"><Loader2 size={20} className="animate-spin mx-auto mb-2" style={{ color: "var(--accent)" }} /><p className="t-muted text-sm">Loading vendors...</p></div>}
+        {!loading && vendors.length === 0 && <div className="py-8 text-center"><p className="t-muted text-sm">No approved vendors yet</p></div>}
+
+        {!loading && vendors.length > 0 && (
+          <>
+            <div className="space-y-2 max-h-64 overflow-auto mb-5">
+              {vendors.map(v => {
+                const sel = selected.includes(v._id);
+                return (
+                  <div key={v._id} onClick={() => toggle(v._id)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-200"
+                    style={{ background: sel ? "var(--accent-subtle)" : "transparent", border: `1px solid ${sel ? "var(--accent)" : "var(--border-color)"}` }}>
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all"
+                      style={sel ? { background: "var(--accent)" } : { border: "2px solid var(--border-color)" }}>
+                      {sel && <Check size={12} className="text-white" strokeWidth={3} />}
+                    </div>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: "var(--accent)" }}>{v.name?.[0] || "V"}</div>
+                    <div className="min-w-0 flex-1"><p className="t-primary text-sm font-medium truncate">{v.name}</p><p className="t-muted text-xs truncate">{v.email}</p></div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-between items-center pt-4 bt-default">
+              <button onClick={close} className="btn-secondary">Cancel</button>
+              <button onClick={handleSend} disabled={selected.length === 0 || sending} className="btn-primary">
+                {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Send ({selected.length})
+              </button>
+            </div>
+          </>
         )}
-
-        {!loading && vendors.length === 0 && (
-          <p className="text-center text-gray-400 text-sm">
-            No approved vendors yet
-          </p>
-        )}
-
-        {/* Vendor List */}
-       {!loading && vendors.length > 0 && (
-  <div className="space-y-3 max-h-60 overflow-auto">
-    {vendors.map((vendor) => (
-      <div
-        key={vendor._id}
-        onClick={() => toggleVendor(vendor._id)}
-        className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer
-          ${
-            selected.includes(vendor._id)
-              ? "border-purple-500 bg-purple-50"
-              : "border-gray-200"
-          }`}
-      >
-        <input
-          type="checkbox"
-          checked={selected.includes(vendor._id)}
-          readOnly
-        />
-
-        <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-purple-600 text-white font-bold">
-          {vendor.name?.[0] || "V"}
-        </div>
-
-        <div>
-          <p className="font-medium">{vendor.name}</p>
-          <p className="text-sm text-gray-500">{vendor.email}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-
-
-        {/* Footer */}
-        <div className="flex justify-between mt-6">
-          <button
-            onClick={() => {
-              setSelected([]);
-              onClose();
-            }}
-            className="px-4 py-2 bg-gray-100 rounded-lg"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={handleSend}
-            disabled={selected.length === 0}
-            className="px-6 py-2 rounded-lg text-white bg-gradient-to-r from-purple-500 to-indigo-500 disabled:opacity-50"
-          >
-            ✈️ Send ({selected.length})
-          </button>
-        </div>
       </div>
     </div>
   );

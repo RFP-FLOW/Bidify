@@ -1,14 +1,10 @@
 import VendorSidebar from "./VendorSidebar";
 
-const VendorLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-[#fff5d7] flex">
-      <VendorSidebar />
-      <main className="flex-1 p-8">
-        {children}
-      </main>
-    </div>
-  );
-};
+const VendorLayout = ({ children }) => (
+  <div className="page-layout">
+    <VendorSidebar />
+    <main className="page-content max-w-6xl mx-auto">{children}</main>
+  </div>
+);
 
 export default VendorLayout;

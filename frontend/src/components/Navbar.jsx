@@ -12,8 +12,11 @@ function Navbar() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    const token = localStorage.getItem("token");
+    if (storedUser && token) {
       setUser(JSON.parse(storedUser));
+    } else {
+      setUser(null);
     }
   }, []);
 
