@@ -1,164 +1,57 @@
-import { useState } from "react";
-import { NavLink ,useNavigate} from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  CheckCircle,
-  Inbox,
-  BadgeCheck,
-  User,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
+import { LayoutDashboard, Users, CheckCircle, Inbox, User, BadgeCheck, LogOut, Sun, Moon, FileText } from "lucide-react";
 
-function ManagerSidebar({companyName}) {
-  const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate(); 
+const navItems = [
+  { label: "Dashboard",       path: "/manager/dashboard",            icon: LayoutDashboard },
+  { label: "Employee",        path: "/company/manager/add-employee", icon: Users },
+  { label: "Confirmed RFPs",  path: "/manager/confirmed",           icon: CheckCircle },
+  { label: "Vendors",         path: "/manager/vendors",             icon: Inbox },
+  { label: "Recommendations", path: "/manager/recommendations",     icon: BadgeCheck },
+  { label: "Profile",         path: "/company/profile",             icon: User },
+];
 
-const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/company/login");
-  };
-
+export default function SidebarManager() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { theme, toggleTheme } = useTheme();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const companyName = user?.companyName || "Company";
 
   return (
-
-    <aside
-  className={`top-16 left-0 z-40 sticky top-0 bg-white border-r border-gray-200 transition-all duration-300
-  ${collapsed ? "w-24" : "w-64"} px-4 py-6 h-[calc(100vh-4rem)] flex flex-col`}
->
-
-      {/* LOGO */}
-      <div className="flex items-center justify-between mb-10">
-        {!collapsed && (
-          <div className="relative pl-3">
-          
-            <p className="text-lg font-bold text-gray-700 truncate max-w-[180px]">{companyName}</p>
-          </div>
-        )}
-
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded hover:bg-gray-100"
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
+    <aside className="h-screen w-[260px] flex flex-col justify-between sticky top-0 transition-colors duration-300 bg-card" style={{ borderRight: "1px solid var(--border-color)" }}>
+      <div className="px-5 pt-7 pb-4">
+        <div className="flex items-center gap-3 mb-10 px-2">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "var(--accent)" }}><FileText size={16} className="text-white" /></div>
+          <div><span className="t-primary text-[15px] font-bold tracking-[-0.02em] block leading-tight">{companyName}</span><span className="t-muted text-[11px] font-medium">Manager Portal</span></div>
+        </div>
+        <p className="t-muted text-[11px] uppercase tracking-[0.1em] font-semibold mb-3 px-3">Menu</p>
+        <nav className="space-y-1">
+          {navItems.map(({ label, path, icon: Icon }) => {
+            const active = pathname === path;
+            return (
+              <button key={path} onClick={() => navigate(path)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 ${active ? "" : "hover:bg-[var(--bg-hover)]"}`}
+                style={active ? { color: "#fff", background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" } : { color: "var(--text-secondary)" }}>
+                <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />{label}
+              </button>
+            );
+          })}
+        </nav>
       </div>
-
-      {/* NAV */}
-      <nav className="flex-1 px-2 space-y-4 mt-6       ">
-        <SidebarItem
-          icon={<LayoutDashboard size={18} />}
-          label="Dashboard"
-          to="/manager/dashboard"
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Users size={18} />}
-          label="Employee"
-          to="/company/manager/add-employee"
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<CheckCircle size={18} />}
-          label="Confirmed RFPs"
-          to="/manager/confirmed"
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Inbox size={18} />}
-          label="Vendor"
-          to="/manager/vendors"
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<User size={18} />}
-          label="Profile"
-          to="/company/profile"
-          collapsed={collapsed}
-        />
-        <SidebarItem
-  icon={<BadgeCheck size={18} />}
-  label="Recommendations"
-  to="/manager/recommendations"
-  collapsed={collapsed}
-/>
-      </nav>
-
-      <div className="my-6 border-t border-gray-200" />
-
-     <button
-         onClick={handleLogout}
-         className="group relative w-full">
-        <div
-             className={`relative flex items-center h-12
-             ${collapsed ? "w-12 justify-center" : "w-full px-8 gap-4"}
-             rounded-xl transition-all text-base font-medium
-             text-gray-700
-             hover:bg-[#eef2ff] hover:text-[#3a2d97]
-             active:bg-[#e0e7ff]`}
-         >
-    {/* LEFT BAR – SAME AS DASHBOARD */}
-         <span
-              className="absolute left-0 top-0 h-full w-1
-                 rounded-r-full bg-[#3a2d97]
-                  opacity-0 group-hover:opacity-100 transition-opacity"
-          />
-        <span className="text-lg">
-            <LogOut size={18} />
-        </span>
-
-           {!collapsed && <span>Logout</span>}
-     </div>
-
-        {collapsed && (
-           <span
-               className="absolute left-14 top-1/2 -translate-y-1/2
-                 whitespace-nowrap rounded-md bg-gray-900
-                 px-3 py-1.5 text-sm text-white
-                 opacity-0 group-hover:opacity-100" >
-              Logout
-            </span>
-          )}
-       </button>
-
+      <div className="px-5 pb-6 space-y-2">
+        <button onClick={toggleTheme} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium bg-elevated b-default transition-all duration-200 hover:brightness-95 t-secondary">
+          <span className="flex items-center gap-2.5">{theme === "dark" ? <Moon size={15} /> : <Sun size={15} />}{theme === "dark" ? "Dark mode" : "Light mode"}</span>
+          <div className="w-9 h-5 rounded-full relative transition-colors duration-300" style={{ background: theme === "dark" ? "var(--accent)" : "#d1d5db" }}>
+            <div className="absolute top-[3px] w-[14px] h-[14px] rounded-full bg-white transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style={{ left: theme === "dark" ? "19px" : "3px", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+          </div>
+        </button>
+        <button onClick={() => { localStorage.removeItem("token"); navigate("/company/login"); }}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium t-secondary transition-all duration-200 hover:text-red-500 hover:bg-red-50">
+          <LogOut size={15} strokeWidth={1.8} /> Log out
+        </button>
+        <div className="pt-3 mt-1 bt-default"><p className="t-muted text-[11px] text-center">Need help? <span className="t-accent cursor-pointer hover:underline font-medium">Support</span></p></div>
+      </div>
     </aside>
   );
 }
-
-/* ---- SIDEBAR ITEM ---- */
-function SidebarItem({ icon, label, to, collapsed }) {
-  return (
-    <div className="relative group flex justify-" >
-      <NavLink
-        to={to}
-        className={({ isActive }) =>
-          `flex items-center w-full h-12 gap-4 px-8 py-3 rounded-lg transition-all text-base font-medium
-          ${collapsed ? "w-12 mx-auto justify-center" : "w-full px-8 gap-4"} 
-        ${
-            isActive
-              ? "bg-[#eef2ff] text-[#3a2d97] border-[#3a2d97] border-l-4 font-medium"
-              : "text-gray-700 hover:bg-gray-100"
-          }`
-        }
-      >
-        <span className="text-lg">{icon}</span>
-        {!collapsed && <span>{label}</span>}
-      </NavLink>
-
-      {collapsed && (
-        <span
-          className="absolute left-16 top-1/2 -translate-y-1/2
-          whitespace-nowrap rounded-md bg-gray-900 px-3 py-1.5
-          text-sm text-white opacity-0 group-hover:opacity-100"
-        >
-          {label}
-        </span>
-      )}
-    </div>
-  );
-}
-
-export default ManagerSidebar;

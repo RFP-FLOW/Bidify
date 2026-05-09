@@ -1,126 +1,130 @@
-import ManagerLayout  from "../../components/Manager/SidebarCardManager";
 import { useEffect, useState } from "react";
+import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import VendorDetailsModal from "./VendorDetailsModal";
 import { acceptRequest, getPendingRequests, rejectRequest } from "../../services/managerServices";
+import { Card, IconBox, EmptyState } from "../../components/ui/Themed";
+import { LayoutDashboard, FileText, CheckCircle, Users, Eye, Clock, TrendingUp } from "lucide-react";
 
 function ManagerDashboard() {
- 
-    const [vendorRequests, setVendorRequests] = useState([]);
-    const [selectedRequest, setSelectedRequest] = useState(null);
-  
-     useEffect(() => {
-    fetchVendorRequests();
+  const [vendorRequests, setVendorRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  }, []);
- 
+  useEffect(() => { fetchVendorRequests(); }, []);
+
   const fetchVendorRequests = async () => {
-    const res = await getPendingRequests();
-    setVendorRequests(res.data.data);
+    try { const res = await getPendingRequests(); setVendorRequests(res.data.data); }
+    catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
-  const handleApprove = async (id) => {
-    await acceptRequest(id);
-    setVendorRequests((prev) =>
-      prev.filter((req) => req._id !== id)
-    );
-    setSelectedRequest(null);
-  };
+  const handleApprove = async (id) => { await acceptRequest(id); setVendorRequests(prev => prev.filter(r => r._id !== id)); setSelectedRequest(null); };
+  const handleReject = async (id) => { await rejectRequest(id); setVendorRequests(prev => prev.filter(r => r._id !== id)); setSelectedRequest(null); };
 
-  const handleReject = async (id) => {
-    await rejectRequest(id);
-    setVendorRequests((prev) =>
-      prev.filter((req) => req._id !== id)
-    );
-    setSelectedRequest(null);
-  };
-   
-     const user = JSON.parse(localStorage.getItem("user"));
-    const name = user?.name || user?.username || user?.companyName || "User";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const name = user?.name || user?.username || user?.companyName || "Manager";
 
-    return (
-    <ManagerLayout>
-    <div className="min-h-screen bg-[#fff5d7] flex">
+  const stats = [
+    { label: "Active RFPs", value: "6", sub: "Currently in progress", icon: FileText, variant: "stat1" },
+    { label: "Pending Vendors", value: vendorRequests.length, sub: "Awaiting your approval", icon: Clock, variant: "stat2" },
+    { label: "Confirmed RFPs", value: "2", sub: "Vendors approved", icon: CheckCircle, variant: "stat3" },
+  ];
 
-      <main className="flex-1 p-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            Welcome, {name} <span>👋</span>
-          </h2>
-        </div>
+  const avatarColors = ["#4F46E5", "#0891B2", "#059669", "#D97706", "#DC2626", "#7C3AED"];
+  const getColor = (n) => avatarColors[(n || "V").charCodeAt(0) % avatarColors.length];
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
-          <StatCard title="Active RFPs" value="6" />
-          <StatCard title="Confirmed RFPs" value="2" />
-        </div>
-
-        {/* TABLE */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-5 border-b border-gray-200">
-            <h3 className="font-medium text-gray-900">
-              Recent Vendor Requests
-            </h3>
-          </div>
-
-          
-            <table className="w-full text-sm">
-              <tbody>
-                {vendorRequests.length === 0 && (
-                  <tr>
-                    <td className="px-5 py-6 text-center text-gray-400">
-                      No pending vendor requests
-                    </td>
-                  </tr>
-                )}
-
-                {vendorRequests.map((req) => (
-                  <tr
-                    key={req._id}
-                    className="border-t border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="px-5 py-4">
-                     {req.vendorId?.businessName || req.vendorId?.name || "Vendor"}
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <button
-                        onClick={() => setSelectedRequest(req)}
-                        className="px-4 py-1.5 rounded-md bg-[#3a2d97] text-white text-sm"
-                      >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-        </div>
-      </main>
-    </div>
-     
-       {/* MODAL */}
-      {selectedRequest && (
-        <VendorDetailsModal
-          request={selectedRequest}
-          onClose={() => setSelectedRequest(null)}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
-      )}
-
-    </ManagerLayout>
-  );
-}
-
-
-function StatCard({ title, value }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-5">
-      <p className="text-sm text-gray-500">{title}</p>
-      <p className="text-3xl font-semibold text-gray-900 mt-1">
-        {value}
-      </p>
-    </div>
+    <ManagerLayout>
+      {/* ── Page Header ── */}
+      <div className="flex justify-between items-start mb-8 animate-fadeIn">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+            <LayoutDashboard size={26} />
+          </div>
+          <div>
+            <h1 className="t-primary text-2xl font-bold tracking-[-0.02em]">Welcome, {name} 👋</h1>
+            <p className="t-muted text-sm mt-0.5">Manage vendor requests and RFP approvals.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-3 gap-5 mb-8">
+        {stats.map(({ label, value, sub, icon: Icon, variant }, i) => (
+          <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
+            style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>
+            <div className="flex items-center gap-3 mb-3">
+              <IconBox icon={Icon} variant={variant} className="w-10 h-10" size={18} />
+              <span className="t-secondary text-sm font-medium">{label}</span>
+            </div>
+            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${i+1}-value)` }}>{value}</p>
+            <p className="t-muted text-xs">{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Vendor Requests ── */}
+      <Card className="overflow-hidden animate-fadeIn" delay={250}>
+        <div className="px-6 py-5 flex justify-between items-center" style={{ borderBottom: "1px solid var(--border-color)" }}>
+          <div>
+            <h2 className="t-primary text-base font-semibold">Vendor Approval Requests</h2>
+            <p className="t-muted text-xs mt-0.5">Review and approve vendor registrations.</p>
+          </div>
+          <span className="px-3 py-1.5 rounded-full text-[11px] font-bold" style={{ background: "var(--stat-2-accent-bg)", color: "var(--stat-2-accent)" }}>
+            {vendorRequests.length} pending
+          </span>
+        </div>
+
+        {loading && (
+          <div className="px-6 py-4 space-y-3">
+            {[1,2,3].map(i => <div key={i} className="h-16 rounded-xl animate-shimmer" />)}
+          </div>
+        )}
+
+        {!loading && vendorRequests.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+              <Users size={22} />
+            </div>
+            <p className="t-primary text-sm font-semibold mb-1">No pending requests</p>
+            <p className="t-muted text-xs">Vendor approval requests will appear here.</p>
+          </div>
+        ) : (
+          <div>
+            {vendorRequests.map(req => {
+              const vName = req.vendorId?.businessName || req.vendorId?.name || "Vendor";
+              return (
+                <div key={req._id} className="grid grid-cols-[2fr_2fr_1fr] items-center px-6 py-4 transition-colors hover:bg-[var(--bg-hover)]"
+                  style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: getColor(vName) }}>
+                      {vName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="t-primary text-sm font-semibold">{vName}</p>
+                      <p className="t-muted text-xs">{req.vendorId?.email || ""}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide"
+                      style={{ background: "var(--status-sent-bg)", color: "var(--status-sent-text)" }}>
+                      <Clock size={10} /> Pending
+                    </span>
+                  </div>
+                  <div className="flex justify-end">
+                    <button onClick={() => setSelectedRequest(req)} className="btn-primary !py-2 !px-4 !text-xs">
+                      <Eye size={13} /> View Details
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      {selectedRequest && <VendorDetailsModal request={selectedRequest} onClose={() => setSelectedRequest(null)} onApprove={handleApprove} onReject={handleReject} />}
+    </ManagerLayout>
   );
 }
 

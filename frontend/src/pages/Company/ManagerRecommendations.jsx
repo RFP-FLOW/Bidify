@@ -2,474 +2,251 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Card, IconBox, EmptyState, SectionLabel } from "../../components/ui/Themed";
+import { BadgeCheck, ArrowLeft, Trophy, ExternalLink, Check, XCircle, Clock, Search, Package, Bot } from "lucide-react";
 
-
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — must match backend
-
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const fmt = (n) => Number(n || 0).toLocaleString("en-IN");
-const dateStr = (d) =>
-  new Date(d).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const dateStr = (d) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
+const isCacheValid = (rfp) => rfp.aiRecommendationCache && rfp.aiRecommendationCachedAt && Date.now() - new Date(rfp.aiRecommendationCachedAt).getTime() < CACHE_TTL_MS;
 
-const authHeader = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
-
-// Returns true if the rfp's cache is still valid
-const isCacheValid = (rfp) =>
-  rfp.aiRecommendationCache &&
-  rfp.aiRecommendationCachedAt &&
-  Date.now() - new Date(rfp.aiRecommendationCachedAt).getTime() < CACHE_TTL_MS;
-
-// ─── main page ────────────────────────────────────────────────────────────────
 function ManagerRecommendations() {
   const [rfps, setRfps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/rfp/forwarded", {
-        headers: authHeader(),
-      })
-      .then((res) => setRfps(res.data.rfps || []))
-      .catch((err) => console.error("Failed to fetch forwarded RFPs", err))
+    axios.get("http://localhost:5000/api/rfp/forwarded", { headers: authHeader() })
+      .then(res => setRfps(res.data.rfps || []))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
-  if (selected) {
-    return (
-      <ManagerLayout>
-        <DetailView rfp={selected} onBack={() => setSelected(null)} />
-      </ManagerLayout>
-    );
-  }
+  if (selected) return <ManagerLayout><DetailView rfp={selected} onBack={() => setSelected(null)} /></ManagerLayout>;
+
+  const filtered = rfps.filter(r => !search || r.title.toLowerCase().includes(search.toLowerCase()) || (r.createdBy?.name || "").toLowerCase().includes(search.toLowerCase()));
 
   return (
     <ManagerLayout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Employee Recommendations
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          RFPs forwarded to you by employees with AI vendor recommendations
-        </p>
+      {/* ── Header ── */}
+      <div className="flex justify-between items-start mb-8 animate-fadeIn">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+            <BadgeCheck size={26} />
+          </div>
+          <div>
+            <h1 className="t-primary text-2xl font-bold tracking-[-0.02em]">AI Recommendations</h1>
+            <p className="t-muted text-sm mt-0.5">RFPs forwarded to you with AI vendor analysis.</p>
+          </div>
+        </div>
       </div>
 
-      {loading && (
-        <p className="text-gray-400 text-sm py-12 text-center">Loading…</p>
-      )}
-
-      {!loading && rfps.length === 0 && (
-        <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-          <p className="text-gray-400 text-sm mt-2">
-            No recommendations yet. When an employee forwards vendor
-            recommendations, they'll appear here.
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-4">
-        {rfps.map((rfp) => (
-          <RFPCard key={rfp._id} rfp={rfp} onView={() => setSelected(rfp)} />
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-3 gap-5 mb-8">
+        {[
+          { label: "Total Forwarded", value: rfps.length, sub: "From employees", icon: BadgeCheck, variant: "stat1" },
+          { label: "With AI Data", value: rfps.filter(r => isCacheValid(r)).length, sub: "Cached analysis", icon: Bot, variant: "stat2" },
+          { label: "Pending Review", value: rfps.length, sub: "Awaiting decision", icon: Clock, variant: "stat3" },
+        ].map(({ label, value, sub, icon: Icon, variant }, i) => (
+          <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
+            style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>
+            <div className="flex items-center gap-3 mb-3">
+              <IconBox icon={Icon} variant={variant} className="w-10 h-10" size={18} />
+              <span className="t-secondary text-sm font-medium">{label}</span>
+            </div>
+            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${i+1}-value)` }}>{value}</p>
+            <p className="t-muted text-xs">{sub}</p>
+          </div>
         ))}
       </div>
+
+      {/* ── Directory ── */}
+      <Card className="overflow-hidden animate-fadeIn" delay={250}>
+        <div className="px-6 py-5 flex justify-between items-center" style={{ borderBottom: "1px solid var(--border-color)" }}>
+          <div>
+            <h2 className="t-primary text-base font-semibold">Forwarded RFPs</h2>
+            <p className="t-muted text-xs mt-0.5">Click to view detailed AI analysis.</p>
+          </div>
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 t-muted" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search RFPs..." className="input-themed !w-[220px] !pl-9 !py-2 !text-xs !rounded-lg" />
+          </div>
+        </div>
+
+        {loading && <div className="px-6 py-4 space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 rounded-xl animate-shimmer" />)}</div>}
+
+        {!loading && filtered.length === 0 && (
+          <div className="px-6 py-12 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+              <BadgeCheck size={22} />
+            </div>
+            <p className="t-primary text-sm font-semibold mb-1">{search ? "No results" : "No recommendations yet"}</p>
+            <p className="t-muted text-xs">Forwarded RFPs will appear here.</p>
+          </div>
+        )}
+
+        {!loading && filtered.map(rfp => (
+          <RFPRow key={rfp._id} rfp={rfp} onClick={() => setSelected(rfp)} />
+        ))}
+      </Card>
     </ManagerLayout>
   );
 }
 
-// ─── card ─────────────────────────────────────────────────────────────────────
-// If cache is valid  → shows vendor names instantly (no API call)
-// If cache expired   → calls /api/ai/recommend to refresh, then shows
-function RFPCard({ rfp, onView }) {
-  const [aiData, setAiData] = useState(
-    isCacheValid(rfp) ? rfp.aiRecommendationCache : null
-  );
+/* ── RFP Row (with inline AI preview) ── */
+function RFPRow({ rfp, onClick }) {
+  const [aiData, setAiData] = useState(isCacheValid(rfp) ? rfp.aiRecommendationCache : null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    // Cache still good — nothing to do
     if (isCacheValid(rfp)) return;
-
-    // Cache missing or expired — call AI to refresh
     setRefreshing(true);
-    axios
-      .post(
-        `http://localhost:5000/api/ai/recommend/${rfp._id}`,
-        {},
-        { headers: authHeader() }
-      )
-      .then((res) => setAiData(res.data.recommendation))
-      .catch((err) => console.error("AI refresh failed", err))
+    axios.post(`http://localhost:5000/api/ai/recommend/${rfp._id}`, {}, { headers: authHeader() })
+      .then(res => setAiData(res.data.recommendation))
+      .catch(() => {})
       .finally(() => setRefreshing(false));
   }, [rfp._id]);
 
   const top2 = aiData?.topRecommendations?.slice(0, 2) || [];
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5">
-      {/* top row */}
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="font-semibold text-gray-800 text-base">{rfp.title}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Forwarded by{" "}
-            <span className="text-gray-600 font-medium">
-              {rfp.createdBy?.name}
-            </span>{" "}
-            · {dateStr(rfp.updatedAt)}
-          </p>
+    <div onClick={onClick} className="px-6 py-5 cursor-pointer transition-colors hover:bg-[var(--bg-hover)] group"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: "var(--accent)" }}>
+            {(rfp.title || "R").charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="t-primary text-sm font-semibold group-hover:text-[var(--accent-text)] transition-colors">{rfp.title}</p>
+            <p className="t-muted text-xs mt-0.5">By <span className="t-secondary font-medium">{rfp.createdBy?.name}</span> · {dateStr(rfp.updatedAt)}</p>
+          </div>
         </div>
-        <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-3 py-1 rounded-full">
-          FORWARDED
-        </span>
+        <span className="px-3 py-1.5 rounded-full text-[11px] font-bold" style={{ background: "var(--status-fwd-bg)", color: "var(--status-fwd-text)" }}>FORWARDED</span>
       </div>
 
-      {/* vendor preview */}
-      {refreshing && (
-        <p className="text-xs text-gray-300 mb-3">Refreshing AI analysis…</p>
-      )}
-      {!refreshing && top2.length === 0 && (
-        <p className="text-xs text-gray-300 mb-3">No AI data available</p>
-      )}
+      {refreshing && <p className="t-muted text-xs ml-[52px]">Loading AI data...</p>}
+
       {top2.length > 0 && (
-        <div className="flex gap-3 mb-4">
-          {top2.map((vendor, i) => (
-            <div
-              key={i}
-              className={`flex-1 rounded-xl p-3 border-l-4 ${i === 0
-                  ? "bg-green-50 border-green-400"
-                  : "bg-gray-50 border-gray-200"
-                }`}
-            >
-              <p
-                className={`text-xs font-semibold mb-1 ${i === 0 ? "text-green-700" : "text-gray-400"
-                  }`}
-              >
-                #{i + 1} {i === 0 ? "Best" : ""}
-              </p>
-              <p className="text-sm font-semibold text-gray-800 truncate">
-                {vendor.vendor}
-              </p>
-              <p
-                className={`text-sm font-semibold mt-1 ${i === 0 ? "text-green-700" : "text-gray-600"
-                  }`}
-              >
-                ₹{fmt(vendor.grandTotal)}
-              </p>
-              {vendor.deliveryDays && (
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {vendor.deliveryDays} days
-                </p>
-              )}
+        <div className="flex gap-3 ml-[52px]">
+          {top2.map((v, i) => (
+            <div key={i} className="flex-1 rounded-lg px-3 py-2" style={{ background: i === 0 ? "var(--stat-3-accent-bg)" : "var(--bg-input)", borderLeft: `3px solid ${i === 0 ? "var(--stat-3-accent)" : "var(--border-color)"}` }}>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: i === 0 ? "var(--stat-3-accent)" : "var(--text-muted)" }}>#{i+1} {i === 0 ? "Best" : ""}</p>
+              <p className="t-primary text-xs font-semibold truncate">{v.vendor}</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: i === 0 ? "var(--stat-3-accent)" : "var(--text-secondary)" }}>₹{fmt(v.grandTotal)}</p>
             </div>
           ))}
         </div>
       )}
-
-      <button
-        onClick={onView}
-        className="w-full py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition font-medium"
-      >
-        View full analysis →
-      </button>
     </div>
   );
 }
 
-// ─── detail view ──────────────────────────────────────────────────────────────
-// Same logic: instant if cache valid, refreshes from AI if expired
+/* ── Detail View ── */
 function DetailView({ rfp, onBack }) {
-  const [aiData, setAiData] = useState(
-    isCacheValid(rfp) ? rfp.aiRecommendationCache : null
-  );
+  const [aiData, setAiData] = useState(isCacheValid(rfp) ? rfp.aiRecommendationCache : null);
   const [loading, setLoading] = useState(!isCacheValid(rfp));
-
-  // 🔴 ADDED: state for approval
   const [approvedId, setApprovedId] = useState(null);
 
   useEffect(() => {
     if (isCacheValid(rfp)) return;
-
     setLoading(true);
-    axios
-      .post(
-        `http://localhost:5000/api/ai/recommend/${rfp._id}`,
-        {},
-        { headers: authHeader() }
-      )
-      .then((res) => setAiData(res.data.recommendation))
-      .catch((err) => console.error("AI refresh failed", err))
+    axios.post(`http://localhost:5000/api/ai/recommend/${rfp._id}`, {}, { headers: authHeader() })
+      .then(res => setAiData(res.data.recommendation))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [rfp._id]);
 
-  // 🔴 ADDED: approve function
   const handleApprove = async (proposalId) => {
-  try {
-    const res = await axios.patch(
-      `http://localhost:5000/api/rfp/proposal/approve/${proposalId}`,
-      {},
-      { headers: authHeader() }
-    );
+    try {
+      const res = await axios.patch(`http://localhost:5000/api/rfp/proposal/approve/${proposalId}`, {}, { headers: authHeader() });
+      if (res.data.success) {
+        setAiData(prev => ({ ...prev,
+          topRecommendations: prev.topRecommendations.map(v => ({ ...v, status: v.proposalId === proposalId ? "ACCEPTED" : "REJECTED" })),
+          vendorsAnalysis: prev.vendorsAnalysis.map(v => ({ ...v, status: v.proposalId === proposalId ? "ACCEPTED" : "REJECTED" })),
+        }));
+        setApprovedId(proposalId);
+        toast.success("Vendor Approved ✅");
+      } else toast.error(res.data.message);
+    } catch { toast.error("Failed to approve vendor ❌"); }
+  };
 
-    if (res.data.success) {
+  const unique = []; const seen = new Set();
+  (aiData?.topRecommendations || []).forEach(v => { if (!seen.has(v.email)) { seen.add(v.email); unique.push(v); } });
+  const top3 = unique.slice(0, 3);
+  const analysisMap = {}; aiData?.vendorsAnalysis?.forEach(v => { analysisMap[v.vendor] = v; });
+  const rankBg = ["var(--stat-3-accent)", "var(--stat-2-accent)", "var(--stat-1-accent)"];
 
-      // update local UI instantly
-      setAiData((prev) => {
-        const updated = { ...prev };
-
-        updated.topRecommendations =
-          updated.topRecommendations.map((v) => ({
-            ...v,
-            status:
-              v.proposalId === proposalId
-                ? "ACCEPTED"
-                : "REJECTED",
-          }));
-
-        updated.vendorsAnalysis =
-          updated.vendorsAnalysis.map((v) => ({
-            ...v,
-            status:
-              v.proposalId === proposalId
-                ? "ACCEPTED"
-                : "REJECTED",
-          }));
-
-        return updated;
-      });
-
-      setApprovedId(proposalId);
-
-      toast.success("Vendor Approved Successfully ✅");
-    } else {
-      toast.error(res.data.message);
-    }
-  } catch (err) {
-    console.error(err);
-
-    toast.error("Failed to approve vendor ❌");
-  }
-};
-
-  const uniqueRecommendations = [];
-  const seen = new Set();
-
-  (aiData?.topRecommendations || []).forEach((vendor) => {
-    const key = vendor.email;
-
-    if (!seen.has(key)) {
-      seen.add(key);
-      uniqueRecommendations.push(vendor);
-    }
-  });
-
-  const top3 = uniqueRecommendations.slice(0, 3);
-  const analysisMap = {};
-  aiData?.vendorsAnalysis?.forEach((v) => {
-    analysisMap[v.vendor] = v;
-  });
-
-  const borderColors = [
-    "border-green-400",
-    "border-blue-400",
-    "border-orange-300",
-  ];
-  const rankBg = ["bg-green-500", "bg-blue-500", "bg-orange-400"];
-  console.log("TOP3 DATA:", top3);
   return (
     <div>
-      <button
-        onClick={onBack}
-        className="text-sm text-purple-600 hover:underline mb-5 flex items-center gap-1"
-      >
-        ← Back to Recommendations
-      </button>
+      <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-medium mb-6 t-accent hover:underline"><ArrowLeft size={14} /> Back to Recommendations</button>
 
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-800">{rfp.title}</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Forwarded by{" "}
-          <span className="font-medium text-gray-600">
-            {rfp.createdBy?.name}
-          </span>{" "}
-          ({rfp.createdBy?.email})
-        </p>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8 animate-fadeIn">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
+          <Trophy size={26} />
+        </div>
+        <div>
+          <h1 className="t-primary text-2xl font-bold tracking-[-0.02em]">{rfp.title}</h1>
+          <p className="t-muted text-sm mt-0.5">By <span className="t-secondary font-medium">{rfp.createdBy?.name}</span> ({rfp.createdBy?.email})</p>
+        </div>
       </div>
 
-      {loading && (
-        <p className="text-gray-400 text-sm py-12 text-center">
-          Cache expired — refreshing AI analysis…
-        </p>
-      )}
-
-      {!loading && top3.length === 0 && (
-        <p className="text-gray-400 text-sm py-12 text-center">
-          No AI analysis available for this RFP.
-        </p>
-      )}
+      {loading && <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-40 rounded-2xl animate-shimmer" />)}</div>}
+      {!loading && top3.length === 0 && <EmptyState icon={BadgeCheck} title="No AI analysis available" subtitle="No data for this RFP" />}
 
       <div className="space-y-4">
-        {top3.map((vendor, index) => {
-          const analysis = analysisMap[vendor.vendor] || {};
+        {top3.map((vendor, i) => {
+          const a = analysisMap[vendor.vendor] || {};
           return (
-            <div
-              key={index}
-              className={`bg-white rounded-2xl p-5 border border-gray-100 border-l-4 ${borderColors[index]}`}
-            >
-              {/* vendor header */}
+            <Card key={i} className="p-5" style={{ borderLeft: `4px solid ${rankBg[i]}` }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <span
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${rankBg[index]}`}
-                  >
-                    #{index + 1}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {vendor.vendor}
-                    </p>
-                    <p className="text-xs text-gray-400">{vendor.email}</p>
-                  </div>
+                  <span className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ background: rankBg[i] }}>#{i+1}</span>
+                  <div><p className="t-primary text-sm font-semibold">{vendor.vendor}</p><p className="t-muted text-xs">{vendor.email}</p></div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">
-                    ₹{fmt(vendor.grandTotal)}
-                  </p>
-                  {vendor.deliveryDays !== undefined && (
-                    <p className="text-xs text-gray-400">
-                      {vendor.deliveryDays} days delivery
-                    </p>
-
-                  )}
-                  {vendor.status === "ACCEPTED" && (
-                    <p className="text-green-600 font-semibold text-sm mt-1">
-                      Approved ✅
-                    </p>
-                  )}
-
-                  {vendor.status === "REJECTED" && (
-                    <p className="text-red-500 font-semibold text-sm mt-1">
-                      Rejected ❌
-                    </p>
-                  )}
+                  <p className="text-lg font-bold" style={{ color: "var(--stat-3-accent)" }}>₹{fmt(vendor.grandTotal)}</p>
+                  {vendor.deliveryDays !== undefined && <p className="t-muted text-xs">{vendor.deliveryDays} days</p>}
+                  {vendor.status === "ACCEPTED" && <p style={{ color: "var(--stat-3-accent)" }} className="text-sm font-semibold mt-1">Approved ✅</p>}
+                  {vendor.status === "REJECTED" && <p className="text-red-500 text-sm font-semibold mt-1">Rejected ❌</p>}
                 </div>
               </div>
 
-              {/* AI reason */}
-              {analysis.reason && (
-                <div className="mb-4 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800">
-                  💡 {analysis.reason}
-                </div>
-              )}
+              {a.reason && <div className="mb-4 rounded-lg px-3 py-2 text-xs" style={{ background: "var(--stat-1-accent-bg)", color: "var(--stat-1-accent)", border: "1px solid var(--stat-1-border)" }}>💡 {a.reason}</div>}
 
-              {/* item breakdown table */}
-              {analysis.itemBreakdown?.length > 0 && (
-                <div className="overflow-x-auto">
+              {a.itemBreakdown?.length > 0 && (
+                <div className="overflow-x-auto mb-3 rounded-lg b-subtle">
                   <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-gray-50 text-gray-400 text-xs">
-                        <th className="text-left px-3 py-2 rounded-tl-lg font-medium">
-                          Item
-                        </th>
-
-                        <th className="text-center px-3 py-2 font-medium">
-                          Qty
-                        </th>
-
-                        <th className="text-right px-3 py-2 font-medium">
-                          Unit price
-                        </th>
-
-                        <th className="text-right px-3 py-2 rounded-tr-lg font-medium">
-                          Total
-                        </th>
-                      </tr>
-                    </thead>
-
+                    <thead><tr style={{ background: "var(--bg-input)" }}>
+                      {["Item", "Qty", "Unit Price", "Total"].map(h => <th key={h} className={`t-muted text-[11px] uppercase tracking-wider font-semibold px-3 py-2 ${h === "Item" ? "text-left" : h === "Qty" ? "text-center" : "text-right"}`}>{h}</th>)}
+                    </tr></thead>
                     <tbody>
-                      {analysis.itemBreakdown.map((item, idx) => (
-                        <tr
-                          key={idx}
-                          className="border-t border-gray-50 text-gray-600"
-                        >
-                          <td className="px-3 py-2">{item.item}</td>
-
-                          <td className="px-3 py-2 text-center">
-                            {item.quantity ?? "—"}
-                          </td>
-
-                          <td className="px-3 py-2 text-right">
-                            {item.unitPrice
-                              ? `₹${fmt(item.unitPrice)}`
-                              : "—"}
-                          </td>
-
-                          <td className="px-3 py-2 text-right font-medium">
-                            ₹{fmt(item.totalItemPrice)}
-                          </td>
+                      {a.itemBreakdown.map((item, idx) => (
+                        <tr key={idx} style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                          <td className="t-secondary px-3 py-2">{item.item}</td>
+                          <td className="t-secondary px-3 py-2 text-center">{item.quantity ?? "—"}</td>
+                          <td className="t-secondary px-3 py-2 text-right">{item.unitPrice ? `₹${fmt(item.unitPrice)}` : "—"}</td>
+                          <td className="t-primary px-3 py-2 text-right font-medium">₹{fmt(item.totalItemPrice)}</td>
                         </tr>
                       ))}
+                      {a.deliveryCharge !== undefined && <tr style={{ borderTop: "1px solid var(--border-subtle)" }}><td colSpan={3} className="t-muted px-3 py-2 text-right text-xs">Delivery</td><td className="t-muted px-3 py-2 text-right text-xs">₹{fmt(a.deliveryCharge)}</td></tr>}
+                      <tr style={{ borderTop: "2px solid var(--border-color)" }}><td colSpan={3} className="t-primary px-3 py-2 text-right font-bold text-sm">Grand total</td><td className="px-3 py-2 text-right font-bold text-sm" style={{ color: "var(--stat-3-accent)" }}>₹{fmt(a.grandTotal || vendor.grandTotal)}</td></tr>
                     </tbody>
-
-                    <tfoot>
-                      {analysis.deliveryCharge !== undefined && (
-                        <tr className="border-t border-gray-100 text-gray-400 text-xs">
-                          <td colSpan={3} className="px-3 py-2 text-right">
-                            Delivery charges
-                          </td>
-
-                          <td className="px-3 py-2 text-right">
-                            ₹{fmt(analysis.deliveryCharge)}
-                          </td>
-                        </tr>
-                      )}
-
-                      <tr className="border-t-2 border-gray-200 font-bold text-gray-800 text-sm">
-                        <td colSpan={3} className="px-3 py-2 text-right">
-                          Grand total
-                        </td>
-
-                        <td className="px-3 py-2 text-right text-green-600">
-                          ₹{fmt(analysis.grandTotal || vendor.grandTotal)}
-                        </td>
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>
               )}
 
-              {/* VIEW FILE */}
-             {vendor.attachment && (
-  <div className="mt-4">
-    <a
-      href={vendor.attachment}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
-    >
-      📄 View Proposal File
-    </a>
-  </div>
-)}
+              {vendor.attachment && <a href={vendor.attachment} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-medium t-accent hover:underline mt-2"><ExternalLink size={12} /> View Proposal File</a>}
 
-
-              {/* 🔴 ADDED: approve button (NO UI disturbed) */}
               {vendor.status === "PENDING" && (
-                <button
-                  onClick={() => handleApprove(vendor.proposalId)}
-                  className="mt-4 px-4 py-2 rounded-lg text-sm bg-green-600 text-white hover:bg-green-700"
-                >
-                  {approvedId === vendor.proposalId
-                    ? "Approved ✅"
-                    : "Approve"}
+                <button onClick={() => handleApprove(vendor.proposalId)} className="btn-primary mt-4" style={{ background: "var(--stat-3-accent)" }}>
+                  <Check size={14} /> {approvedId === vendor.proposalId ? "Approved ✅" : "Approve Vendor"}
                 </button>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
