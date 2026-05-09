@@ -232,13 +232,14 @@ export const updateVendorProfile = async (req, res) => {
   try {
     const vendorId = req.user._id;
 
-    const { name, businessName } = req.body;
+    const { name, businessName, phone } = req.body;
 
     const vendor = await Vendor.findByIdAndUpdate(
       vendorId,
       {
         name,
         businessName,
+        phone,
       },
       { new: true }
     );
@@ -253,7 +254,7 @@ export const updateVendorProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      data: vendor,
+      vendor,
     });
   } catch (error) {
     console.error("UPDATE VENDOR PROFILE ERROR:", error);
