@@ -9,6 +9,7 @@ const VendorProfile = () => {
   const [formData, setFormData] = useState({
     name: "",
     businessName: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -19,6 +20,7 @@ const VendorProfile = () => {
         setFormData({
           name: res.data.vendor.name,
           businessName: res.data.vendor.businessName,
+          phone: res.data.vendor.phone || "",
         });
       } catch (err) {
         console.log(err);
@@ -92,6 +94,28 @@ const VendorProfile = () => {
               />
             ) : (
               <p className="text-lg font-medium">{vendor.businessName}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Phone Number */}
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-sm text-gray-500">Phone Number</p>
+            {editMode ? (
+              <input
+                type="text"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    phone: e.target.value,
+                  })
+                }
+                className="mt-1 border rounded-lg px-3 py-1"
+              />
+            ) : (
+              <p className="text-lg font-medium">{vendor.phone || "Not Provided"}</p>
             )}
           </div>
         </div>

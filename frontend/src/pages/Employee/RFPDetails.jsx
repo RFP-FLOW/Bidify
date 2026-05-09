@@ -53,7 +53,6 @@ function RFPDetails() {
             <StatusBadge status={rfp.status} />
           </div>
           <div className="flex gap-3">
-            <button className="btn-secondary"><Mail size={15} /> Check Emails</button>
             <button onClick={() => { setShowModal(true); fetchVendors(); }} className="btn-primary"><Send size={15} /> Send to Vendors</button>
           </div>
         </div>
@@ -90,14 +89,7 @@ function RFPDetails() {
           </details>
         </Card>
 
-        {/* Empty proposals */}
-        <Card className="py-12 text-center" delay={320}>
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
-            <Mail size={22} />
-          </div>
-          <p className="t-primary text-base font-semibold mb-1">No proposals received yet</p>
-          <p className="t-muted text-sm">Proposals will appear here once vendors respond</p>
-        </Card>
+
       </main>
       <SelectVendorsModal isOpen={showModal} onClose={() => setShowModal(false)} vendors={vendors} loading={vendorsLoading} rfpId={rfp._id} />
     </PageLayout>

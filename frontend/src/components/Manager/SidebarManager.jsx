@@ -50,7 +50,7 @@ export default function SidebarManager() {
           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium t-secondary transition-all duration-200 hover:text-red-500 hover:bg-red-50">
           <LogOut size={15} strokeWidth={1.8} /> Log out
         </button>
-        <div className="pt-3 mt-1 bt-default"><p className="t-muted text-[11px] text-center">Need help? <span className="t-accent cursor-pointer hover:underline font-medium">Support</span></p></div>
+
       </div>
     </aside>
   );
