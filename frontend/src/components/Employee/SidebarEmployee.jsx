@@ -43,7 +43,7 @@ export default function SidebarEmployee() {
             <div className="absolute top-[3px] w-[14px] h-[14px] rounded-full bg-white transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style={{ left: theme === "dark" ? "19px" : "3px", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
           </div>
         </button>
-        <button onClick={() => { localStorage.removeItem("token"); navigate("/company/login"); }}
+        <button onClick={() => { localStorage.clear(); navigate("/company/login"); }}
           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium t-secondary transition-all duration-200 hover:text-red-500 hover:bg-red-50">
           <LogOut size={15} strokeWidth={1.8} /> Log out
         </button>
