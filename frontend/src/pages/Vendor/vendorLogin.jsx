@@ -48,9 +48,9 @@ function VendorLogin() {
       // ✅ REDIRECT TO DASHBOARD
       navigate("/vendor/dashboard");
     } catch (err) {
-  console.log("LOGIN ERROR FULL:", err.response?.data);
-  toast.error(err.response?.data?.message || "Login failed");
-}
+      console.log("LOGIN ERROR FULL:", err.response?.data);
+      toast.error(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -59,28 +59,24 @@ function VendorLogin() {
 
       <div className="flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] bg-white">
+
           {/* IMAGE */}
           <div className="hidden md:block">
             <img
               src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d"
-              alt="Company login"
+              alt="Vendor login"
               className="w-full h-full object-cover"
             />
           </div>
 
           {/* FORM */}
-          <p
-            onClick={() => navigate("/")}
-            className="text-center text-xs text-gray-400 mt-4 cursor-pointer hover:text-black"
-          >
-            ← Back to Home
-          </p>
           <div className="p-8">
             <h2 className="text-2xl font-bold text-center mb-8">
               Vendor Login
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
               {/* EMAIL */}
               <div className="relative">
                 <input
@@ -132,7 +128,7 @@ function VendorLogin() {
                   Password
                 </label>
 
-                {/* Eye icon (shifted left) */}
+                {/* Eye icon */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -149,17 +145,19 @@ function VendorLogin() {
               >
                 Login
               </button>
-              <p className="text-sm text-center mt-3">
-                <span
-                  onClick={() => navigate("/vendor/forgot-password")}
-                  className="text-[#3a2d97] cursor-pointer hover:underline"
-                >
-                  Forgot Password?
-                </span>
-              </p>
             </form>
 
-            {/* SIGNUP LINK */}
+           {/* FORGET PASSWORD */}
+            <p className="text-sm text-center mt-4">
+             <span
+               onClick={() => navigate("/vendor/forgot-password")}
+               className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+             >
+               Forgot password?
+             </span>
+           </p>
+
+            {/* LINKS */}
             <p className="text-center text-sm text-gray-600 mt-3">
               Are you a company?{" "}
               <span
@@ -170,7 +168,7 @@ function VendorLogin() {
               </span>
             </p>
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <button
                 onClick={() => navigate("/vendor/register")}
                 className="text-[#3a2d97] font-semibold hover:underline"
@@ -178,6 +176,7 @@ function VendorLogin() {
                 Sign up here
               </button>
             </p>
+
           </div>
         </div>
       </div>
