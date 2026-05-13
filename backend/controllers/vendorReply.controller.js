@@ -138,26 +138,63 @@ deliveryDays: parsedData.deliveryDays || undefined,
   }
 };
 
-export const getVendorOpenRFPs = async (req, res) => {
+export const getVendorOpenRFPs = async (
+  req,
+  res
+) => {
   try {
     const vendorId = req.user._id;
 
+    // ALL OPEN RFPS
     const rfps = await RFP.find({
-      status: "SENT", // 👈 company ne send ki ho
-      sentToVendors: vendorId, // 👈 is vendor ko hi send hui ho
+      status: "SENT",
+      sentToVendors: vendorId,
     })
-      .populate("companyId", "companyName")
+      .populate(
+        "companyId",
+        "companyName"
+      )
       .lean();
+
+    // VENDOR PROPOSALS
+    const proposals =
+      await Proposal.find({
+        vendorId,
+      }).select("rfpId");
+
+    // replied rfp ids
+    const repliedRfpIds =
+      proposals.map((p) =>
+        p.rfpId.toString()
+      );
+
+    // ADD FLAG
+    const updatedRfps = rfps.map(
+      (rfp) => ({
+        ...rfp,
+
+        hasVendorReplied:
+          repliedRfpIds.includes(
+            rfp._id.toString()
+          ),
+      })
+    );
 
     res.status(200).json({
       success: true,
-      data: rfps,
+      data: updatedRfps,
     });
+
   } catch (error) {
-    console.error("GET OPEN RFPS ERROR:", error);
+    console.error(
+      "GET OPEN RFPS ERROR:",
+      error
+    );
+
     res.status(500).json({
       success: false,
-      message: "Failed to fetch open RFPs",
+      message:
+        "Failed to fetch open RFPs",
     });
   }
 };
@@ -170,7 +207,7 @@ export const approveProposal = async (req, res) => {
 
     const proposal = await Proposal.findById(proposalId)
       .populate("vendorId")
-      .populate("rfpId","title");
+      .populate("rfpId","title companyId");
 
     if (!proposal) {
       return res.status(404).json({
@@ -259,6 +296,31 @@ export const getApprovedProposals = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+export const getMyProposals = async (
+  req,
+  res
+) => {
+  try {
+    const proposals = await Proposal.find({
+      vendorId: req.user.id,
+    })
+      .populate("rfpId")
+      .populate("vendorId");
+
+    res.status(200).json({
+      success: true,
+      data: proposals,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch proposals",
     });
   }
 };

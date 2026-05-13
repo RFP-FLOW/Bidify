@@ -1,6 +1,6 @@
 import express from "express";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
-import { submitVendorReply, getVendorOpenRFPs } from "../controllers/vendorReply.controller.js";
+import { submitVendorReply, getVendorOpenRFPs, getMyProposals } from "../controllers/vendorReply.controller.js";
 import  upload  from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
@@ -25,4 +25,9 @@ router.get(
   getVendorOpenRFPs
 );
 
+router.get(
+  "/my-proposals",
+  authMiddleware,
+  getMyProposals
+);
 export default router;

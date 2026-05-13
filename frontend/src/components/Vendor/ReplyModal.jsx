@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRef } from "react";
+import { toast } from "react-toastify";
 
 const ReplyModal = ({
   open,
@@ -32,43 +33,80 @@ const ReplyModal = ({
   if (!open) return null;
 
   const handleSubmit = async () => {
-    if (!message.trim()) {
-      setError("Message is required");
-      return;
-    }
+  if (!message.trim()) {
+    setError("Message is required");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token");
 
-      const formData = new FormData();
-      formData.append("rfpId", rfpId);
-      formData.append("message", message);
-      if (quotedPrice) formData.append("quotedPrice", quotedPrice);
-      if (file) formData.append("attachment", file);
+    const formData = new FormData();
 
-      await axios.post(
-        "http://localhost:5000/api/vendor-reply/replies",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // ❌ DO NOT set Content-Type
-          },
-        },
+    formData.append("rfpId", rfpId);
+    formData.append(
+      "message",
+      message
+    );
+
+    if (quotedPrice) {
+      formData.append(
+        "quotedPrice",
+        quotedPrice
       );
-
-      onSuccess?.(rfpId);
-      onClose();
-    } catch (err) {
-      console.error("Reply submit error:", err.response || err);
-      setError(err.response?.data?.message || "Failed to send reply");
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (file) {
+      formData.append(
+        "attachment",
+        file
+      );
+    }
+
+    // API CALL
+    await axios.post(
+      "http://localhost:5000/api/vendor-reply/replies",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // ✅ SUCCESS TOAST
+    toast.success(
+      "Reply sent successfully 🚀"
+    );
+
+    // refresh parent page
+    onSuccess?.(rfpId);
+
+    // close modal
+    onClose();
+
+  } catch (err) {
+    console.error(
+      "Reply submit error:",
+      err.response || err
+    );
+
+    const errorMessage =
+      err.response?.data?.message ||
+      "Failed to send reply";
+
+    setError(errorMessage);
+
+    toast.error(errorMessage);
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div
