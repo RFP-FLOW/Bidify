@@ -207,7 +207,7 @@ export const approveProposal = async (req, res) => {
 
     const proposal = await Proposal.findById(proposalId)
       .populate("vendorId")
-      .populate("rfpId","title");
+      .populate("rfpId","title companyId");
 
     if (!proposal) {
       return res.status(404).json({
