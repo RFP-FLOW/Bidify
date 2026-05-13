@@ -189,6 +189,15 @@ console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
            </p>        
 
             {/* SIGNUP LINK */}
+            <p className="text-center text-sm text-gray-600 mt-3">
+              Are you a vendor?{" "}
+              <span
+                onClick={() => navigate("/vendor/login")}
+                className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+              >
+                Login here
+              </span>
+            </p>
             <p className="text-center text-sm font-medium text-gray-700 mt-6">
               Don’t have an account?{" "}
               <button
