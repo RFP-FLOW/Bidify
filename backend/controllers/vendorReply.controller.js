@@ -262,3 +262,28 @@ export const getApprovedProposals = async (req, res) => {
     });
   }
 };
+
+export const getMyProposals = async (
+  req,
+  res
+) => {
+  try {
+    const proposals = await Proposal.find({
+      vendorId: req.user.id,
+    })
+      .populate("rfpId")
+      .populate("vendorId");
+
+    res.status(200).json({
+      success: true,
+      data: proposals,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch proposals",
+    });
+  }
+};

@@ -5,45 +5,98 @@ import VendorLayout from "../../components/Vendor/Layout";
 
 const VendorCompanyDetails = () => {
   const { id } = useParams();
+
   const [company, setCompany] = useState(null);
+  const [requestSent, setRequestSent] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCompany = async () => {
-      const res = await api.get(`/company/${id}`);
-      setCompany(res.data);
+      try {
+        const res = await api.get(`/company/${id}`);
+
+        setCompany(res.data);
+
+        // OPTIONAL:
+        // agar backend alreadyRequested bhej raha ho
+        if (res.data.alreadyRequested) {
+          setRequestSent(true);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchCompany();
   }, [id]);
 
   const sendRequest = async () => {
-    await api.post("/auth/request", {
-      companyId: id,
-    });
-    alert("Request sent to company");
+    try {
+      await api.post("/auth/request", {
+        companyId: id,
+      });
+
+      setRequestSent(true);
+
+      alert("Request sent to company");
+    } catch (error) {
+      console.log(error);
+      alert("Failed to send request");
+    }
   };
 
-  if (!company) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <VendorLayout>
+        <p className="text-gray-500">Loading...</p>
+      </VendorLayout>
+    );
+  }
+
+  if (!company) {
+    return (
+      <VendorLayout>
+        <p className="text-red-500">
+          Company not found
+        </p>
+      </VendorLayout>
+    );
+  }
 
   return (
     <VendorLayout>
-      <h2 className="text-2xl font-bold">
-        {company.companyName}
-      </h2>
+      <div className="bg-white border rounded-2xl p-6 shadow-sm">
+        {/* COMPANY NAME */}
+        <h2 className="text-2xl font-bold text-gray-800">
+          {company.companyName}
+        </h2>
 
-      <p className="mt-4 text-gray-600">
-        {company.description}
-      </p>
+        {/* DESCRIPTION */}
+        <p className="mt-4 text-gray-600 leading-relaxed">
+          {company.description}
+        </p>
 
-      <p className="mt-2 text-sm text-gray-500">
-        {company.address}
-      </p>
+        {/* ADDRESS */}
+        <p className="mt-3 text-sm text-gray-500">
+          {company.address}
+        </p>
 
-      <button
-        onClick={sendRequest}
-        className="mt-6 px-6 py-2 bg-[#3a2d97] text-white rounded-md"
-      >
-        Send Request
-      </button>
+        {/* BUTTON / STATUS */}
+        {!requestSent ? (
+          <button
+            onClick={sendRequest}
+            className="mt-6 px-6 py-2 bg-[#3a2d97] hover:bg-[#2f237d] text-white rounded-md transition"
+          >
+            Send Request
+          </button>
+        ) : (
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-md text-sm font-medium">
+            ✔ Request Sent
+          </div>
+        )}
+      </div>
     </VendorLayout>
   );
 };

@@ -3,12 +3,41 @@ import { useTheme } from "../../context/ThemeContext";
 import { LayoutDashboard, FileText, Inbox, CheckCircle, User, Send, LogOut, Sun, Moon, Store } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard",     path: "/vendor/dashboard",             icon: LayoutDashboard },
-  { label: "Open RFPs",     path: "/vendor/rfps",                  icon: FileText },
-  { label: "My Bids",       path: "/vendor/open-rfps",             icon: Inbox },
-  { label: "Won Contracts",  path: "/vendor/getApprovedProposals", icon: CheckCircle },
-  { label: "My Requests",   path: "/vendor/requests",              icon: Send },
-  { label: "Profile",       path: "/vendor/profile",               icon: User },
+  {
+    label: "Dashboard",
+    path: "/vendor/dashboard",
+    icon: LayoutDashboard,
+  },
+
+  {
+    label: "Open RFPs",
+    path: "/vendor/open-rfps",
+    icon: FileText,
+  },
+
+  {
+    label: "My Proposals",
+    path: "/vendor/my-proposals",
+    icon: Inbox,
+  },
+
+  {
+    label: "Won Contracts",
+    path: "/vendor/approved-proposals",
+    icon: CheckCircle,
+  },
+
+  {
+    label: "My Requests",
+    path: "/vendor/requests",
+    icon: Send,
+  },
+
+  {
+    label: "Profile",
+    path: "/vendor/profile",
+    icon: User,
+  },
 ];
 
 export default function VendorSidebar() {

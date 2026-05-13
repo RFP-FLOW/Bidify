@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { ThemeProvider } from "./context/ThemeContext"; 
+import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/landing.jsx";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -33,6 +33,7 @@ import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
 import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
 import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
 import ApprovedProposals from "./pages/Vendor/ApprovedProposals.jsx";
+import MyProposals from "./pages/Vendor/MyProposals.jsx";
 
 //Auth
 import SetPassword from "./pages/Password-reset/SetPassword.jsx";
@@ -48,152 +49,163 @@ import ManagerRecommendations from "./pages/Company/ManagerRecommendations.jsx";
 function App() {
   return (
     <ThemeProvider>
-    <BrowserRouter>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <BrowserRouter>
+        <ToastContainer position="top-right" autoClose={3000} />
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PublicRoute>
-              <LandingPage />
-            </PublicRoute>
-          }
-        />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
+          />
 
-        <Route
-          path="/company/login"
-          element={
-            <PublicRoute>
-              <CompanyLogin />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/manager/dashboard"
-          element={
-            <ProtectedRoute allowedrole="manager">
-              <ManagerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/employee/rfp/:rfpId/proposals"
-          element={
-            <ProtectedRoute>
-              <RfpProposals />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/company/login"
+            element={
+              <PublicRoute>
+                <CompanyLogin />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/manager/dashboard"
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <ManagerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/rfp/:rfpId/proposals"
+            element={
+              <ProtectedRoute>
+                <RfpProposals />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-  path="/employee/rfp/:rfpId/forward"
-  element={
-    <ProtectedRoute>
-      <ForwardToManager />
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/employee/rfp/:rfpId/forward"
+            element={
+              <ProtectedRoute>
+                <ForwardToManager />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/company/register" element={<CompanyRegister />} />
-        <Route path="/company/manager/add-employee" element={<AddEmployee />} />
-        <Route path="/company/profile" element={<AddCompanyProfile />} />
-        <Route path="/manager/vendors" element={<AcceptedVendors />} />
-        <Route path="/manager/confirmed" element={<ConfirmedRFPs />} />
-        <Route
-          path="/employee/set-password/:token"
-          element={<EmployeeSetPassword />}
-        />
+          <Route path="/company/register" element={<CompanyRegister />} />
+          <Route
+            path="/company/manager/add-employee"
+            element={<AddEmployee />}
+          />
+          <Route path="/company/profile" element={<AddCompanyProfile />} />
+          <Route path="/manager/vendors" element={<AcceptedVendors />} />
+          <Route path="/manager/confirmed" element={<ConfirmedRFPs />} />
+          <Route
+            path="/employee/set-password/:token"
+            element={<EmployeeSetPassword />}
+          />
 
-        <Route
-  path="/manager/recommendations"
-  element={
-    <ProtectedRoute allowedrole="manager">
-      <ManagerRecommendations />
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/manager/recommendations"
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <ManagerRecommendations />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
-        <Route path="/employee/create-rfp" element={<CreateRFP />} />
+          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+          <Route path="/employee/create-rfp" element={<CreateRFP />} />
 
-        <Route
-          path="/vendor/login"
-          element={
-            <PublicRoute>
-              <VendorLogin />
-            </PublicRoute>
-          }
-        />
-        <Route path="/vendor/register" element={<VendorRegister />} />
-        <Route path="/vendor/getApprovedProposals" element={<ApprovedProposals />} />
-        <Route
-          path="/vendor/dashboard"
-          element={
-            <ProtectedRoute allowedrole="vendor">
-              <VendorDashboard />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/vendor/login"
+            element={
+              <PublicRoute>
+                <VendorLogin />
+              </PublicRoute>
+            }
+          />
+          <Route path="/vendor/register" element={<VendorRegister />} />
+          <Route
+            path="/vendor/approved-proposals"
+            element={<ApprovedProposals />}
+          />
+          <Route
+            path="/vendor/dashboard"
+            element={
+              <ProtectedRoute allowedrole="vendor">
+                <VendorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/vendor/my-proposals" element={<MyProposals />} />
 
-        <Route path="/rfp/:rfpId" element={<RFPDetails />} />
+          <Route path="/rfp/:rfpId" element={<RFPDetails />} />
 
-        <Route path="/set-password/:token" element={<SetPassword />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/set-password/:token" element={<SetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route
-          path="/vendor/requests"
-          element={
-            <ProtectedRoute>
-              <VendorRequests />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vendor/companies"
-          element={
-            <ProtectedRoute role="vendor">
-              <VendorCompanies />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route
+            path="/vendor/requests"
+            element={
+              <ProtectedRoute>
+                <VendorRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/companies"
+            element={
+              <ProtectedRoute role="vendor">
+                <VendorCompanies />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/vendor/rfps" element={<VendorRFPs />} />
-        <Route
-          path="/employee/bids"
-          element={
-            <ProtectedRoute>
-              <Bids />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/vendor/open-rfps"
+            element={
+              <ProtectedRoute allowedrole="vendor">
+                <VendorRFPs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/bids"
+            element={
+              <ProtectedRoute>
+                <Bids />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/vendor/companies/:id"
-          element={
-            <ProtectedRoute role="vendor">
-              <VendorCompanyDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/vendor/forgot-password"
-          element={<VendorForgotPassword />}
-        />
-        <Route
-          path="/vendor/reset-password/:token"
-          element={<VendorResetPassword />}
-        />
-        <Route path="/vendor/verify-otp" element={<VendorVerifyOtp />} />
-        <Route path="/vendor/profile" element={<VendorProfile />} />
-
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path="/vendor/companies/:id"
+            element={
+              <ProtectedRoute role="vendor">
+                <VendorCompanyDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/forgot-password"
+            element={<VendorForgotPassword />}
+          />
+          <Route
+            path="/vendor/reset-password/:token"
+            element={<VendorResetPassword />}
+          />
+          <Route path="/vendor/verify-otp" element={<VendorVerifyOtp />} />
+          <Route path="/vendor/profile" element={<VendorProfile />} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
-  
   );
-
 }
 
 export default App;
