@@ -19,6 +19,8 @@ import vendorReplyRoutes from "./routes/vendorReply.routes.js";
 import commonPasswordRoutes from "./routes/commonPassword.routes.js";
 import vendorCompanyRoutes from "./routes/vendorCompany.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/commonauth.routes.js";
 
 dotenv.config();
 console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
@@ -28,6 +30,7 @@ const app = express();
 connectDB();
 
 // Middlewares
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
@@ -42,6 +45,7 @@ app.use("/api/company", companyauthRoutes);
 app.use("/api/rfp", rfpRoutes);
 app.use("/api/auth", commonPasswordRoutes);
 app.use("/api/manager-vendor", managerVendor);
+app.use("/api/commonauth", authRoutes);
 // Vendor
 app.use("/api/vendor", vendorauthRoutes);
 app.use("/api/vendor/rfp", vendorRfpRoutes);

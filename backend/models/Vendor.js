@@ -52,6 +52,9 @@ const vendorSchema = new mongoose.Schema(
     },
     otp: String,
     otpExpiry: Date,
+    refreshToken: {
+      type: String,
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,
