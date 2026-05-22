@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      select: false,
     },
 
     role: {
@@ -50,29 +49,29 @@ const userSchema = new mongoose.Schema(
     resetTokenExpiry: {
       type: Date,
     },
-    refreshToken: {
-      type: String,
-    },
+
     otp: {
-      type: String,
-    },
+     type: String,
+   },
 
-    otpExpiry: {
-      type: Date,
-    },
+   otpExpiry: {
+    type: Date,
+   },
 
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    status: {
-      type: String,
-      enum: ["invited", "active", "expired"],
-      default: "invited",
-    },
+   isEmailVerified: {
+    type: Boolean,
+    default: false,
   },
-  { timestamps: true },
+
+  status: {
+  type: String,
+  enum: ["invited", "active","expired"],
+  default: "invited",
+},
+
+
+  },
+  { timestamps: true }
 );
 
 export default mongoose.model("User", userSchema);

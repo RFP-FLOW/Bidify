@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
+
 //---------------Register INIT--SEND OTP---------------
 
 export const registerInit = async (req, res) => {
@@ -19,49 +20,47 @@ export const registerInit = async (req, res) => {
 
     //Case 1: User exists and already verified->BLOCK
     if (existing && existing.companyId) {
-      return res
-        .status(400)
-        .json({ message: "Email already registered. Please login!" });
+      return res.status(400).json({ message: "Email already registered. Please login!" });
     }
+    
+     // Case 2: User exists but NOT verified → resend / regenerate OTP
+if (existing && !existing.companyId) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Case 2: User exists but NOT verified → resend / regenerate OTP
-    if (existing && !existing.companyId) {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const hashedOtp = await bcrypt.hash(otp, 10);
-      existing.otp = hashedOtp;
-      existing.otpExpiry = Date.now() + 10 * 60 * 1000;
-      await existing.save();
+  existing.otp = otp;
+  existing.otpExpiry = Date.now() + 10 * 60 * 1000;
+  await existing.save();
 
-      await sendEmail({
-        to: email,
-        subject: "Verify your email – Bidify",
-        html: `
+  await sendEmail({
+    to: email,
+    subject: "Verify your email – Bidify",
+    html: `
       <h3>Your OTP is:</h3>
       <h2>${otp}</h2>
       <p>Valid for 10 minutes</p>
     `,
-      });
+  });
 
-      return res.json({
-        message:
-          existing.otpExpiry && existing.otpExpiry < Date.now()
-            ? "Previous OTP expired. New OTP sent."
-            : "OTP re-sent. Please verify your email.",
-      });
-    }
+  return res.json({
+    message:
+      existing.otpExpiry && existing.otpExpiry < Date.now()
+        ? "Previous OTP expired. New OTP sent."
+        : "OTP re-sent. Please verify your email.",
+  });
+}
 
-    //Fresh Registration
+
+    //Fresh Registration   
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const hashedOtp = await bcrypt.hash(otp, 10);
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword=await bcrypt.hash(password,10);
     // temporary user
     await User.create({
-      name: username,
+      name:username,
       email,
-      password: hashedPassword, // hash later
+      password:hashedPassword, // hash later
       role: "manager",
       companyName,
-      otp: hashedOtp,
+      otp,
       otpExpiry: Date.now() + 10 * 60 * 1000, // 10 min
       isEmailVerified: false,
     });
@@ -77,6 +76,7 @@ export const registerInit = async (req, res) => {
     });
 
     res.json({ message: "OTP sent to email" });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -89,20 +89,12 @@ export const verifyOtp = async (req, res) => {
 
     const user = await User.findOne({
       email,
+      otp,
       otpExpiry: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP",
-      });
-    }
-    const isMatch = await bcrypt.compare(otp, user.otp);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP",
-      });
+      return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
     if (user.companyId) {
@@ -114,19 +106,21 @@ export const verifyOtp = async (req, res) => {
     const company = await Company.create({
       companyName,
       createdBy: user._id,
-      acceptedVendors: [],
+      acceptedVendors: [], 
     });
 
     user.isEmailVerified = true;
     user.otp = undefined;
     user.otpExpiry = undefined;
-    user.isActive = true;
-    user.status = "active";
+    user.isActive=true;
+    user.status="active";
     user.companyId = company._id;
+
 
     await user.save();
 
     res.json({ message: "Company registered successfully" });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -141,7 +135,7 @@ export const resendOtp = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -154,9 +148,7 @@ export const resendOtp = async (req, res) => {
     // 🔐 Generate new OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const hashedOtp = await bcrypt.hash(otp, 10);
-
-    user.otp = hashedOtp;
+    user.otp = otp;
     user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
 
@@ -172,18 +164,20 @@ export const resendOtp = async (req, res) => {
     });
 
     res.json({ message: "OTP resent successfully" });
+
   } catch (error) {
     console.error("Resend OTP error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+
 /* ================= LOGIN COMPANY ================= */
 export const loginCompany = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email });
     if (!user || !user.isActive) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -192,61 +186,36 @@ export const loginCompany = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-
+    
     const company = await Company.findById(user.companyId);
 
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    const accessToken = jwt.sign(
-      {
-        _id: user._id,
-        role: user.role,
-        companyId: user.companyId,
-      },
+    const token = jwt.sign(
+      { _id: user._id, role: user.role,companyId: user.companyId },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "15m",
-      },
+      { expiresIn: "1d" }
     );
-
-    const refreshToken = jwt.sign(
-      {
-        _id: user._id,
-      },
-      process.env.REFRESH_SECRET,
-      {
-        expiresIn: "7d",
-      },
-    );
-
-    user.refreshToken = refreshToken;
-
-    await user.save();
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     res.json({
       message: "Login successful",
-      accessToken,
+      token,
       user: {
         _id: user._id,
         username: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId,
-        companyName: company.companyName,
+        companyId:user.companyId,
+        companyName:company.companyName,
       },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 /* ================= ADD EMPLOYEE (MANAGER ONLY) ================= */
 export const addEmployee = async (req, res) => {
@@ -268,27 +237,26 @@ export const addEmployee = async (req, res) => {
     }
 
     if (!manager.companyId) {
-      return res
-        .status(400)
-        .json({ message: "Manager has no company assigned" });
+      return res.status(400).json({ message: "Manager has no company assigned" });
     }
 
     const existingUser = await User.findOne({ email });
 
     //CASE 1: ACTIVE EMPLOYEE
-    if (existingUser && existingUser.status === "active") {
+    if (existingUser && existingUser.status==="active") {
       return res.status(400).json({ message: "Employee already exists" });
     }
 
+
     //Case 2: Invited (RESEND)
     if (
-      existingUser &&
-      existingUser.status === "invited" &&
-      existingUser.resetTokenExpiry > Date.now()
-    ) {
-      const resetLink = `${process.env.CLIENT_URL}/set-password/${existingUser.resetToken}`;
+          existingUser &&
+          existingUser.status === "invited" &&
+          existingUser.resetTokenExpiry > Date.now()
+        ) {
+          const resetLink = `${process.env.CLIENT_URL}/set-password/${existingUser.resetToken}`;
 
-      await sendEmail({
+          await sendEmail({
         to: email,
         subject: "Set your password – Bidify",
         html: `
@@ -301,19 +269,20 @@ export const addEmployee = async (req, res) => {
       return res.json({
         message: "Invitation re-sent successfully",
       });
-    }
 
+        }
+    
     //Case3: Expired -> RE-Invite
-
-    if (
-      existingUser &&
-      existingUser.status === "invited" &&
-      existingUser.resetTokenExpiry &&
-      existingUser.resetTokenExpiry < Date.now()
-    ) {
-      existingUser.status = "expired";
-      await existingUser.save();
-    }
+     
+     if (
+          existingUser &&
+          existingUser.status === "invited" &&
+          existingUser.resetTokenExpiry &&
+         existingUser.resetTokenExpiry < Date.now()
+        ) {
+          existingUser.status = "expired";
+          await existingUser.save();
+        }
 
     if (existingUser && existingUser.status === "expired") {
       const resetToken = crypto.randomBytes(32).toString("hex");
@@ -356,7 +325,7 @@ export const addEmployee = async (req, res) => {
       managerId: manager._id,
       companyId: manager.companyId, // ✅ NOW VALID
       isActive: false,
-      status: "invited",
+      status:"invited",
       resetToken,
       resetTokenExpiry: Date.now() + 15 * 60 * 1000,
     });
@@ -378,18 +347,21 @@ export const addEmployee = async (req, res) => {
     res.status(201).json({
       message: "Employee added successfully. Password setup link sent.",
     });
+
   } catch (error) {
     console.error("Add Employee Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
+
+
 /* ================= SET EMPLOYEE PASSWORD ================= */
 export const setEmployeePassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
-    if (!password) {
+   if (!password) {
       return res.status(400).json({ message: "Password is required" });
     }
 
@@ -405,8 +377,8 @@ export const setEmployeePassword = async (req, res) => {
     employee.password = await bcrypt.hash(password, 10);
     employee.isActive = true;
     employee.resetToken = undefined;
-    employee.status = "active";
-    employee.isEmailVerified = true;
+    employee.status="active";
+    employee.isEmailVerified="true";
     employee.resetTokenExpiry = undefined;
 
     await employee.save();
@@ -416,6 +388,7 @@ export const setEmployeePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // GET SINGLE COMPANY BY ID (FOR VENDOR)
 export const getCompanyById = async (req, res) => {
@@ -432,6 +405,8 @@ export const getCompanyById = async (req, res) => {
   }
 };
 
+
+
 export const getAllCompanies = async (req, res) => {
   try {
     const companies = await Company.find(); // 👈 returns EVERYTHING
@@ -439,16 +414,17 @@ export const getAllCompanies = async (req, res) => {
     res.status(200).json({
       success: true,
       count: companies.length,
-      companies,
+      companies
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "Unable to fetch companies",
+      message: "Unable to fetch companies"
     });
   }
 };
+
 
 /* ================= GET ALL EMPLOYEES OF MANAGER ================= */
 export const getMyEmployees = async (req, res) => {
@@ -473,10 +449,12 @@ export const getMyEmployees = async (req, res) => {
       count: employees.length,
       employees,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // UPDATE COMPANY PROFILE
 export const updateCompanyProfile = async (req, res) => {
@@ -484,7 +462,7 @@ export const updateCompanyProfile = async (req, res) => {
     const { address, description, gstNumber, phone, website } = req.body;
 
     const company = await Company.findOneAndUpdate(
-      { createdBy: req.user._id }, // ✅ IMPORTANT FIX
+      { createdBy: req.user._id },   // ✅ IMPORTANT FIX
       {
         address,
         description,
@@ -492,7 +470,7 @@ export const updateCompanyProfile = async (req, res) => {
         website,
         phone,
       },
-      { new: true },
+      { new: true }
     );
 
     if (!company) {
@@ -526,3 +504,5 @@ export const getCompanyProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
