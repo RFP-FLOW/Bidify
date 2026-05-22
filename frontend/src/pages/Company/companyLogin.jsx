@@ -29,7 +29,6 @@ const handleSubmit = async (e) => {
   try {
     const res = await fetch("http://localhost:5000/api/company/login", {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -48,10 +47,10 @@ const handleSubmit = async (e) => {
     }
 
     // 🔥 FIX HERE
-    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("token", data.token);
     localStorage.setItem("role", formData.role);
     
-console.log("TOKEN AFTER LOGIN:", localStorage.getItem("accessToken"));
+console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
     localStorage.setItem("user", JSON.stringify(data.user));
 
     // navigate after successful login

@@ -35,19 +35,13 @@ function VendorLogin() {
       return;
     }
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/vendor/login",
-        {
-          email: formData.email,
-          password: formData.password,
-        },
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.post("http://localhost:5000/api/vendor/login", {
+        email: formData.email,
+        password: formData.password,
+      });
 
       // ✅ SAVE TOKEN (MOST IMPORTANT)
-      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", "vendor");
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
@@ -65,6 +59,7 @@ function VendorLogin() {
 
       <div className="flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] bg-white">
+
           {/* IMAGE */}
           <div className="hidden md:block">
             <img
@@ -81,6 +76,7 @@ function VendorLogin() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
               {/* EMAIL */}
               <div className="relative">
                 <input
@@ -151,15 +147,15 @@ function VendorLogin() {
               </button>
             </form>
 
-            {/* FORGET PASSWORD */}
+           {/* FORGET PASSWORD */}
             <p className="text-sm text-center mt-4">
-              <span
-                onClick={() => navigate("/vendor/forgot-password")}
-                className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
-              >
-                Forgot password?
-              </span>
-            </p>
+             <span
+               onClick={() => navigate("/vendor/forgot-password")}
+               className="text-[#3a2d97] font-semibold cursor-pointer hover:underline"
+             >
+               Forgot password?
+             </span>
+           </p>
 
             {/* LINKS */}
             <p className="text-center text-sm text-gray-600 mt-3">
@@ -180,6 +176,7 @@ function VendorLogin() {
                 Sign up here
               </button>
             </p>
+
           </div>
         </div>
       </div>

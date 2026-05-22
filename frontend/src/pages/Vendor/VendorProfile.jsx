@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import VendorLayout from "../../components/Vendor/Layout";
-import API from "../../utils/axiosInstance";
+import api from "../../services/api";
 import { toast } from "react-toastify";
 import {
   User,
@@ -39,7 +39,7 @@ const VendorProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await API.get(
+        const res = await api.get(
           "/vendor/profile"
         );
 
@@ -108,7 +108,7 @@ const VendorProfile = () => {
 
   const handleUpdate = async () => {
     try {
-      const res = await API.put(
+      const res = await api.put(
         "/vendor/profile",
         formData
       );

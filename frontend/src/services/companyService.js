@@ -1,16 +1,16 @@
-import API from "../utils/axiosInstance";
+import api from "./api";
 
 export const getCompanyProfile = async () => {
-  const res = await API.get("/company/profile");
+  const res = await api.get("/company/profile");
   return res.data;
 };
 
 export const updateCompanyProfile = async (data) => {
-  return API.put("/company/profile", data);
+  return api.put("/company/profile", data);
 };
 
 export const getAllCompanies = () =>
-  API.get("/company/get-AllCompany");
+  api.get("/company/get-AllCompany");
 
 export const getCompanyById = (id) =>
-  API.get(`/company/${id}`);
+  api.get(`/company/${id}`);

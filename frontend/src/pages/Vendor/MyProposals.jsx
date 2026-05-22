@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import VendorLayout from "../../components/Vendor/Layout";
-import API from "../../utils/axiosInstance";
+import api from "../../services/api";
 import {
   FileText,
   IndianRupee,
@@ -14,7 +14,7 @@ const MyProposals = () => {
   useEffect(() => {
     const fetchProposals = async () => {
       try {
-        const res = await API.get(
+        const res = await api.get(
           "/vendor-reply/my-proposals"
         );
 
