@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../utils/axiosInstance";
 import VendorLayout from "../../components/Vendor/Layout";
 import {
   CheckCircle2,
@@ -12,7 +12,7 @@ const ApprovedProposals = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios
+    API
       .get(
         "http://localhost:5000/api/vendor/approved",
         {

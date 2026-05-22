@@ -5,7 +5,7 @@ import {
 } from "react";
 
 import VendorLayout from "../../components/Vendor/Layout";
-import api from "../../services/api";
+import API from "../../utils/axiosInstance";
 
 import {
   Search,
@@ -31,8 +31,8 @@ const VendorRequests = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await api.get(
-          "/vendor-company/requests"
+        const res = await API.get(
+          "/vendor/requests"
         );
 
         setRequests(res.data);

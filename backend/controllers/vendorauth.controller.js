@@ -22,13 +22,13 @@ export const vendorRegisterInit = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
+    const hashedOtp = await bcrypt.hash(otp, 10);
     // Case: user exists but not verified → resend OTP
     if (existing && !existing.isEmailVerified) {
-      existing.otp = otp;
+      existing.otp = hashedOtp;
       existing.otpExpiry = Date.now() + 10 * 60 * 1000;
       await existing.save();
-    } 
+    }
     // Fresh vendor
     else {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -40,7 +40,7 @@ export const vendorRegisterInit = async (req, res) => {
         email,
         password: hashedPassword,
         role: "vendor",
-        otp,
+        otp: hashedOtp,
         otpExpiry: Date.now() + 10 * 60 * 1000,
         isEmailVerified: false,
         isActive: false,
@@ -58,7 +58,6 @@ export const vendorRegisterInit = async (req, res) => {
     });
 
     res.json({ message: "OTP sent to email" });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -70,12 +69,19 @@ export const verifyVendorOtp = async (req, res) => {
 
     const vendor = await Vendor.findOne({
       email,
-      otp,
       otpExpiry: { $gt: Date.now() },
     });
 
     if (!vendor) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    const isMatch = await bcrypt.compare(otp, vendor.otp);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
     }
 
     vendor.isEmailVerified = true;
@@ -86,7 +92,6 @@ export const verifyVendorOtp = async (req, res) => {
     await vendor.save();
 
     res.json({ message: "Vendor registered successfully" });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -107,8 +112,8 @@ export const resendVendorOtp = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    vendor.otp = otp;
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    vendor.otp = hashedOtp;
     vendor.otpExpiry = Date.now() + 10 * 60 * 1000;
     await vendor.save();
 
@@ -123,12 +128,10 @@ export const resendVendorOtp = async (req, res) => {
     });
 
     res.json({ message: "OTP resent successfully" });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 /* ================= LOGIN ================= */
 export const loginVendor = async (req, res) => {
@@ -136,7 +139,7 @@ export const loginVendor = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await Vendor.findOne({ email }).select("+password");
-    if (!user||!user.isActive) {
+    if (!user || !user.isActive) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
@@ -145,15 +148,41 @@ export const loginVendor = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
+    const accessToken = jwt.sign(
+      {
+        _id: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" },
+      {
+        expiresIn: "15m",
+      },
     );
+
+    const refreshToken = jwt.sign(
+      {
+        _id: user._id,
+      },
+      process.env.REFRESH_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    user.refreshToken = refreshToken;
+
+    await user.save();
+
+    res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
     res.json({
       message: "Login successful",
-      token,
+       accessToken,
       user: {
         id: user._id,
         name: user.name,
@@ -166,25 +195,7 @@ export const loginVendor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// export const getVendorStats = async (req, res) => {
-//   const vendorId = req.user.id;
 
-//   const total = await Proposal.countDocuments({ vendorId });
-//   const accepted = await Proposal.countDocuments({
-//     vendorId,
-//     status: "ACCEPTED",
-//   });
-//   const pending = await Proposal.countDocuments({
-//     vendorId,
-//     status: "PENDING",
-//   });
-
-//   res.json({
-//     total,
-//     pending,
-//     accepted,
-//   });
-// };
 export const getVendorStats = async (req, res) => {
   res.json({
     pending: 1,
@@ -241,7 +252,7 @@ export const updateVendorProfile = async (req, res) => {
         businessName,
         phone,
       },
-      { new: true }
+      { new: true },
     );
 
     if (!vendor) {
