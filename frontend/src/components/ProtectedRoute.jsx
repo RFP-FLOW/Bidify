@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children, allowedrole }) => {
   
 
   if (!token) {
-    if(allowedrole==="manager"){
+    if(allowedrole==="manager" || allowedrole==="employee"){
        return <Navigate to="/company/login" replace/>;
     }
     return <Navigate to="/vendor/login" replace />;

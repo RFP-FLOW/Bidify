@@ -16,7 +16,6 @@ function VendorRegister() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // GST format (official)
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -241,13 +240,13 @@ function VendorRegister() {
               {/* CONFIRM PASSWORD */}
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none pr-12"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 outline-none"
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all pointer-events-none ${floatingLabel(
@@ -256,11 +255,6 @@ function VendorRegister() {
                 >
                   Confirm Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[#3a2d97]"
-                ></button>
               </div>
 
               {/* SUBMIT */}

@@ -2,12 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-function SetPassword() {
+function SetPassword({ role = "company" }) {
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +27,7 @@ function SetPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           password,
-          role: "company", // ✅ ADD THIS
+          role,
         }),
       },
     );
@@ -37,7 +38,7 @@ function SetPassword() {
       toast.error(data.message);
     } else {
       toast.success("Password set successfully 🎉");
-      navigate("/company/login");
+      navigate(role === "vendor" ? "/vendor/login" : "/company/login");
     }
 
     setLoading(false);
@@ -51,13 +52,22 @@ function SetPassword() {
       >
         <h2 className="text-xl font-bold mb-6 text-center">Set New Password</h2>
 
-        <input
-          type="password"
-          placeholder="New password"
-          className="w-full border px-3 py-2 rounded mb-4"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="New password"
+            className="w-full border px-3 py-2 rounded pr-12"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3a2d97]"
+          >
+            {showPassword ? "🙈" : "👁"}
+          </button>
+        </div>
 
         <input
           type="password"
