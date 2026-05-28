@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
+import { getAllCompanies } from "../controllers/companyauth.controller.js";
 import {
   sendVendorRequest,
   getVendorRequests,
@@ -19,5 +20,8 @@ router.get("/requests", getVendorRequests);
 
 // 🔍 Check request status for company
 router.get("/request-status/:companyId", checkRequestStatus);
+
+// 📋 Get all companies (for vendor to browse)
+router.get("/companies", getAllCompanies);
 
 export default router;

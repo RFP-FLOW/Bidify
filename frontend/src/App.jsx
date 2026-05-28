@@ -81,7 +81,7 @@ function App() {
           <Route
             path="/employee/rfp/:rfpId/proposals"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedrole="employee">
                 <RfpProposals />
               </ProtectedRoute>
             }
@@ -90,20 +90,52 @@ function App() {
           <Route
             path="/employee/rfp/:rfpId/forward"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedrole="employee">
                 <ForwardToManager />
               </ProtectedRoute>
             }
           />
 
-          <Route path="/company/register" element={<CompanyRegister />} />
+          <Route
+            path="/company/register"
+            element={
+              <PublicRoute>
+                <CompanyRegister />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/company/manager/add-employee"
-            element={<AddEmployee />}
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <AddEmployee />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/company/profile" element={<AddCompanyProfile />} />
-          <Route path="/manager/vendors" element={<AcceptedVendors />} />
-          <Route path="/manager/confirmed" element={<ConfirmedRFPs />} />
+          <Route
+            path="/company/profile"
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <AddCompanyProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/vendors"
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <AcceptedVendors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/confirmed"
+            element={
+              <ProtectedRoute allowedrole="manager">
+                <ConfirmedRFPs />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/employee/set-password/:token"
             element={<EmployeeSetPassword />}
@@ -118,8 +150,22 @@ function App() {
             }
           />
 
-          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
-          <Route path="/employee/create-rfp" element={<CreateRFP />} />
+          <Route
+            path="/employee/dashboard"
+            element={
+              <ProtectedRoute allowedrole="employee">
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/create-rfp"
+            element={
+              <ProtectedRoute allowedrole="employee">
+                <CreateRFP />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/vendor/login"
@@ -129,10 +175,21 @@ function App() {
               </PublicRoute>
             }
           />
-          <Route path="/vendor/register" element={<VendorRegister />} />
+          <Route
+            path="/vendor/register"
+            element={
+              <PublicRoute>
+                <VendorRegister />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/vendor/approved-proposals"
-            element={<ApprovedProposals />}
+            element={
+              <ProtectedRoute allowedrole="vendor">
+                <ApprovedProposals />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/vendor/dashboard"
@@ -142,12 +199,33 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/vendor/my-proposals" element={<MyProposals />} />
+          <Route
+            path="/vendor/my-proposals"
+            element={
+              <ProtectedRoute allowedrole="vendor">
+                <MyProposals />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/rfp/:rfpId" element={<RFPDetails />} />
+          <Route
+            path="/rfp/:rfpId"
+            element={
+              <ProtectedRoute>
+                <RFPDetails />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/set-password/:token" element={<SetPassword />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
 
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route
@@ -161,7 +239,7 @@ function App() {
           <Route
             path="/vendor/companies"
             element={
-              <ProtectedRoute role="vendor">
+              <ProtectedRoute allowedrole="vendor">
                 <VendorCompanies />
               </ProtectedRoute>
             }
@@ -178,7 +256,7 @@ function App() {
           <Route
             path="/employee/bids"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedrole="employee">
                 <Bids />
               </ProtectedRoute>
             }
@@ -187,21 +265,32 @@ function App() {
           <Route
             path="/vendor/companies/:id"
             element={
-              <ProtectedRoute role="vendor">
+              <ProtectedRoute allowedrole="vendor">
                 <VendorCompanyDetails />
               </ProtectedRoute>
             }
           />
           <Route
             path="/vendor/forgot-password"
-            element={<VendorForgotPassword />}
+            element={
+              <PublicRoute>
+                <VendorForgotPassword />
+              </PublicRoute>
+            }
           />
           <Route
             path="/vendor/reset-password/:token"
             element={<VendorResetPassword />}
           />
           <Route path="/vendor/verify-otp" element={<VendorVerifyOtp />} />
-          <Route path="/vendor/profile" element={<VendorProfile />} />
+          <Route
+            path="/vendor/profile"
+            element={
+              <ProtectedRoute allowedrole="vendor">
+                <VendorProfile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -15,7 +15,6 @@ function CompanyRegister() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
 
@@ -230,13 +229,13 @@ function CompanyRegister() {
               {/* CONFIRM PASSWORD */}
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 focus:border-[#3a2d97] outline-none pr-12"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#3a2d97]/40 focus:border-[#3a2d97] outline-none"
                 />
                 <label
                   className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none ${floatingLabel(
@@ -245,16 +244,6 @@ function CompanyRegister() {
                 >
                   Confirm Password
                 </label>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[#3a2d97]"
-                >
-                  {showConfirmPassword ? "🙈" : "👁"}
-                </button>
               </div>
 
               {/* SUBMIT */}

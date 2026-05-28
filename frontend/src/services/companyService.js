@@ -10,7 +10,7 @@ export const updateCompanyProfile = async (data) => {
 };
 
 export const getAllCompanies = () =>
-  api.get("/company/get-AllCompany");
+  api.get("/vendor-company/companies");
 
 export const getCompanyById = (id) =>
   api.get(`/company/${id}`);

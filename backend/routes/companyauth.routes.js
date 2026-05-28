@@ -5,7 +5,6 @@ import {
   setEmployeePassword,
   verifyOtp,
   registerInit,
-  getAllCompanies,
   getCompanyById,
   getMyEmployees,
   getCompanyProfile,
@@ -14,7 +13,7 @@ import {
 } from "../controllers/companyauth.controller.js";
 
 
-import authMiddleware,{managerOnly,vendorOnly} from "../middlewares/auth.middleware.js";
+import authMiddleware,{managerOnly} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -35,7 +34,6 @@ router.put("/profile", authMiddleware, managerOnly, updateCompanyProfile);
 
 router.get("/profile",authMiddleware,managerOnly,getCompanyProfile);
 
-router.get("/get-AllCompany",authMiddleware,vendorOnly,getAllCompanies);
 router.get("/:id", authMiddleware, getCompanyById);
 
 export default router;

@@ -9,6 +9,7 @@ function EmployeeSetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,13 +64,22 @@ function EmployeeSetPassword() {
           Set Your Password
         </h2>
 
-        <input
-          type="password"
-          placeholder="New Password"
-          className="w-full mb-4 px-3 py-2 border rounded-lg"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="New Password"
+            className="w-full px-3 py-2 border rounded-lg pr-12"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3a2d97]"
+          >
+            {showPassword ? "🙈" : "👁"}
+          </button>
+        </div>
 
         <input
           type="password"

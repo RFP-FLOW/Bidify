@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-function ForgotPassword() {
+function ForgotPassword({ role = "company" }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,7 @@ function ForgotPassword() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,
-        role: "company",
+        role,
       }),
     });
 
