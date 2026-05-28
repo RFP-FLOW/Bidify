@@ -1,5 +1,5 @@
 import express from "express";
-import { loginVendor, getVendorRFPs, getVendorStats, resendVendorOtp, verifyVendorOtp, vendorRegisterInit, getVendorProfile, updateVendorProfile } from "../controllers/vendorauth.controller.js";
+import { loginVendor, getVendorStats, resendVendorOtp, verifyVendorOtp, vendorRegisterInit, getVendorProfile, updateVendorProfile } from "../controllers/vendorauth.controller.js";
 import authMiddleware, { vendorOnly } from "../middlewares/auth.middleware.js";
 import { getApprovedProposals } from "../controllers/vendorRfp.controller.js";
 
@@ -10,7 +10,7 @@ router.post("/verify-otp", verifyVendorOtp);
 router.post("/resend-otp", resendVendorOtp);
 router.post("/login", loginVendor);
 router.get("/dashboard/stats", authMiddleware, vendorOnly, getVendorStats);
-router.get("/rfps", authMiddleware, vendorOnly, getVendorRFPs);
+
 
 router.get("/profile", authMiddleware, vendorOnly, getVendorProfile);
 router.put("/profile", authMiddleware, vendorOnly, updateVendorProfile);

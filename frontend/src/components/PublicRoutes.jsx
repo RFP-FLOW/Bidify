@@ -8,6 +8,10 @@ const PublicRoute = ({ children }) => {
     return <Navigate to="/manager/dashboard" replace />;
   }
 
+  if (token && role === "employee") {
+    return <Navigate to="/employee/dashboard" replace />;
+  }
+
   if (token && role === "vendor") {
     return <Navigate to="/vendor/dashboard" replace />;
   }
