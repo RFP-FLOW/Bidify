@@ -10,7 +10,7 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import vendorauthRoutes from "./routes/vendorauth.routes.js";
-import protectedRoutes from "./routes/protected.routes.js";
+
 import companyauthRoutes from "./routes/companyauth.routes.js";
 import rfpRoutes from "./routes/rfpRoutes.js";
 import managerVendor from "./routes/managerVendor.routes.js";
@@ -37,7 +37,7 @@ app.use(
 );
 
 // Routes
-app.use("/api/protected", protectedRoutes);
+
 app.use("/api/company", companyauthRoutes);
 app.use("/api/rfp", rfpRoutes);
 app.use("/api/auth", commonPasswordRoutes);

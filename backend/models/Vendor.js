@@ -40,6 +40,16 @@ const vendorSchema = new mongoose.Schema(
       trim: true,
     },
 
+    category: {
+      type: String,
+      trim: true,
+    },
+
+    website: {
+      type: String,
+      trim: true,
+    },
+
     role: {
       type: String,
       default: "vendor",

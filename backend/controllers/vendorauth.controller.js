@@ -1,4 +1,5 @@
 import Vendor from "../models/Vendor.js";
+import Proposal from "../models/Proposal.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
@@ -166,44 +167,36 @@ export const loginVendor = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// export const getVendorStats = async (req, res) => {
-//   const vendorId = req.user.id;
-
-//   const total = await Proposal.countDocuments({ vendorId });
-//   const accepted = await Proposal.countDocuments({
-//     vendorId,
-//     status: "ACCEPTED",
-//   });
-//   const pending = await Proposal.countDocuments({
-//     vendorId,
-//     status: "PENDING",
-//   });
-
-//   res.json({
-//     total,
-//     pending,
-//     accepted,
-//   });
-// };
 export const getVendorStats = async (req, res) => {
-  res.json({
-    pending: 1,
-    replied: 2,
-    accepted: 3,
-  });
+  try {
+    const vendorId = req.user._id;
+
+    const total = await Proposal.countDocuments({ vendorId });
+    const accepted = await Proposal.countDocuments({
+      vendorId,
+      status: "ACCEPTED",
+    });
+    const pending = await Proposal.countDocuments({
+      vendorId,
+      status: "PENDING",
+    });
+    const rejected = await Proposal.countDocuments({
+      vendorId,
+      status: "REJECTED",
+    });
+
+    res.json({
+      totalProposals: total,
+      pending,
+      accepted,
+      rejected,
+    });
+  } catch (error) {
+    console.error("GET VENDOR STATS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch vendor stats" });
+  }
 };
 
-export const getVendorRFPs = async (req, res) => {
-  // res.json([
-  //   {
-  //     _id: "1",
-  //     title: "Laptop Procurement",
-  //     description: "Need 20 laptops",
-  //     status: "PENDING",
-  //     createdAt: new Date(),
-  //   },
-  // ]);
-};
 
 export const getVendorProfile = async (req, res) => {
   try {
@@ -232,7 +225,7 @@ export const updateVendorProfile = async (req, res) => {
   try {
     const vendorId = req.user._id;
 
-    const { name, businessName, phone } = req.body;
+    const { name, businessName, phone, address, description, category, website } = req.body;
 
     const vendor = await Vendor.findByIdAndUpdate(
       vendorId,
@@ -240,9 +233,13 @@ export const updateVendorProfile = async (req, res) => {
         name,
         businessName,
         phone,
+        address,
+        description,
+        category,
+        website,
       },
-      { new: true }
-    );
+      { new: true, runValidators: true }
+    ).select("-password");
 
     if (!vendor) {
       return res.status(404).json({
