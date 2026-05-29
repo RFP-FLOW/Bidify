@@ -10,6 +10,7 @@ import {
   forwardToManager,
   getForwardedRFPs,
   getConfirmedRFPs,
+  getManagerStats,
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
@@ -82,6 +83,14 @@ router.get("/confirmed", authMiddleware, getConfirmedRFPs);
 // Employee naya RFP create karta hai - status: DRAFT
 // -----------------------------------------------------------
 router.post("/", authMiddleware, createRFP);
+
+
+// -----------------------------------------------------------
+// 📊 MANAGER DASHBOARD STATS
+// GET /api/rfp/manager-stats
+// Manager ke dashboard ke liye real stats
+// -----------------------------------------------------------
+router.get("/manager-stats", authMiddleware, getManagerStats);
 
 
 // -----------------------------------------------------------

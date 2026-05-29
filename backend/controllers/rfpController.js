@@ -3,7 +3,7 @@ import Proposal from "../models/Proposal.js";
 import Vendor from "../models/Vendor.js";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/UserSchema.js";
-
+import VendorRequest from "../models/VendorRequest.js";
 /**
  * @desc    Create a new RFP (DRAFT)
  * @route   POST /api/rfp
@@ -524,8 +524,11 @@ export const getForwardedRFPs = async (req, res) => {
 export const getConfirmedRFPs = async (req, res) => {
   try {
     const proposals = await Proposal.find({
-      status: "ACCEPTED",
-    })
+  status: "ACCEPTED",
+  rfpId: { $in: await RFP.find({ 
+    companyId: req.user.companyId 
+  }).distinct("_id") }
+})
       .populate(
         "rfpId",
         "title aiRecommendationCache"
@@ -626,5 +629,47 @@ export const getConfirmedRFPs = async (req, res) => {
       message:
         "Failed to fetch confirmed RFPs",
     });
+  }
+};
+
+
+// rfpController.js
+export const getManagerStats = async (req, res) => {
+  try {
+    const companyId = req.user.companyId;
+
+    // get all employee ids under this manager
+    const employees = await User.find({
+      managerId: req.user._id,
+      role: "employee"
+    }).select("_id");
+
+    const employeeIds = employees.map(e => e._id);
+
+    // count active RFPs
+    const activeRFPs = await RFP.countDocuments({
+      createdBy: { $in: employeeIds },
+      status: { $in: ["SENT", "FORWARDED"] }
+    });
+
+    // count confirmed RFPs
+    const confirmedRFPs = await Proposal.countDocuments({
+      status: "ACCEPTED",
+    });
+
+    // pending vendors already fetched
+    const pendingVendors = await VendorRequest.countDocuments({
+      companyId,
+      status: "PENDING"
+    });
+
+    res.json({
+      activeRFPs,
+      confirmedRFPs,
+      pendingVendors
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

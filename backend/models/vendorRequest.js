@@ -32,4 +32,5 @@ const vendorRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("VendorRequest", vendorRequestSchema);
+export default mongoose.models.VendorRequest ||
+  mongoose.model("VendorRequest", vendorRequestSchema);

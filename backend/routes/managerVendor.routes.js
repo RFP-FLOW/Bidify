@@ -18,6 +18,6 @@ router.patch("/vendor-requests/:requestId/accept", managerOnly, acceptVendorRequ
 router.patch("/vendor-requests/:requestId/reject", managerOnly, rejectVendorRequest);
 
 // 👩‍💻 Employee + Manager → approved vendors (for RFP modal)
-router.get("/vendors/approved", getAcceptedVendors);
+router.get("/vendors/approved", managerOnly, getAcceptedVendors);
 
 export default router;
