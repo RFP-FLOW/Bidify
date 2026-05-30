@@ -44,7 +44,7 @@ export const acceptVendorRequest = async (req, res) => {
       });
     }
 
-    if (request.companyId.toString() !== req.user.companyId) {
+  if (request.companyId.toString() !== req.user.companyId.toString())  {
   return res.status(403).json({
     success: false,
     message: "Unauthorized approval attempt",
@@ -121,7 +121,7 @@ export const getAcceptedVendors = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: vendors.map(v => v.vendorId),
+      data: vendors.map(v => v.vendorId).filter(Boolean),
     });
   } catch (error) {
     console.error("GET ACCEPTED VENDORS ERROR:", error); // 👈 IMPORTANT

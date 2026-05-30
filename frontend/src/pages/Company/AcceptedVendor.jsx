@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import { getAcceptedVendors } from "../../services/managerServices";
-import { Card, IconBox } from "../../components/ui/Themed";
+import { Card, EmptyState, LoadingSkeleton, SearchInput, ManagerPageHeader, StatGrid } from "../../components/ui/Themed";
 import { Users, Phone, MapPin, FileText, Search, Inbox, Mail } from "lucide-react";
 
 function AcceptedVendors() {
@@ -13,7 +13,7 @@ function AcceptedVendors() {
     (async () => {
       try { const res = await getAcceptedVendors(); setVendors(res.data.data || []); }
       catch (e) { console.error(e); }
-      finally { setLoading(false); }
+      finally { setLoading(false); } 
     })();
   }, []);
 
@@ -25,36 +25,18 @@ function AcceptedVendors() {
   return (
     <ManagerLayout>
       {/* ── Header ── */}
-      <div className="flex justify-between items-start mb-8 animate-fadeIn">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
-            <Inbox size={26} />
-          </div>
-          <div>
-            <h1 className="t-primary text-2xl font-bold tracking-[-0.02em]">Vendor Directory</h1>
-            <p className="t-muted text-sm mt-0.5">All approved vendors for your organization.</p>
-          </div>
-        </div>
-      </div>
+      <ManagerPageHeader
+        icon={Inbox}
+        title="Vendor Directory"
+        subtitle="All approved vendors for your organization."
+      />
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-3 gap-5 mb-8">
-        {[
-          { label: "Total Vendors", value: vendors.length, sub: "Approved vendors", icon: Users, variant: "stat1" },
-          { label: "With Phone", value: vendors.filter(v => v.phone).length, sub: "Contact available", icon: Phone, variant: "stat2" },
-          { label: "With GST", value: vendors.filter(v => v.gstNumber).length, sub: "GST registered", icon: FileText, variant: "stat3" },
-        ].map(({ label, value, sub, icon: Icon, variant }, i) => (
-          <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
-            style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>
-            <div className="flex items-center gap-3 mb-3">
-              <IconBox icon={Icon} variant={variant} className="w-10 h-10" size={18} />
-              <span className="t-secondary text-sm font-medium">{label}</span>
-            </div>
-            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${i+1}-value)` }}>{value}</p>
-            <p className="t-muted text-xs">{sub}</p>
-          </div>
-        ))}
-      </div>
+      <StatGrid stats={[
+        { label: "Total Vendors", value: vendors.length, sub: "Approved vendors", icon: Users, variant: "stat1" },
+        { label: "With Phone", value: vendors.filter(v => v.phone).length, sub: "Contact available", icon: Phone, variant: "stat2" },
+        { label: "With GST", value: vendors.filter(v => v.gstNumber).length, sub: "GST registered", icon: FileText, variant: "stat3" },
+      ]} />
 
       {/* ── Directory ── */}
       <Card className="overflow-hidden animate-fadeIn" delay={250}>
@@ -63,10 +45,7 @@ function AcceptedVendors() {
             <h2 className="t-primary text-base font-semibold">Approved Vendors</h2>
             <p className="t-muted text-xs mt-0.5">View vendor details and contact information.</p>
           </div>
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 t-muted" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vendors..." className="input-themed !w-[220px] !pl-9 !py-2 !text-xs !rounded-lg" />
-          </div>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search vendors..." />
         </div>
 
         {/* Table Header */}
@@ -76,16 +55,11 @@ function AcceptedVendors() {
           ))}
         </div>
 
-        {loading && <div className="px-6 py-4 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 rounded-xl animate-shimmer" />)}</div>}
+        {loading && <LoadingSkeleton rows={3} cardHeight="h-16" />}
 
         {!loading && filtered.length === 0 && (
-          <div className="px-6 py-12 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "var(--accent-subtle)", color: "var(--accent-text)" }}>
-              <Users size={22} />
-            </div>
-            <p className="t-primary text-sm font-semibold mb-1">{search ? "No results found" : "No approved vendors"}</p>
-            <p className="t-muted text-xs">Vendors will appear here once approved.</p>
-          </div>
+          <EmptyState icon={Users} title={search ? "No results found" : "No approved vendors"}
+            subtitle="Vendors will appear here once approved." />
         )}
 
         {!loading && filtered.map(vendor => (
