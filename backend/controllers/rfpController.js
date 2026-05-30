@@ -85,10 +85,10 @@ export const getRFPById = async (req, res) => {
     const { id } = req.params;
 
     const rfp = await RFP.findOne({
-  _id: req.params.id,
-  createdBy: req.user._id,
-})
-.populate("sentToVendors", "name email");
+      _id: req.params.id,
+      createdBy: req.user._id,
+    })
+      .populate("sentToVendors", "name email");
 
     if (!rfp) {
       return res.status(404).json({
@@ -349,13 +349,13 @@ export const forwardToManager = async (req, res) => {
             ? `<div style="margin-top:8px;">
                 <p style="margin:0 0 4px;font-size:12px;color:#9ca3af;">Item Breakdown</p>
                 ${analysis.itemBreakdown
-                  .map(
-                    (item) =>
-                      `<span style="display:inline-block;background:#f3e8ff;color:#7c3aed;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px;">
+              .map(
+                (item) =>
+                  `<span style="display:inline-block;background:#f3e8ff;color:#7c3aed;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px;">
                         ${item.item} — ₹${Number(item.totalItemPrice).toLocaleString("en-IN")}
                       </span>`
-                  )
-                  .join("")}
+              )
+              .join("")}
               </div>`
             : "";
 
@@ -368,22 +368,20 @@ export const forwardToManager = async (req, res) => {
         const deliveryHtml =
           analysis.deliveryDays || analysis.deliveryCharge !== undefined
             ? `<div style="display:flex;gap:12px;margin-top:10px;">
-                ${
-                  analysis.deliveryDays
-                    ? `<div style="background:#f9fafb;border-radius:6px;padding:6px 12px;flex:1;">
+                ${analysis.deliveryDays
+              ? `<div style="background:#f9fafb;border-radius:6px;padding:6px 12px;flex:1;">
                         <p style="margin:0;font-size:11px;color:#9ca3af;">Delivery Time</p>
                         <p style="margin:0;font-weight:600;color:#374151;">${analysis.deliveryDays} days</p>
                       </div>`
-                    : ""
-                }
-                ${
-                  analysis.deliveryCharge !== undefined
-                    ? `<div style="background:#f9fafb;border-radius:6px;padding:6px 12px;flex:1;">
+              : ""
+            }
+                ${analysis.deliveryCharge !== undefined
+              ? `<div style="background:#f9fafb;border-radius:6px;padding:6px 12px;flex:1;">
                         <p style="margin:0;font-size:11px;color:#9ca3af;">Delivery Charge</p>
                         <p style="margin:0;font-weight:600;color:#374151;">₹${Number(analysis.deliveryCharge).toLocaleString("en-IN")}</p>
                       </div>`
-                    : ""
-                }
+              : ""
+            }
               </div>`
             : "";
 
@@ -466,12 +464,12 @@ export const forwardToManager = async (req, res) => {
       aiRecommendationCachedAt: new Date(),
     });
 
-   res.status(200).json({
-  success: true,
-  message: `Email sent to manager ${manager.name}`,
-  managerEmail: manager.email,
-  managerName: manager.name,
-});
+    res.status(200).json({
+      success: true,
+      message: `Email sent to manager ${manager.name}`,
+      managerEmail: manager.email,
+      managerName: manager.name,
+    });
   } catch (error) {
     console.error("Forward to Manager Error:", error);
     res.status(500).json({ message: "Failed to forward to manager" });
@@ -524,11 +522,13 @@ export const getForwardedRFPs = async (req, res) => {
 export const getConfirmedRFPs = async (req, res) => {
   try {
     const proposals = await Proposal.find({
-  status: "ACCEPTED",
-  rfpId: { $in: await RFP.find({ 
-    companyId: req.user.companyId 
-  }).distinct("_id") }
-})
+      status: "ACCEPTED",
+      rfpId: {
+        $in: await RFP.find({
+          companyId: req.user.companyId
+        }).distinct("_id")
+      }
+    })
       .populate(
         "rfpId",
         "title aiRecommendationCache"
@@ -638,7 +638,6 @@ export const getManagerStats = async (req, res) => {
   try {
     const companyId = req.user.companyId;
 
-    // get all employee ids under this manager
     const employees = await User.find({
       managerId: req.user._id,
       role: "employee"
@@ -646,25 +645,39 @@ export const getManagerStats = async (req, res) => {
 
     const employeeIds = employees.map(e => e._id);
 
-    // count active RFPs
-    const activeRFPs = await RFP.countDocuments({
+    // Step 1 — get all forwarded RFP ids
+    const forwardedRfpIds = await RFP.find({
       createdBy: { $in: employeeIds },
-      status: { $in: ["SENT", "FORWARDED"] }
-    });
+      status: "FORWARDED"
+    }).distinct("_id");
 
-    // count confirmed RFPs
+    // Step 2 — find which ones are already approved
+    const approvedRfpIds = await Proposal.find({
+      status: "ACCEPTED",
+      rfpId: { $in: forwardedRfpIds }
+    }).distinct("rfpId");
+
+    // Step 3 — subtract approved from forwarded
+    const forwardedRFPs = forwardedRfpIds.length - approvedRfpIds.length;
+
+    // confirmed deals
+    const managerRfpIds = await RFP.find({
+      createdBy: { $in: employeeIds }
+    }).distinct("_id");
+
     const confirmedRFPs = await Proposal.countDocuments({
       status: "ACCEPTED",
+      rfpId: { $in: managerRfpIds }
     });
 
-    // pending vendors already fetched
+    // pending vendors
     const pendingVendors = await VendorRequest.countDocuments({
       companyId,
       status: "PENDING"
     });
 
     res.json({
-      activeRFPs,
+      forwardedRFPs,
       confirmedRFPs,
       pendingVendors
     });
