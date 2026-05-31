@@ -67,7 +67,7 @@ export const recommendVendorsByAI = async (req, res) => {
       .populate("vendorId", "name email")
       .lean();
 
-    console.log("DEBUG - Raw proposals count:", proposals.length);
+    //console.log("DEBUG - Raw proposals count:", proposals.length);
 
     if (!proposals || proposals.length < 1) {
       return res.status(400).json({

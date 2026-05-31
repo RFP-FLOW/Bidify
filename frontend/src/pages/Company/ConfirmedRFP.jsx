@@ -3,6 +3,7 @@ import api from "../../services/api";
 import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import { Card, StatGrid, ManagerPageHeader, SearchInput, EmptyState, LoadingSkeleton } from "../../components/ui/Themed";
 import { CheckCircle, ExternalLink, Truck, DollarSign } from "lucide-react";
+import {getConfirmedRFPs} from "../../services/rfpService";
 
 const fmt = (n) => Number(n || 0).toLocaleString("en-IN");
 
@@ -12,7 +13,7 @@ const ConfirmedRFPs = () => {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    api.get("/rfp/confirmed")
+         getConfirmedRFPs()
       .then(res => setData(res.data.rfps || []))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));

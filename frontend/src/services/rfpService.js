@@ -20,3 +20,7 @@ export const getEmployeeRFPs = () => {
 export const getRFPStats = () => {
   return api.get("/rfp/stats");
 };
+
+export const getConfirmedRFPs = () => {
+   return api.get("/rfp/confirmed");
+};

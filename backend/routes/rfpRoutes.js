@@ -11,10 +11,10 @@ import {
   getForwardedRFPs,
   getConfirmedRFPs,
   getManagerStats,
+  getRfpProposals
 } from "../controllers/rfpController.js";
 import { generateRFP } from "../controllers/aiRfp.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
-import { getRfpProposals } from "../controllers/vendorRfp.controller.js";
 import { approveProposal } from "../controllers/vendorReply.controller.js";
 
 const router = express.Router();
