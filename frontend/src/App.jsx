@@ -18,7 +18,7 @@ import ConfirmedRFPs from "./pages/Company/ConfirmedRFP.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
-import Bids from "./pages/Employee/Bids.jsx";
+import Proposals from "./pages/Employee/Proposals.jsx";
 import ForwardToManager from "./pages/Employee/ForwardToManager.jsx";
 import RfpProposals from "./pages/Employee/RfpProposals.jsx";
 
@@ -27,8 +27,6 @@ import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
 import VendorRegister from "./pages/Vendor/vendorRegister.jsx";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
 import VendorRequests from "./pages/Vendor/VendorRequests.jsx";
-import VendorCompanies from "./pages/Vendor/VendorCompanies.jsx";
-import VendorCompanyDetails from "./pages/Vendor/VendorCompanyDetails.jsx";
 import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
 import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
 import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
@@ -236,14 +234,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/vendor/companies"
-            element={
-              <ProtectedRoute allowedrole="vendor">
-                <VendorCompanies />
-              </ProtectedRoute>
-            }
-          />
 
           <Route
             path="/vendor/open-rfps"
@@ -254,22 +244,15 @@ function App() {
             }
           />
           <Route
-            path="/employee/bids"
+            path="/employee/proposals"
             element={
               <ProtectedRoute allowedrole="employee">
-                <Bids />
+                <Proposals />
               </ProtectedRoute>
             }
           />
 
-          <Route
-            path="/vendor/companies/:id"
-            element={
-              <ProtectedRoute allowedrole="vendor">
-                <VendorCompanyDetails />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/vendor/forgot-password"
             element={

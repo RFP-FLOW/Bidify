@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import VendorLayout from "../../components/Vendor/Layout";
-import { getAllCompanies } from "../../services/companyService";
+import { getAllCompanies, getVendorRequests } from "../../services/companyService";
 import api from "../../services/api";
 import { Card, IconBox, EmptyState } from "../../components/ui/Themed";
+import { toast } from "react-toastify";
 import { LayoutDashboard, Building2, Send, Search, X, Eye } from "lucide-react";
 
 const VendorDashboard = () => {
   const [companies, setCompanies] = useState([]);
+  const [requestsSentCount, setRequestsSentCount] = useState(0);
+  const [activeContractsCount, setActiveContractsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [requestSent, setRequestSent] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const checkRequestStatus = async (companyId) => {
     try { const res = await api.get(`/vendor-company/request-status/${companyId}`); setRequestSent(res.data.requested); }
@@ -17,18 +22,55 @@ const VendorDashboard = () => {
   };
 
   useEffect(() => {
-    (async () => { try { const res = await getAllCompanies(); setCompanies(res.data.companies || res.data); } catch (e) { console.error(e); } })();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [companiesRes, requestsRes] = await Promise.all([
+          getAllCompanies(),
+          getVendorRequests().catch(() => ({ data: [] })),
+        ]);
+
+        const comps = companiesRes.data.companies || companiesRes.data || [];
+        const requests = requestsRes.data || [];
+        setCompanies(comps);
+        setRequestsSentCount(requests.length || 0);
+        setActiveContractsCount((requests.filter((r) => r.status === "APPROVED")).length || 0);
+      } catch (e) {
+        console.error(e);
+        toast.error("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSendRequest = async () => {
     if (!selectedCompany) return;
     try { await api.post("/vendor-company/request", { companyId: selectedCompany._id }); setRequestSent(true); }
-    catch (err) { alert(err.response?.data?.message || "Failed to send request"); }
+    catch (err) { toast.error(err.response?.data?.message || "Failed to send request"); }
+    finally {
+      // refresh counts
+      try {
+        const res = await getVendorRequests();
+        const requests = res.data || [];
+        setRequestsSentCount(requests.length || 0);
+        setActiveContractsCount((requests.filter((r) => r.status === "APPROVED")).length || 0);
+      } catch (e) {
+        // silent
+      }
+    }
   };
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const name = user?.name || user?.businessName || "Vendor";
-  const filtered = companies.filter(c => !search || (c.companyName || "").toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const filtered = companies.filter((c) => !debouncedSearch || (c.companyName || "").toLowerCase().includes(debouncedSearch.toLowerCase()));
 
   const avatarColors = ["#4F46E5", "#0891B2", "#059669", "#D97706", "#DC2626", "#7C3AED"];
   const getColor = (n) => avatarColors[(n || "C").charCodeAt(0) % avatarColors.length];
@@ -47,16 +89,21 @@ const VendorDashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-3 gap-5 mb-8" role="region" aria-label="Vendor stats">
         {[
           { label: "Companies", value: companies.length, sub: "Available to connect", icon: Building2, variant: "stat1" },
-          { label: "Requests Sent", value: "—", sub: "Pending approvals", icon: Send, variant: "stat2" },
-          { label: "Active Contracts", value: "—", sub: "Won proposals", icon: LayoutDashboard, variant: "stat3" },
+          { label: "Requests Sent", value: requestsSentCount, sub: "Pending approvals", icon: Send, variant: "stat2" },
+          { label: "Active Contracts", value: activeContractsCount, sub: "Won proposals", icon: LayoutDashboard, variant: "stat3" },
         ].map(({ label, value, sub, icon: Icon, variant }, i) => (
-          <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
-            style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>
+          <div
+            key={label}
+            className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
+            style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}
+            role="status"
+            aria-label={`${label} stat`}
+          >
             <div className="flex items-center gap-3 mb-3"><IconBox icon={Icon} variant={variant} className="w-10 h-10" size={18} /><span className="t-secondary text-sm font-medium">{label}</span></div>
-            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${i+1}-value)` }}>{value}</p>
+            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${i+1}-value)` }}>{loading ? "—" : value}</p>
             <p className="t-muted text-xs">{sub}</p>
           </div>
         ))}

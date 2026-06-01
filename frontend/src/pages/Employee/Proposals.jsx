@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { PageLayout, PageContent, PageHeader, EmptyState, IconBox } from "../../components/ui/Themed";
 import { Gavel, FileText, Clock, ChevronLeft, ChevronRight, ArrowRight, Inbox } from "lucide-react";
 
-const Bids = () => {
+const Proposals = () => {
   const navigate = useNavigate();
   const [rfps, setRfps] = useState([]);
   const [page, setPage] = useState(1);
@@ -32,12 +32,12 @@ const Bids = () => {
     <PageLayout>
       <Sidebar />
       <PageContent>
-        <PageHeader title="Vendor Bids" subtitle="Track vendor responses for your sent RFPs" />
+        <PageHeader title="Vendor Proposals" subtitle="Track vendor proposals for your sent RFPs" />
 
         {loading && <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-[80px] rounded-xl animate-shimmer" />)}</div>}
 
         {!loading && rfps.length === 0 && (
-          <EmptyState icon={Inbox} title="No sent RFPs yet" subtitle="Send an RFP to vendors to start receiving bids" />
+          <EmptyState icon={Inbox} title="No sent RFPs yet" subtitle="Send an RFP to vendors to start receiving proposals" />
         )}
 
         {!loading && rfps.length > 0 && !hasAnyBid && (
@@ -66,7 +66,7 @@ const Bids = () => {
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
                     style={{ background: rfp.bidCount > 0 ? "var(--status-fwd-bg)" : "var(--status-sent-bg)", color: rfp.bidCount > 0 ? "var(--status-fwd-text)" : "var(--status-sent-text)" }}>
-                    <Gavel size={12} />{rfp.bidCount} {rfp.bidCount === 1 ? "Bid" : "Bids"}
+                    <Gavel size={12} />{rfp.bidCount} {rfp.bidCount === 1 ? "Proposal" : "Proposals"}
                   </span>
                   <ArrowRight size={15} className="t-muted opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 </div>
@@ -87,4 +87,4 @@ const Bids = () => {
   );
 };
 
-export default Bids;
+export default Proposals;

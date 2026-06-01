@@ -10,4 +10,6 @@ export const updateCompanyProfile = async (data) => {
 };
 
 export const getAllCompanies = () =>
-  api.get("/vendor-company/companies");
+  api.get("/vendor-company/companies");
+
+export const getVendorRequests = () => api.get("/vendor-company/requests");

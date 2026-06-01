@@ -100,10 +100,12 @@ const MyProposals = () => {
                   </h2>
 
                   <p className="t-muted text-sm mt-1">
-                    {
-                      proposal.companyId
-                        ?.companyName
-                    }
+                    {(
+                      proposal.companyId?.companyName ||
+                      proposal.rfpId?.companyId?.companyName ||
+                      proposal.rfpId?.companyName ||
+                      "—"
+                    )}
                   </p>
                 </div>
 
