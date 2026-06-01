@@ -4,6 +4,7 @@ import api from "../../services/api";
 import ManagerLayout from "../../components/Manager/SidebarCardManager";
 import { Card, SearchInput, ManagerPageHeader, StatGrid } from "../../components/ui/Themed";
 import { UserPlus, Users, UserCheck, Clock, Mail, RotateCcw, X, Send, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { getAllEmployees } from "../../services/managerServices";
 
 const PER_PAGE = 5;
 
@@ -17,7 +18,7 @@ function AddEmployee() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await api.get("/company/manager/employees");
+      const res = await getAllEmployees();
       if (res.data) setEmployees(res.data.employees);
     } catch { toast.error("Failed to load employees"); }
   };
@@ -28,7 +29,8 @@ function AddEmployee() {
     e.preventDefault();
     if (loading) return;
     if (!formData.name || !formData.email) return toast.error("Please fill all fields");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return toast.error("Enter a valid email");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) 
+         return toast.error("Enter a valid email");
     try {
       setLoading(true);
       const res = await api.post("/company/manager/add-employee", formData);

@@ -1,4 +1,3 @@
-
 import Company from "../models/Company.js";
 import Vendor from "../models/Vendor.js";
 import VendorRequest from "../models/vendorRequest.js";
@@ -15,7 +14,7 @@ export const getPendingVendorRequests = async (req, res) => {
     })
       .populate("vendorId", "name email phone businessName address gstNumber")
       .sort({ createdAt: -1 });
-       
+
     res.status(200).json({
       success: true,
       count: requests.length,
@@ -44,12 +43,12 @@ export const acceptVendorRequest = async (req, res) => {
       });
     }
 
-  if (request.companyId.toString() !== req.user.companyId.toString())  {
-  return res.status(403).json({
-    success: false,
-    message: "Unauthorized approval attempt",
-  });
-}
+    if (request.companyId.toString() !== req.user.companyId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized approval attempt",
+      });
+    }
 
     request.status = "APPROVED";
     request.reviewedBy = managerId;
@@ -61,9 +60,9 @@ export const acceptVendorRequest = async (req, res) => {
     );
 
     await Vendor.findByIdAndUpdate(
-  request.vendorId,
-  { $addToSet: { approvedCompanies: request.companyId } }
-);
+      request.vendorId,
+      { $addToSet: { approvedCompanies: request.companyId } }
+    );
 
 
     res.status(200).json({
@@ -108,7 +107,7 @@ export const rejectVendorRequest = async (req, res) => {
 //----------GET ACCEPTED VENDOR------------
 export const getAcceptedVendors = async (req, res) => {
   try {
-    console.log("companyId from token:", req.user.companyId);
+   // console.log("companyId from token:", req.user.companyId);
 
     const vendors = await VendorRequest.find({
       vendorId: { $exists: true },
@@ -124,7 +123,7 @@ export const getAcceptedVendors = async (req, res) => {
       data: vendors.map(v => v.vendorId).filter(Boolean),
     });
   } catch (error) {
-    console.error("GET ACCEPTED VENDORS ERROR:", error); // 👈 IMPORTANT
+  //  console.error("GET ACCEPTED VENDORS ERROR:", error); // 👈 IMPORTANT
     res.status(500).json({
       success: false,
       message: error.message,

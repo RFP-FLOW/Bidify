@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { toast } from "react-toastify";
-import SelectVendorsModal from "../../components/SelectVendorsModal";
+import SelectVendorsModal from "../../components/Employee/SelectVendorsModal";
 import { PageLayout, PageContent, Card, StatusBadge, SectionLabel } from "../../components/ui/Themed";
 import { Send, Package, Mail } from "lucide-react";
 

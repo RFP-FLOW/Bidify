@@ -11,9 +11,13 @@ function AcceptedVendors() {
 
   useEffect(() => {
     (async () => {
-      try { const res = await getAcceptedVendors(); setVendors(res.data.data || []); }
-      catch (e) { console.error(e); }
-      finally { setLoading(false); } 
+      try { 
+        const res = await getAcceptedVendors(); 
+        setVendors(res.data.data || []); 
+      }catch (e) { 
+        console.error(e); 
+      }finally {
+         setLoading(false); } 
     })();
   }, []);
 

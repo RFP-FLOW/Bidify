@@ -21,3 +21,6 @@ export const rejectRequest = (id) =>
 
 export const getAcceptedVendors = () =>
   api.get("/manager-vendor/vendors/approved");
+
+export const getAllEmployees = () =>
+   api.get("/company/manager/employees");
