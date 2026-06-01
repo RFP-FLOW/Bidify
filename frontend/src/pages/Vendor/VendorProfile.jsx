@@ -18,12 +18,7 @@ const VendorProfile = () => {
   const [editMode, setEditMode] =
     useState(false);
 
-  const [stats, setStats] = useState({
-    totalProposals: 0,
-    approved: 0,
-    pending: 0,
-    rejected: 0,
-  });
+  
 
   const [formData, setFormData] =
     useState({
@@ -68,9 +63,7 @@ const VendorProfile = () => {
               .description || "",
         });
 
-        if (res.data.stats) {
-          setStats(res.data.stats);
-        }
+        // stats removed from profile view
       } catch (err) {
         console.log(err);
 
@@ -197,50 +190,7 @@ const VendorProfile = () => {
         </div>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {[
-          {
-            label: "Total Proposals",
-            value: stats.totalProposals,
-            color:
-              "bg-blue-100 text-blue-700",
-          },
-          {
-            label: "Approved",
-            value: stats.approved,
-            color:
-              "bg-green-100 text-green-700",
-          },
-          {
-            label: "Pending",
-            value: stats.pending,
-            color:
-              "bg-yellow-100 text-yellow-700",
-          },
-          {
-            label: "Rejected",
-            value: stats.rejected,
-            color:
-              "bg-red-100 text-red-700",
-          },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="card p-5 hover:translate-y-[-2px] transition-all duration-300"
-          >
-            <div
-              className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${item.color}`}
-            >
-              {item.label}
-            </div>
-
-            <h3 className="t-primary text-3xl font-bold mt-4">
-              {item.value}
-            </h3>
-          </div>
-        ))}
-      </div>
+      {/* Stats removed from profile view */}
 
       {/* PROFILE DETAILS */}
       <div className="card p-7 space-y-8 animate-fadeIn">

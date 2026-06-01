@@ -18,7 +18,7 @@ import ConfirmedRFPs from "./pages/Company/ConfirmedRFP.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import RFPDetails from "./pages/Employee/RFPDetails";
 import CreateRFP from "./pages/Employee/CreateRFP";
-import Bids from "./pages/Employee/Bids.jsx";
+import Proposals from "./pages/Employee/Proposals.jsx";
 import ForwardToManager from "./pages/Employee/ForwardToManager.jsx";
 import RfpProposals from "./pages/Employee/RfpProposals.jsx";
 
@@ -254,10 +254,10 @@ function App() {
             }
           />
           <Route
-            path="/employee/bids"
+            path="/employee/proposals"
             element={
               <ProtectedRoute allowedrole="employee">
-                <Bids />
+                <Proposals />
               </ProtectedRoute>
             }
           />

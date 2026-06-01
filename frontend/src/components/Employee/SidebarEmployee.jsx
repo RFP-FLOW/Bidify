@@ -5,7 +5,7 @@ import { LayoutDashboard, FilePlus, Gavel, LogOut, Sun, Moon, FileText } from "l
 const navItems = [
   { label: "Dashboard",   path: "/employee/dashboard",  icon: LayoutDashboard },
   { label: "Create RFP",  path: "/employee/create-rfp", icon: FilePlus },
-  { label: "Vendor Bids", path: "/employee/bids",       icon: Gavel },
+  { label: "Vendor Proposals", path: "/employee/proposals",       icon: Gavel },
 ];
 
 export default function SidebarEmployee() {

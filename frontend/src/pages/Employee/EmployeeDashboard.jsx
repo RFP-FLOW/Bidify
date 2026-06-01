@@ -10,7 +10,7 @@ const ITEMS_PER_PAGE = 5;
 
 const STAT_CARDS = [
   { key: "draft", label: "Draft RFPs", sub: "Pending completion", icon: FileText, variant: "stat1" },
-  { key: "sent", label: "Sent RFPs", sub: "Awaiting vendor bids", icon: Send, variant: "stat2" },
+  { key: "sent", label: "Sent RFPs", sub: "Awaiting vendor proposals", icon: Send, variant: "stat2" },
   { key: "forwarded", label: "Forwarded", sub: "Sent to manager", icon: TrendingUp, variant: "stat3" },
 ];
 

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import VendorLayout from "../../components/Vendor/Layout";
-import { getAllCompanies } from "../../services/companyService";
+import { getAllCompanies, getVendorRequests } from "../../services/companyService";
 import api from "../../services/api";
 import { Card, IconBox, EmptyState } from "../../components/ui/Themed";
 import { LayoutDashboard, Building2, Send, Search, X, Eye } from "lucide-react";
 
 const VendorDashboard = () => {
   const [companies, setCompanies] = useState([]);
+  const [requestsSentCount, setRequestsSentCount] = useState(0);
+  const [activeContractsCount, setActiveContractsCount] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [requestSent, setRequestSent] = useState(false);
   const [search, setSearch] = useState("");
@@ -17,7 +19,16 @@ const VendorDashboard = () => {
   };
 
   useEffect(() => {
-    (async () => { try { const res = await getAllCompanies(); setCompanies(res.data.companies || res.data); } catch (e) { console.error(e); } })();
+    (async () => {
+      try {
+        const [companiesRes, requestsRes] = await Promise.all([getAllCompanies(), getVendorRequests().catch(() => ({ data: [] }))]);
+        const comps = companiesRes.data.companies || companiesRes.data || [];
+        const requests = requestsRes.data || [];
+        setCompanies(comps);
+        setRequestsSentCount(requests.length || 0);
+        setActiveContractsCount((requests.filter(r => r.status === "APPROVED")).length || 0);
+      } catch (e) { console.error(e); }
+    })();
   }, []);
 
   const handleSendRequest = async () => {
@@ -50,8 +61,8 @@ const VendorDashboard = () => {
       <div className="grid grid-cols-3 gap-5 mb-8">
         {[
           { label: "Companies", value: companies.length, sub: "Available to connect", icon: Building2, variant: "stat1" },
-          { label: "Requests Sent", value: "—", sub: "Pending approvals", icon: Send, variant: "stat2" },
-          { label: "Active Contracts", value: "—", sub: "Won proposals", icon: LayoutDashboard, variant: "stat3" },
+          { label: "Requests Sent", value: requestsSentCount, sub: "Pending approvals", icon: Send, variant: "stat2" },
+          { label: "Active Contracts", value: activeContractsCount, sub: "Won proposals", icon: LayoutDashboard, variant: "stat3" },
         ].map(({ label, value, sub, icon: Icon, variant }, i) => (
           <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
             style={{ background: `var(--stat-${i+1}-bg)`, border: `1px solid var(--stat-${i+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>

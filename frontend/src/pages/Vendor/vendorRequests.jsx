@@ -6,6 +6,7 @@ import {
 
 import VendorLayout from "../../components/Vendor/Layout";
 import api from "../../services/api";
+import { IconBox } from "../../components/ui/Themed";
 
 import {
   Search,
@@ -124,65 +125,21 @@ const VendorRequests = () => {
         </div>
       </div>
 
-      {/* STATS */}
+      {/* STATS (dashboard-style cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {[
-          {
-            label: "Total Requests",
-            value: stats.total,
-            color:
-              "bg-blue-100 text-blue-700",
-            icon: Send,
-          },
-
-          {
-            label: "Approved",
-            value: stats.approved,
-            color:
-              "bg-green-100 text-green-700",
-            icon: CheckCircle2,
-          },
-
-          {
-            label: "Pending",
-            value: stats.pending,
-            color:
-              "bg-yellow-100 text-yellow-700",
-            icon: Clock3,
-          },
-
-          {
-            label: "Rejected",
-            value: stats.rejected,
-            color:
-              "bg-red-100 text-red-700",
-            icon: XCircle,
-          },
-        ].map(
-          ({
-            label,
-            value,
-            color,
-            icon: Icon,
-          }) => (
-            <div
-              key={label}
-              className="card p-5 hover:translate-y-[-2px] transition-all duration-300"
-            >
-              <div
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${color}`}
-              >
-                <Icon size={14} />
-
-                {label}
-              </div>
-
-              <h3 className="t-primary text-3xl font-bold mt-4">
-                {value}
-              </h3>
-            </div>
-          )
-        )}
+          { label: "Total Requests", value: stats.total, icon: Send, variant: "stat1", sub: "All requests" },
+          { label: "Approved", value: stats.approved, icon: CheckCircle2, variant: "stat2", sub: "Approved by companies" },
+          { label: "Pending", value: stats.pending, icon: Clock3, variant: "stat3", sub: "Awaiting review" },
+          { label: "Rejected", value: stats.rejected, icon: XCircle, variant: "stat1", sub: "Declined requests" },
+        ].map(({ label, value, icon: Icon, variant, sub }, i) => (
+          <div key={label} className="rounded-2xl p-5 animate-fadeIn hover:translate-y-[-2px] transition-all duration-300 cursor-default"
+            style={{ background: `var(--stat-${(i%3)+1}-bg)`, border: `1px solid var(--stat-${(i%3)+1}-border)`, boxShadow: "var(--shadow-sm)", animationDelay: `${i*80}ms` }}>
+            <div className="flex items-center gap-3 mb-3"><IconBox icon={Icon} variant={variant} className="w-10 h-10" size={18} /><span className="t-secondary text-sm font-medium">{label}</span></div>
+            <p className="text-3xl font-bold tracking-tight mb-0.5" style={{ color: `var(--stat-${(i%3)+1}-value)` }}>{value}</p>
+            <p className="t-muted text-xs">{sub}</p>
+          </div>
+        ))}
       </div>
 
       {/* FILTER + SEARCH */}
