@@ -14,7 +14,6 @@ import vendorauthRoutes from "./routes/vendorauth.routes.js";
 import companyauthRoutes from "./routes/companyauth.routes.js";
 import rfpRoutes from "./routes/rfpRoutes.js";
 import managerVendor from "./routes/managerVendor.routes.js";
-import vendorRfpRoutes from "./routes/vendorRfp.routes.js";
 import vendorReplyRoutes from "./routes/vendorReply.routes.js";
 import commonPasswordRoutes from "./routes/commonPassword.routes.js";
 import vendorCompanyRoutes from "./routes/vendorCompany.routes.js";
@@ -44,7 +43,6 @@ app.use("/api/auth", commonPasswordRoutes);
 app.use("/api/manager-vendor", managerVendor);
 // Vendor
 app.use("/api/vendor", vendorauthRoutes);
-app.use("/api/vendor/rfp", vendorRfpRoutes);
 app.use("/api/vendor-reply", vendorReplyRoutes);
 app.use("/api/vendor-company", vendorCompanyRoutes);
 app.use("/api/ai", aiRoutes);

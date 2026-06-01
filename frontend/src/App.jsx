@@ -27,8 +27,6 @@ import VendorLogin from "./pages/Vendor/vendorLogin.jsx";
 import VendorRegister from "./pages/Vendor/vendorRegister.jsx";
 import VendorDashboard from "./pages/Vendor/vendorDashboard.jsx";
 import VendorRequests from "./pages/Vendor/VendorRequests.jsx";
-import VendorCompanies from "./pages/Vendor/VendorCompanies.jsx";
-import VendorCompanyDetails from "./pages/Vendor/VendorCompanyDetails.jsx";
 import VendorRFPs from "./pages/Vendor/vendorRFPs.jsx";
 import VendorForgotPassword from "./pages/Password-reset/VendorForgotPassword";
 import VendorResetPassword from "./pages/Password-reset/VendorSetPassword";
@@ -236,14 +234,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/vendor/companies"
-            element={
-              <ProtectedRoute allowedrole="vendor">
-                <VendorCompanies />
-              </ProtectedRoute>
-            }
-          />
 
           <Route
             path="/vendor/open-rfps"
@@ -262,14 +252,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/vendor/companies/:id"
-            element={
-              <ProtectedRoute allowedrole="vendor">
-                <VendorCompanyDetails />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/vendor/forgot-password"
             element={

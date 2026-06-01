@@ -308,7 +308,10 @@ export const getMyProposals = async (
     const proposals = await Proposal.find({
       vendorId: req.user.id,
     })
-      .populate("rfpId")
+      .populate({
+        path: "rfpId",
+        populate: { path: "companyId", select: "companyName" },
+      })
       .populate("vendorId");
 
     res.status(200).json({
