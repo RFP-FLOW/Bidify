@@ -3,7 +3,7 @@ import Proposal from "../models/Proposal.js";
 import Vendor from "../models/Vendor.js";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/UserSchema.js";
-import VendorRequest from "../models/VendorRequest.js";
+import VendorRequest from "../models/vendorRequest.js";
 /**
  * @desc    Create a new RFP (DRAFT)
  * @route   POST /api/rfp
