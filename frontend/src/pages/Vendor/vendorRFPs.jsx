@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import VendorLayout from "../../components/Vendor/Layout";
 import ReplyModal from "../../components/Vendor/ReplyModal";
@@ -15,7 +15,7 @@ function VendorRFPs() {
 
   const fetchRFPs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/vendor-reply/open-rfps", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+      const res = await api.get("/vendor-reply/open-rfps");
       setRfps(res.data.data);
     } catch (e) { console.error(e); localStorage.clear(); navigate("/vendor/login"); }
   };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function VendorRegister() {
   const navigate = useNavigate();
@@ -82,27 +83,13 @@ function VendorRegister() {
     }
 
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/vendor/register-init",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.name,
-            businessName: formData.businessName,
-            email: formData.email,
-            gstNumber: formData.gstNumber,
-            password: formData.password,
-          }),
-        },
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message);
-        return;
-      }
+      await api.post("/vendor/register-init", {
+        name: formData.name,
+        businessName: formData.businessName,
+        email: formData.email,
+        gstNumber: formData.gstNumber,
+        password: formData.password,
+      });
 
       toast.success("OTP sent to your email 📩");
 
@@ -111,7 +98,7 @@ function VendorRegister() {
       });
     } catch (err) {
       console.log(err);
-      toast.error("Server error");
+      toast.error(err.response?.data?.message || "Server error");
     }
   };
 

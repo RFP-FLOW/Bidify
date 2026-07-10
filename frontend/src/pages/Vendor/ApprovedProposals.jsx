@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import VendorLayout from "../../components/Vendor/Layout";
 import {
   CheckCircle2,
@@ -12,17 +12,8 @@ const ApprovedProposals = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(
-        "http://localhost:5000/api/vendor/approved",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              "token"
-            )}`,
-          },
-        }
-      )
+    api
+      .get("/vendor/approved")
       .then((res) =>
         setData(res.data.proposals)
       )

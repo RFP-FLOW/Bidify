@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function CompanyRegister() {
   const navigate = useNavigate();
@@ -69,28 +70,12 @@ function CompanyRegister() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:5000/api/company/register-init",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            companyName: formData.companyName,
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Registration failed");
-        return;
-      }
+      await api.post("/company/register-init", {
+        companyName: formData.companyName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
       toast.success("OTP sent to your email 📩");
 
@@ -104,7 +89,7 @@ function CompanyRegister() {
       });
 
     } catch (error) {
-      toast.error("Server error. Please try again.");
+      toast.error(error.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -249,9 +234,10 @@ function CompanyRegister() {
               {/* SUBMIT */}
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full mt-4 py-3 bg-[#3a2d97] text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all"
               >
-                Create Company Account
+                {loading ? "Creating..." : "Create Company Account"}
               </button>
             </form>
 

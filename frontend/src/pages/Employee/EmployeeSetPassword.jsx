@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function EmployeeSetPassword() {
   const { token } = useParams();
@@ -27,28 +28,14 @@ function EmployeeSetPassword() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-  `http://localhost:5000/api/company/set-password/${token}`,
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
-  }
-);
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Invalid or expired link");
-        return;
-      }
+      await api.post(`/company/set-password/${token}`, { password });
 
       toast.success("Password set successfully 🎉");
       navigate("/company/login");
 
     } catch (err) {
       console.log(err);
-      toast.error("Server error");
+      toast.error(err.response?.data?.message || "Invalid or expired link");
     } finally {
       setLoading(false);
     }

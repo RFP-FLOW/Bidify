@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "../../components/Navbar";
+import api from "../../services/api";
 
 function VendorVerifyOtp() {
   const navigate = useNavigate();
@@ -35,30 +36,16 @@ function VendorVerifyOtp() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:5000/api/vendor/verify-otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: state.email,
-            otp,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message);
-        return;
-      }
+      await api.post("/vendor/verify-otp", {
+        email: state.email,
+        otp,
+      });
 
       toast.success("Vendor registered successfully 🎉");
       navigate("/vendor/login");
 
-    } catch {
-      toast.error("OTP verification failed");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
     }
@@ -68,27 +55,13 @@ function VendorVerifyOtp() {
     try {
       setResendLoading(true);
 
-      const res = await fetch(
-        "http://localhost:5000/api/vendor/resend-otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: state.email }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message);
-        return;
-      }
+      await api.post("/vendor/resend-otp", { email: state.email });
 
       toast.success("OTP resent 📩");
       setTimer(30);
 
-    } catch {
-      toast.error("Failed to resend OTP");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
     } finally {
       setResendLoading(false);
     }

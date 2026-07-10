@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Navbar from "../../components/Navbar";
+import api from "../../services/api";
 
 function VerifyOtp() {
   const navigate = useNavigate();
@@ -33,26 +34,15 @@ function VerifyOtp() {
     try {
       setResendLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/company/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: state.email,
-        }),
+      await api.post("/company/resend-otp", {
+        email: state.email,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Failed to resend OTP");
-        return;
-      }
 
       toast.success("OTP resent successfully 📩");
       setTimer(30);
     } catch (err) {
       console.log(err);
-      toast.error("Server error while resending OTP");
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
     } finally {
       setResendLoading(false);
     }
@@ -68,25 +58,19 @@ function VerifyOtp() {
 
     setLoading(true);
 
-    const res = await fetch("http://localhost:5000/api/company/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await api.post("/company/verify-otp", {
         otp,
         email: state.email,
         companyName: state.companyName,
         username: state.username,
         password: state.password,
-      }),
-    });
+      });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data.message);
-    } else {
       toast.success("Company registered successfully 🎉");
       navigate("/company/login");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Verification failed");
     }
 
     setLoading(false);

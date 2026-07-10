@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { useNavigate } from "react-router-dom";
 import { PageLayout, PageContent, PageHeader, EmptyState, IconBox } from "../../components/ui/Themed";
@@ -16,9 +16,7 @@ const Proposals = () => {
     (async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/rfp/bids?page=${page}&limit=5`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const res = await api.get(`/rfp/bids?page=${page}&limit=5`);
         setRfps(Array.isArray(res?.data?.rfps) ? res.data.rfps : []);
         setTotalPages(res?.data?.totalPages || 1);
       } catch (e) { console.error(e); setRfps([]); }

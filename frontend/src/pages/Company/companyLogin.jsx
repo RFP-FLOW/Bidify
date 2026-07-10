@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function CompanyLogin() {
   const navigate = useNavigate();
@@ -27,30 +28,18 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
-    const res = await fetch("http://localhost:5000/api/company/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-      }),
+    const res = await api.post("/company/login", {
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
-    }
+    const data = res.data;
 
     // 🔥 FIX HERE
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", formData.role);
-    
-console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
+
     localStorage.setItem("user", JSON.stringify(data.user));
 
     // navigate after successful login
@@ -60,9 +49,9 @@ console.log("TOKEN AFTER LOGIN:", localStorage.getItem("token"));
       navigate("/employee/dashboard",{replace:true});
     }
   } catch (err) {
-  console.log("LOGIN ERROR FULL:", err.response?.data);
-  toast.error(err.response?.data?.message || "Login failed");
-}
+    console.log("LOGIN ERROR FULL:", err.response?.data);
+    toast.error(err.response?.data?.message || "Login failed");
+  }
 };
 
 

@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function VendorLogin() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ function VendorLogin() {
       return;
     }
     try {
-      const res = await axios.post("http://localhost:5000/api/vendor/login", {
+      const res = await api.post("/vendor/login", {
         email: formData.email,
         password: formData.password,
       });

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function SetPassword({ role = "company" }) {
   const { token } = useParams();
@@ -20,25 +21,16 @@ function SetPassword({ role = "company" }) {
 
     setLoading(true);
 
-    const res = await fetch(
-      `http://localhost:5000/api/auth/reset-password/${token}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password,
-          role,
-        }),
-      },
-    );
+    try {
+      await api.post(`/auth/reset-password/${token}`, {
+        password,
+        role,
+      });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data.message);
-    } else {
       toast.success("Password set successfully 🎉");
       navigate(role === "vendor" ? "/vendor/login" : "/company/login");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
 
     setLoading(false);
