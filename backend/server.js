@@ -20,11 +20,11 @@ import vendorCompanyRoutes from "./routes/vendorCompany.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 
 dotenv.config();
-console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
+//console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
 const app = express();
 
 // DB
-connectDB();
+await connectDB();
 
 // Middlewares
 app.use(express.json());

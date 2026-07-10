@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 
@@ -42,9 +42,6 @@ const ReplyModal = ({
     setLoading(true);
     setError("");
 
-    const token =
-      localStorage.getItem("token");
-
     const formData = new FormData();
 
     formData.append("rfpId", rfpId);
@@ -67,15 +64,10 @@ const ReplyModal = ({
       );
     }
 
-    // API CALL
-    await axios.post(
-      "http://localhost:5000/api/vendor-reply/replies",
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+   
+    await api.post(
+      "/vendor-reply/replies",
+      formData
     );
 
     // ✅ SUCCESS TOAST

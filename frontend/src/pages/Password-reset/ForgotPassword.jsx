@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function ForgotPassword({ role = "company" }) {
   const [email, setEmail] = useState("");
@@ -15,21 +16,15 @@ function ForgotPassword({ role = "company" }) {
 
     setLoading(true);
 
-    const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await api.post("/auth/forgot-password", {
         email,
         role,
-      }),
-    });
+      });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data.message);
-    } else {
       toast.success("Reset link sent to your email 📩");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
 
     setLoading(false);

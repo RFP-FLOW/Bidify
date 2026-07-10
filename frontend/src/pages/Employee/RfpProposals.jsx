@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { PageLayout, PageContent, PageHeader, Card, EmptyState } from "../../components/ui/Themed";
 import { Bot, Trophy, Clock, DollarSign, Paperclip, ExternalLink, ArrowUpRight, Mail } from "lucide-react";
@@ -26,7 +26,7 @@ const RfpProposals = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/rfp/${rfpId}/proposals`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+        const res = await api.get(`/rfp/${rfpId}/proposals`);
         setProposals(res.data.proposals);
         setRfpTitle(res.data.rfpTitle);
       } catch (e) { console.error(e); }
@@ -36,7 +36,7 @@ const RfpProposals = () => {
 
   const handleAICompare = async () => {
     try { setAiLoading(true);
-      const res = await axios.post(`http://localhost:5000/api/ai/recommend/${rfpId}`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+      const res = await api.post(`/ai/recommend/${rfpId}`, {});
       setAiResult(res.data.recommendation);
     } catch (e) { console.error(e); }
     finally { setAiLoading(false); }

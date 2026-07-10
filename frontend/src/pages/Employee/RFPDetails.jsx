@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { toast } from "react-toastify";
 import SelectVendorsModal from "../../components/Employee/SelectVendorsModal";
@@ -17,7 +17,7 @@ function RFPDetails() {
 
   const fetchVendors = async () => {
     try { setVendorsLoading(true);
-      const res = await axios.get("http://localhost:5000/api/manager-vendor/vendors/approved", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, withCredentials: true });
+      const res = await api.get("/manager-vendor/vendors/approved");
       setVendors(res.data.data || []);
     } catch (e) { console.error(e); toast.error("Failed to load vendors"); }
     finally { setVendorsLoading(false); }
@@ -26,7 +26,7 @@ function RFPDetails() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/rfp/${rfpId}`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, withCredentials: true });
+        const res = await api.get(`/rfp/${rfpId}`);
         setRfp(res.data);
       } catch (e) { console.error(e); toast.error("Failed to load RFP details"); }
       finally { setLoading(false); }

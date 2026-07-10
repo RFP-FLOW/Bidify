@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { toast } from "react-toastify";
 import { X, Send, Loader2, Check } from "lucide-react";
 
@@ -14,7 +14,7 @@ function SelectVendorsModal({ isOpen, onClose, vendors = [], loading = false, rf
 
   const handleSend = async () => {
     try { setSending(true);
-      await axios.post(`http://localhost:5000/api/rfp/${rfpId}/send`, { vendorIds: selected }, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+      await api.post(`/rfp/${rfpId}/send`, { vendorIds: selected });
       toast.success("RFP sent to vendors"); close();
     } catch (e) { console.error(e); toast.error("Failed to send RFP"); }
     finally { setSending(false); }

@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { toast } from "react-toastify";
 import { PageLayout, PageContent, PageHeader, Card, SectionLabel } from "../../components/ui/Themed";
@@ -21,8 +21,7 @@ function CreateRFP() {
     hasLoadedDraft.current = true;
     (async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/api/rfp/${draftId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await api.get(`/rfp/${draftId}`);
         setPrompt(res.data.description || "");
         setAiRFP({ title: res.data.title, items: res.data.items || [] });
         toast.info("Draft loaded for editing");
@@ -34,8 +33,7 @@ function CreateRFP() {
     if (!prompt.trim()) return toast.error("Please describe your requirements");
     try {
       setLoadingAI(true);
-      const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/api/rfp/generate", { prompt }, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      const res = await api.post("/rfp/generate", { prompt });
       setAiRFP(res.data.data);
       toast.success("AI-generated RFP structure ready");
     } catch (e) { console.error(e); toast.error(e.response?.data?.message || "Failed to generate RFP using AI"); }
@@ -46,11 +44,10 @@ function CreateRFP() {
     if (!aiRFP) return toast.error("Please generate RFP using AI first");
     try {
       setSubmitting(true);
-      const token = localStorage.getItem("token");
       const body = { title: aiRFP.title?.trim() || "Procurement Request", description: prompt, items: aiRFP.items };
       const res = draftId
-        ? await axios.put(`http://localhost:5000/api/rfp/${draftId}`, body, { headers: { Authorization: `Bearer ${token}` } })
-        : await axios.post("http://localhost:5000/api/rfp", body, { headers: { Authorization: `Bearer ${token}` } });
+        ? await api.put(`/rfp/${draftId}`, body)
+        : await api.post("/rfp", body);
       toast.success(draftId ? "Draft updated successfully" : "RFP created successfully");
       navigate(`/rfp/${res.data.rfp._id}`);
     } catch (e) { console.error(e); toast.error("Failed to save RFP"); }

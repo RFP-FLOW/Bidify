@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { X, Package, Users } from "lucide-react";
 import { SectionLabel } from "../../components/ui/Themed";
 
@@ -9,7 +9,7 @@ export default function RfpQuickView({ rfpId, onClose }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/rfp/${rfpId}`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+        const res = await api.get(`/rfp/${rfpId}`);
         setRfp(res.data);
       } catch (e) { console.error(e); }
     })();

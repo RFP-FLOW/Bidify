@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api";
 import Sidebar from "../../components/Employee/SidebarEmployee";
 import { PageLayout, PageContent, Card, SectionLabel } from "../../components/ui/Themed";
 import { ArrowLeft, Trophy, Send, Loader2, CheckCircle2, AlertCircle, Package } from "lucide-react";
@@ -22,9 +22,9 @@ const ForwardToManager = () => {
     if (aiResult) return;
     (async () => {
       try { setLoading(true);
-        const rfpRes = await axios.get(`http://localhost:5000/api/rfp/${rfpId}`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+        const rfpRes = await api.get(`/rfp/${rfpId}`);
         setRfpTitle(rfpRes.data.title || "");
-        const aiRes = await axios.post(`http://localhost:5000/api/ai/recommend/${rfpId}`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+        const aiRes = await api.post(`/ai/recommend/${rfpId}`, {});
         setAiResult(aiRes.data.recommendation);
       } catch { setError("Could not load AI recommendations. Go back and run the AI comparison first."); }
       finally { setLoading(false); }
@@ -35,7 +35,7 @@ const ForwardToManager = () => {
     if (!note.trim()) return setError("Please add a note before forwarding.");
     setError("");
     try { setSending(true);
-      const res = await axios.post(`http://localhost:5000/api/rfp/${rfpId}/forward-to-manager`, { note, aiResult, rfpTitle }, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+      const res = await api.post(`/rfp/${rfpId}/forward-to-manager`, { note, aiResult, rfpTitle });
       setManagerInfo({ name: res.data.managerName, email: res.data.managerEmail }); setSent(true);
     } catch (e) { setError(e.response?.data?.message || "Failed to forward."); }
     finally { setSending(false); }
